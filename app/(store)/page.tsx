@@ -145,7 +145,7 @@ const serializedProducts = validProducts.map(product => ({
   return (
     <main className="min-h-screen">
       <div className="relative space-y-0">
-        <HeroPro products={heroProducts}/>
+        <HeroPro products={heroProducts as any}/>
         <FeaturedCategories/>
         <TopSellers products={serializedProducts}/>
       </div>
