@@ -1,0 +1,19 @@
+:root {
+  --grid-bg: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.06) 1px, transparent 1px);
+}
+.premium-surface {
+  @apply rounded-2xl border border-white/10 bg-white/40 backdrop-blur-md shadow-lg;
+}
+.premium-card {
+  @apply rounded-2xl border border-gray-200/70 bg-white/80 shadow-lg;
+}
+.premium-accent {
+  @apply text-rose-600;
+}
+.premium-cta {
+  @apply rounded-xl bg-black text-white hover:bg-zinc-900;
+}
+.premium-grid-bg {
+  background-image: var(--grid-bg);
+  background-size: 24px 24px;
+}

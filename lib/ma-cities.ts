@@ -1,0 +1,1 @@
+export const MA_CITIES = ["Casablanca", "Rabat", "Fès", "Marrakech", "Tanger", "Agadir", "Meknès", "Oujda", "Kénitra", "Tétouan", "Safi", "Mohammédia", "Khouribga", "El Jadida", "Béni Mellal", "Nador", "Taza", "Settat", "Larache", "Ksar El Kebir", "Guelmim", "Laâyoune", "Dakhla", "Taroudant", "Berkane", "Ouarzazate", "Errachidia", "Al Hoceïma", "Khemisset", "Salé"];

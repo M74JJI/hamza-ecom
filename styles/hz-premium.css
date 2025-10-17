@@ -1,0 +1,79 @@
+/* ========== HZ Premium Gold Aurora (Moderate) ========== */
+:root{
+  --hz-bg: #0B0D10;
+  --hz-glass: rgba(255,255,255,0.06);
+  --hz-border: rgba(255,255,255,0.12);
+  --hz-text: #F9FAFB;
+  --hz-muted: #B0B0B0;
+  --hz-gold-1: #D4AF37;
+  --hz-gold-2: #F8E27E;
+  --hz-aqua: #64FFF6;
+}
+
+.bg-app {
+  background: radial-gradient(1200px 500px at 10% -10%, rgba(212,175,55,.12), transparent 60%),
+              radial-gradient(900px 400px at 90% 0%, rgba(248,226,126,.10), transparent 60%),
+              radial-gradient(700px 300px at 50% 100%, rgba(100,255,246,.10), transparent 60%),
+              var(--hz-bg);
+  min-height: 100vh;
+}
+
+.hz-glass {
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid var(--hz-border);
+  backdrop-filter: blur(14px);
+}
+
+.hz-gold-text {
+  background: linear-gradient(90deg, var(--hz-gold-1), var(--hz-gold-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes hz-aurora-shift {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+.hz-aurora {
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(45% 60% at 20% 30%, rgba(212,175,55,.18), transparent 60%),
+              radial-gradient(40% 60% at 80% 20%, rgba(248,226,126,.16), transparent 60%),
+              radial-gradient(55% 65% at 50% 80%, rgba(100,255,246,.14), transparent 60%);
+  background-size: 200% 200%;
+  animation: hz-aurora-shift 11s ease-in-out infinite;
+  filter: blur(50px);
+  opacity: .6;
+  pointer-events: none;
+}
+
+.hz-underline {
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--hz-gold-1), var(--hz-gold-2));
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(212,175,55,.45);
+}
+
+.hz-link {
+  position: relative;
+  transition: color .2s ease, opacity .2s ease, transform .2s ease;
+}
+.hz-link:hover { color: white; transform: translateY(-1px); }
+
+.hz-icon {
+  transition: transform .18s ease, filter .18s ease;
+  filter: drop-shadow(0 0 0 rgba(212,175,55,0));
+}
+.hz-icon:hover { transform: translateY(-1px) scale(1.02); filter: drop-shadow(0 0 12px rgba(212,175,55,.45)); }
+
+.hz-footer-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+  opacity: .6;
+}

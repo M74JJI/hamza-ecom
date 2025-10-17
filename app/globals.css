@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "react-quill-new/dist/quill.snow.css";
+
+:root{
+  --bg: 14 14 16;
+  --fg: 244 244 245;
+}
+html,body{height:100%}
+body{
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+}
+
+/* Premium theme helpers */
+:root { --grid-bg: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.06) 1px, transparent 1px); }
+.premium-grid-bg { background-image: var(--grid-bg); background-size: 24px 24px; }
+
+@layer utilities {
+  .scroll-indicator {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}

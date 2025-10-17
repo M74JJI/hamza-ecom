@@ -1,0 +1,1 @@
+Place an optional default avatar at public/default-avatar.png for users without images.
