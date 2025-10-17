@@ -385,15 +385,6 @@ export function TopSellers({ products }: TopSellersProps) {
       {currentVariant.name}
     </p>
 
-    {/* Features List */}
-    <div className="mb-6 grid grid-cols-2 gap-2 text-xs">
-      {/*product.features?.slice(0, 4).map((feature, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <div className="w-1 h-1 bg-black rounded-full" />
-          <span className="uppercase tracking-wide">{feature}</span>
-        </div>
-      ))*/}
-    </div>
 
     {/* Enhanced CTA Section */}
     <div className="flex items-center justify-between pt-4 border-t-2 border-black">
