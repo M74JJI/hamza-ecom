@@ -1,9 +1,8 @@
-// ReviewsSection.tsx - Updated with Hero Theme
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, MessageCircle, TrendingUp, Award, Users, Filter, Crown, Sparkles } from 'lucide-react';
+import { Star, MessageCircle, TrendingUp, Award, Users, Filter } from 'lucide-react';
 import ReviewStats from '@/components/reviews/ReviewStats';
 import ReviewForm from '@/components/reviews/ReviewForm';
 import ReviewList from '@/components/reviews/ReviewList';
@@ -20,53 +19,43 @@ export default function ReviewsSection({ productId, variants }: { productId: str
   const fetchedRef = useRef<string | null>(null);
   const effectRunRef = useRef(false);
 
-  useEffect(() => {
-    if (!productId) return;
-    if (effectRunRef.current) return;
-    effectRunRef.current = true;
-    if (fetchedRef.current === productId) return;
-    fetchedRef.current = productId;
+useEffect(() => {
+  if (!productId) return;
 
-    const controller = new AbortController();
-    let cancelled = false;
+  const controller = new AbortController();
 
-    (async () => {
-      setIsLoading(true);
-      try {
-        const [summaryRes, listRes] = await Promise.all([
-          fetch(`/api/reviews/${productId}/summary`, {
-            cache: 'no-store',
-            signal: controller.signal,
-          }),
-          fetch(`/api/reviews/${productId}`, {
-            cache: 'no-store',
-            signal: controller.signal,
-          }),
-        ]);
+  (async () => {
+    setIsLoading(true);
+    try {
+      const [summaryRes, listRes] = await Promise.all([
+        fetch(`/api/reviews/${productId}/summary`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        }),
+        fetch(`/api/reviews/${productId}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        }),
+      ]);
 
-        if (!summaryRes.ok || !listRes.ok) throw new Error('Fetch failed');
+      if (!summaryRes.ok || !listRes.ok) throw new Error('Fetch failed');
 
-        const [summaryJson, listJson] = await Promise.all([
-          summaryRes.json(),
-          listRes.json(),
-        ]);
+      const [summaryJson, listJson] = await Promise.all([
+        summaryRes.json(),
+        listRes.json(),
+      ]);
 
-        if (!cancelled) {
-          setSum(summaryJson);
-          setList(listJson);
-        }
-      } catch (err: any) {
-        if (err.name !== 'AbortError') console.error('[ReviewsSection] fetch error', err);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    })();
+      setSum(summaryJson);
+      setList(listJson);
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error('[ReviewsSection] fetch error', err);
+    } finally {
+      setIsLoading(false);
+    }
+  })();
 
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [productId]);
+  return () => controller.abort();
+}, [productId]);
 
   const filteredReviews = activeFilter === 'all' 
     ? list.reviews 
@@ -77,36 +66,42 @@ export default function ReviewsSection({ productId, variants }: { productId: str
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="mt-20 py-16 bg-gradient-to-b from-amber-50 to-orange-50"
+      className="py-20 bg-white"
+      id="reviews"
     >
       <div className="container mx-auto px-4">
-        {/* Header */}
+        {/* Elegant Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-2xl text-sm font-black border-2 border-yellow-500 shadow-lg mb-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-full text-sm font-light mb-6 border border-gray-200"
+          >
             <MessageCircle className="w-4 h-4" />
             CUSTOMER REVIEWS
-          </div>
-          <h2 className="text-4xl lg:text-5xl font-black text-black mb-4">
-            What Our Customers Say
+          </motion.div>
+          <h2 className="text-5xl lg:text-6xl font-light text-black mb-6 tracking-tight">
+            Customer Voices
           </h2>
-          <p className="text-xl text-gray-800 max-w-2xl mx-auto font-medium">
-            Discover why thousands of customers love our premium products
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light leading-relaxed">
+            Discover authentic experiences from our valued customers
           </p>
         </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-12 gap-12 max-w-7xl mx-auto">
           {/* Left Sidebar - Stats & Filters */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="lg:col-span-4 space-y-6"
+            className="lg:col-span-4 space-y-8"
           >
             {/* Overall Rating Card */}
             <ReviewStats avg={sum.avg} total={sum.total} buckets={sum.buckets} />
@@ -116,14 +111,14 @@ export default function ReviewsSection({ productId, variants }: { productId: str
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-3xl shadow-2xl p-6 border-4 border-black"
+              className="bg-white rounded-2xl p-6 border border-gray-200"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <Filter className="w-5 h-5 text-black" />
-                <h3 className="font-black text-black text-lg">FILTER REVIEWS</h3>
+              <div className="flex items-center gap-3 mb-6">
+                <Filter className="w-5 h-5 text-gray-600" />
+                <h3 className="font-light text-gray-900 text-lg">Filter Reviews</h3>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
                   { label: 'All Reviews', value: 'all', count: list.reviews.length },
                   { label: '5 Stars', value: 5, count: sum.buckets.find(b => b.star === 5)?.count || 0 },
@@ -134,20 +129,20 @@ export default function ReviewsSection({ productId, variants }: { productId: str
                 ].map((filter) => (
                   <motion.button
                     key={filter.value}
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, x: 4 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setActiveFilter(filter.value as any)}
-                    className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all duration-300 border-2 ${
+                    className={`w-full flex items-center justify-between p-4 rounded-xl transition-all duration-300 border ${
                       activeFilter === filter.value
-                        ? 'bg-black text-white border-yellow-500 shadow-lg shadow-yellow-500/30'
-                        : 'bg-gray-100 text-gray-700 border-gray-300 hover:border-gray-400'
+                        ? 'bg-black text-white border-gray-700 shadow-lg'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:shadow-md'
                     }`}
                   >
-                    <span className="font-bold">{filter.label}</span>
-                    <span className={`px-2 py-1 rounded-full text-sm font-black ${
+                    <span className="font-light">{filter.label}</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-light ${
                       activeFilter === filter.value
-                        ? 'bg-yellow-500 text-black'
-                        : 'bg-gray-200 text-gray-600'
+                        ? 'bg-white text-black'
+                        : 'bg-gray-100 text-gray-600'
                     }`}>
                       {filter.count}
                     </span>
@@ -161,23 +156,23 @@ export default function ReviewsSection({ productId, variants }: { productId: str
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-r from-yellow-500 to-red-500 rounded-3xl p-6 text-white shadow-2xl border-4 border-black"
+              className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-gray-900 border border-gray-200"
             >
               <div className="flex items-center gap-3 mb-4">
-                <Award className="w-6 h-6" />
-                <h3 className="font-black text-lg">VERIFIED REVIEWS</h3>
+                <Award className="w-6 h-6 text-gray-700" />
+                <h3 className="font-light text-lg">Verified Reviews</h3>
               </div>
-              <p className="text-yellow-100 text-sm mb-4 font-medium">
-                Every review is from a verified purchase. We never fake customer feedback.
+              <p className="text-gray-600 text-sm mb-4 font-light leading-relaxed">
+                Every review comes from verified purchases. Authenticity guaranteed.
               </p>
-              <div className="flex items-center gap-4 text-xs font-bold">
-                <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  <span>{sum.total}+ VERIFIED</span>
+              <div className="flex items-center gap-6 text-xs font-light">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-gray-600" />
+                  <span>{sum.total}+ Verified</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>98% POSITIVE</span>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-gray-600" />
+                  <span>98% Positive</span>
                 </div>
               </div>
             </motion.div>
@@ -198,24 +193,26 @@ export default function ReviewsSection({ productId, variants }: { productId: str
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="space-y-6"
+              className="space-y-8"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-black text-black">
-                  CUSTOMER REVIEWS
-                  <span className="ml-2 text-gray-600 text-lg">
-                    ({filteredReviews.length})
-                  </span>
-                </h3>
+                <div>
+                  <h3 className="text-2xl font-light text-black">
+                    Customer Experiences
+                  </h3>
+                  <p className="text-gray-600 font-light mt-1">
+                    {filteredReviews.length} {filteredReviews.length === 1 ? 'review' : 'reviews'}
+                  </p>
+                </div>
                 
                 {activeFilter !== 'all' && (
                   <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     onClick={() => setActiveFilter('all')}
-                    className="px-4 py-2 text-sm bg-gray-200 rounded-2xl font-bold border-2 border-gray-300 hover:border-black transition-all duration-300"
+                    className="px-4 py-2 text-sm bg-gray-100 rounded-xl font-light border border-gray-300 hover:border-gray-400 transition-all duration-300"
                   >
-                    CLEAR FILTER
+                    Clear Filter
                   </motion.button>
                 )}
               </div>
@@ -235,15 +232,15 @@ export default function ReviewsSection({ productId, variants }: { productId: str
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white rounded-3xl p-6 shadow-2xl border-4 border-black animate-pulse"
+                        className="bg-white rounded-2xl p-6 border border-gray-200 animate-pulse"
                       >
                         <div className="flex gap-4">
-                          <div className="w-12 h-12 bg-gray-300 rounded-2xl" />
+                          <div className="w-12 h-12 bg-gray-200 rounded-xl" />
                           <div className="flex-1 space-y-3">
-                            <div className="h-4 bg-gray-300 rounded w-1/4" />
-                            <div className="h-3 bg-gray-300 rounded w-1/6" />
-                            <div className="h-3 bg-gray-300 rounded w-full" />
-                            <div className="h-3 bg-gray-300 rounded w-2/3" />
+                            <div className="h-4 bg-gray-200 rounded w-1/4" />
+                            <div className="h-3 bg-gray-200 rounded w-1/6" />
+                            <div className="h-3 bg-gray-200 rounded w-full" />
+                            <div className="h-3 bg-gray-200 rounded w-2/3" />
                           </div>
                         </div>
                       </motion.div>
@@ -263,18 +260,18 @@ export default function ReviewsSection({ productId, variants }: { productId: str
                     key="empty"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-12"
+                    className="text-center py-16"
                   >
-                    <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-2xl flex items-center justify-center border-4 border-black">
-                      <MessageCircle className="w-10 h-10 text-gray-600" />
+                    <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 rounded-2xl flex items-center justify-center border border-gray-300">
+                      <MessageCircle className="w-8 h-8 text-gray-400" />
                     </div>
-                    <h4 className="text-xl font-black text-black mb-2">
-                      NO REVIEWS FOUND
+                    <h4 className="text-xl font-light text-black mb-3">
+                      No Reviews Found
                     </h4>
-                    <p className="text-gray-700 font-medium">
+                    <p className="text-gray-600 font-light max-w-md mx-auto leading-relaxed">
                       {activeFilter === 'all' 
-                        ? "Be the first to review this product!" 
-                        : `No ${activeFilter}-star reviews found.`}
+                        ? "Be the first to share your experience with this product" 
+                        : `No ${activeFilter}-star reviews match your filter.`}
                     </p>
                   </motion.div>
                 )}

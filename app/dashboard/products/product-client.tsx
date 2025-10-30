@@ -263,3 +263,4 @@ export function ProductsClient({ products }: ProductsClientProps) {
     </div>
   );
 }
+

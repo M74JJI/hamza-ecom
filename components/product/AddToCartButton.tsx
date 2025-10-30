@@ -2,58 +2,55 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
-import { Check, ShoppingCart, Sparkles, Zap, ShoppingBag } from 'lucide-react';
+import { Check, ShoppingBag, Sparkles, Plus, Star } from 'lucide-react';
 
 export default function AddToCartButton({ onClick, disabled, alreadyQty }: { onClick: () => void; disabled?: boolean; alreadyQty?: number }) {
   const [done, setDone] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  const [isPulsing, setIsPulsing] = useState(false);
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number; type: 'sparkle' | 'star' }>>([]);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const particleId = useRef(0);
+  
+const createParticles = (count: number) => {
+  const newParticles: { id: number; x: number; y: number; delay: number; type: 'sparkle' | 'star' }[] = [];
+  for (let i = 0; i < count; i++) {
+    newParticles.push({
+      id: particleId.current++,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      delay: Math.random() * 0.4,
+      type: (Math.random() > 0.5 ? 'sparkle' : 'star') as 'sparkle' | 'star', // ✅ FIXED
+    });
+  }
+  setParticles(newParticles);
+  
+  setTimeout(() => {
+    setParticles([]);
+  }, 1500);
+};
 
-  const createParticles = (count: number) => {
-    const newParticles = [];
-    for (let i = 0; i < count; i++) {
-      newParticles.push({
-        id: particleId.current++,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-      });
-    }
-    setParticles(newParticles);
-    
-    setTimeout(() => {
-      setParticles([]);
-    }, 1000);
-  };
 
   async function handleClick() {
     if (disabled) return;
     
-    // Create sparkle particles
-    createParticles(12);
-    
-    // Pulse animation
-    setIsPulsing(true);
-    setTimeout(() => setIsPulsing(false), 600);
+    // Create premium particle effect
+    createParticles(8);
     
     onClick();
     setDone(true);
-    setTimeout(() => setDone(false), 2000);
+    setTimeout(() => setDone(false), 2500);
   }
 
-  // Continuous subtle pulse when item is in cart
+  // Continuous subtle glow when item is in cart
   useEffect(() => {
-    if (alreadyQty && alreadyQty > 0) {
+    if (alreadyQty && alreadyQty > 0 && !done) {
       const interval = setInterval(() => {
-        setIsPulsing(true);
-        setTimeout(() => setIsPulsing(false), 600);
+        createParticles(1);
       }, 4000);
       
       return () => clearInterval(interval);
     }
-  }, [alreadyQty]);
+  }, [alreadyQty, done]);
 
   return (
     <motion.button
@@ -68,66 +65,86 @@ export default function AddToCartButton({ onClick, disabled, alreadyQty }: { onC
       onClick={handleClick}
       disabled={disabled}
       className={`
-        relative px-8 py-4 rounded-2xl font-black text-lg
-        shadow-2xl overflow-hidden border-2
-        transition-all duration-500
+        relative flex-1 px-10 py-5 rounded-2xl
+        overflow-hidden border-2 transition-all duration-500
+        disabled:cursor-not-allowed
+        backdrop-blur-lg
+        group
         ${disabled 
-          ? 'bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed' 
+          ? 'bg-gray-100 text-gray-400 border-gray-200' 
           : done
-            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-yellow-500 shadow-green-500/25'
-            : 'bg-black text-white border-yellow-500 hover:bg-gray-900 hover:shadow-yellow-500/30'
+            ? 'bg-gradient-to-br from-green-600 to-emerald-700 text-white border-green-600 shadow-2xl shadow-green-500/30'
+            : 'bg-gradient-to-br from-black to-gray-900 text-white border-black hover:from-gray-900 hover:to-black hover:shadow-2xl hover:shadow-black/30'
         }
-        ${isPulsing ? 'animate-pulse' : ''}
       `}
     >
-      {/* Animated gradient overlay */}
+      {/* Premium background shine effect */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-500/20 to-transparent"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
         initial={{ x: '-100%' }}
         animate={{ x: isHovering && !disabled && !done ? '100%' : '-100%' }}
-        transition={{ duration: 0.8, ease: 'easeInOut' }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
       />
-      
-      {/* Floating particles */}
+
+      {/* Premium floating particles */}
       <AnimatePresence>
         {particles.map((particle) => (
           <motion.div
             key={particle.id}
-            className="absolute w-2 h-2 pointer-events-none"
+            className="absolute w-3 h-3 pointer-events-none"
             initial={{
-              opacity: 1,
+              opacity: 0,
               scale: 0,
               x: `${particle.x}%`,
               y: `${particle.y}%`,
             }}
             animate={{
-              opacity: 0,
-              scale: [0, 1.5, 0],
-              x: `${particle.x + (Math.random() - 0.5) * 100}%`,
-              y: `${particle.y - 50}%`,
-              rotate: 360,
+              opacity: [0, 1, 0],
+              scale: [0, 1.3, 0],
+              x: `${particle.x + (Math.random() - 0.5) * 80}%`,
+              y: `${particle.y - 60 - Math.random() * 30}%`,
+              rotate: particle.type === 'star' ? [0, 180, 360] : 0,
             }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: 1.2,
-              ease: 'easeOut',
+              duration: 1.5,
+              ease: "easeOut",
+              delay: particle.delay,
             }}
           >
-            <Sparkles className="w-full h-full text-yellow-400 fill-yellow-400" />
+            {particle.type === 'sparkle' ? (
+              <Sparkles className="w-full h-full text-amber-300" />
+            ) : (
+              <Star className="w-full h-full text-white fill-white/80" />
+            )}
           </motion.div>
         ))}
       </AnimatePresence>
 
-      {/* Background shine effect */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-500/30 to-transparent"
-        initial={{ x: '-100%' }}
-        animate={{ x: done ? '100%' : '-100%' }}
-        transition={{ duration: 0.8, delay: done ? 0.1 : 0 }}
-      />
+      {/* Premium success wave effect */}
+      <AnimatePresence>
+        {done && (
+          <>
+            <motion.div
+              className="absolute inset-0 bg-white/40 rounded-2xl"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1.3, opacity: 1 }}
+              exit={{ scale: 1.6, opacity: 0 }}
+              transition={{ duration: 0.8 }}
+            />
+            <motion.div
+              className="absolute inset-0 bg-white/25 rounded-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1.5, opacity: 1 }}
+              exit={{ scale: 1.8, opacity: 0 }}
+              transition={{ duration: 1, delay: 0.1 }}
+            />
+          </>
+        )}
+      </AnimatePresence>
 
-      {/* Main content */}
-      <div className="relative z-10 flex items-center justify-center gap-3">
+      {/* Main button content */}
+      <div className="relative z-10 flex items-center justify-center gap-4">
         <AnimatePresence mode="wait">
           {done ? (
             <motion.div
@@ -135,36 +152,56 @@ export default function AddToCartButton({ onClick, disabled, alreadyQty }: { onC
               initial={{ opacity: 0, scale: 0.8, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: -10 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-4"
             >
+              {/* Premium checkmark animation */}
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.2, 1] }}
-                transition={{ duration: 0.5, times: [0, 0.7, 1] }}
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 20 
+                }}
+                className="relative"
               >
                 <Check className="w-6 h-6" />
+                
+                {/* Mini sparkles on check */}
+                <motion.div
+                  initial={{ scale: 0, opacity: 0, x: -2, y: -2 }}
+                  animate={{ scale: 1, opacity: 1, x: 0, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="absolute -top-1 -right-1"
+                >
+                  <Sparkles className="w-3 h-3 text-amber-300" />
+                </motion.div>
+                <motion.div
+                  initial={{ scale: 0, opacity: 0, x: 2, y: -2 }}
+                  animate={{ scale: 1, opacity: 1, x: 0, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="absolute -top-1 -left-1"
+                >
+                  <Star className="w-2 h-2 text-white fill-white" />
+                </motion.div>
               </motion.div>
-              <span className="font-black">ADDED TO CART!</span>
               
-              {/* Mini cart icon flying in */}
-              <motion.div
-                initial={{ x: 20, opacity: 0, scale: 0 }}
-                animate={{ x: 0, opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.4 }}
-                className="flex items-center gap-1"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                {alreadyQty && alreadyQty > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5, type: 'spring' }}
-                    className="text-xs bg-yellow-500 text-black px-1.5 py-0.5 rounded-full font-black border border-white"
-                  >
+              <span className="font-semibold text-base">Added to Bag</span>
+              
+              {/* Premium cart count fly-in */}
+              {alreadyQty !== undefined && (
+                <motion.div
+                  initial={{ x: 20, opacity: 0, scale: 0.5 }}
+                  animate={{ x: 0, opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4, type: "spring" }}
+                  className="flex items-center gap-2 bg-white/25 px-3 py-1.5 rounded-full backdrop-blur-sm"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span className="text-sm font-semibold">
                     {alreadyQty + 1}
-                  </motion.span>
-                )}
-              </motion.div>
+                  </span>
+                </motion.div>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -172,46 +209,65 @@ export default function AddToCartButton({ onClick, disabled, alreadyQty }: { onC
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-4"
             >
-              {/* Animated shopping cart icon */}
+              {/* Premium animated shopping bag icon */}
               <motion.div
                 animate={{
-                  y: isHovering ? [-2, 2, -2] : 0,
-                  rotate: isHovering ? [-5, 5, -5] : 0,
+                  y: isHovering ? [-3, 0, -3] : 0,
                 }}
                 transition={{
-                  duration: 1,
+                  duration: 2,
                   repeat: isHovering ? Infinity : 0,
-                  ease: 'easeInOut',
+                  ease: "easeInOut",
                 }}
+                className="relative"
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingBag className="w-6 h-6" />
+                
+                {/* Bag shine effect */}
+                <motion.div
+                  className="absolute inset-0 bg-white/30 rounded-full"
+                  animate={{ 
+                    scale: isHovering ? [1, 1.2, 1] : 1,
+                    opacity: isHovering ? [0.3, 0.6, 0.3] : 0
+                  }}
+                  transition={{ duration: 2, repeat: isHovering ? Infinity : 0 }}
+                />
               </motion.div>
               
-              <span className="font-black">
-                ADD TO CART
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-base">
+                  Add to Bag
+                </span>
+                
+                {/* Premium existing quantity indicator */}
                 {typeof alreadyQty === 'number' && alreadyQty > 0 && (
-                  <motion.span
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="ml-2 text-sm bg-yellow-500 text-black px-2 py-1 rounded-full border border-white"
+                    className="flex items-center gap-2 bg-white/25 px-3 py-1.5 rounded-full backdrop-blur-sm"
                   >
-                    IN CART: {alreadyQty}
-                  </motion.span>
+                    <Plus className="w-3 h-3" />
+                    <span className="text-sm font-semibold">
+                      {alreadyQty}
+                    </span>
+                  </motion.div>
                 )}
-              </span>
+              </div>
 
-              {/* Lightning bolt on hover */}
+              {/* Premium hover sparkle effect */}
               <AnimatePresence>
                 {isHovering && !disabled && (
                   <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    exit={{ scale: 0, rotate: 180 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className="flex gap-1"
                   >
-                    <Zap className="w-4 h-4 text-yellow-400 fill-current" />
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    <Star className="w-3 h-3 text-white fill-white/80" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -220,48 +276,51 @@ export default function AddToCartButton({ onClick, disabled, alreadyQty }: { onC
         </AnimatePresence>
       </div>
 
-      {/* Success wave effect */}
-      <AnimatePresence>
-        {done && (
-          <>
-            <motion.div
-              className="absolute inset-0 bg-yellow-500/20 rounded-2xl"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1.2, opacity: 1 }}
-              exit={{ scale: 1.4, opacity: 0 }}
-              transition={{ duration: 0.6 }}
-            />
-            <motion.div
-              className="absolute inset-0 bg-yellow-500/10 rounded-2xl"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1.3, opacity: 1 }}
-              exit={{ scale: 1.5, opacity: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-            />
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Continuous border animation when item in cart */}
+      {/* Premium continuous pulse when item is in cart */}
       <AnimatePresence>
         {alreadyQty && alreadyQty > 0 && !done && (
           <motion.div
-            className="absolute inset-0 rounded-2xl border-2 border-yellow-500"
+            className="absolute inset-0 rounded-2xl border-2 border-white/40"
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{ opacity: [0.3, 0.7, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity }}
           />
         )}
       </AnimatePresence>
 
-      {/* Disabled state overlay */}
+      {/* Premium disabled state overlay */}
       {disabled && (
         <motion.div
-          className="absolute inset-0 bg-gray-500/20 rounded-2xl backdrop-blur-[1px]"
+          className="absolute inset-0 bg-gray-500/20 rounded-2xl backdrop-blur-[2px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         />
       )}
+
+      {/* Premium glow effect */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        animate={{ 
+          opacity: isHovering && !disabled ? [0.4, 0.8, 0.4] : 0,
+          x: isHovering && !disabled ? ['-100%', '100%'] : '-100%'
+        }}
+        transition={{ 
+          opacity: { duration: 2, repeat: isHovering && !disabled ? Infinity : 0 },
+          x: { duration: 2, repeat: isHovering && !disabled ? Infinity : 0 }
+        }}
+      />
+
+      {/* Premium shimmer border */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl border-2 border-transparent bg-gradient-to-r from-transparent via-white/30 to-transparent bg-[length:200%_100%]"
+        animate={{ 
+          backgroundPosition: isHovering && !disabled ? ['0% 0%', '200% 0%'] : '0% 0%'
+        }}
+        transition={{ 
+          duration: 2,
+          repeat: isHovering && !disabled ? Infinity : 0
+        }}
+      />
     </motion.button>
   );
 }

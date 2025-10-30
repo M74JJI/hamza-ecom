@@ -1,0 +1,432 @@
+{
+  "navigation": [
+    {
+      "name": "New Arrivals",
+      "href": "/browse",
+      "badge": {
+        "text": "HOT",
+        "color": "bg-red-500"
+      },
+      "highlight": false,
+      "megaMenu": {
+        "type": "featured",
+        "featured": {
+          "title": "Just Dropped This Week",
+          "subtitle": "Fresh styles added daily",
+          "items": [
+            {
+              "name": "Men's Spring & Autumn Long Sleeve PU Leather Biker Jacket With Letter Embroidery, Grunge",
+              "href": "http://localhost:3000/products/mens-spring-and-autumn-long-sleeve-pu-leather-biker-jacket-with-letter-embroidery-grunge",
+              "price": "559 MAD",
+              "originalPrice": "1,899 MAD",
+              "image": "https://res.cloudinary.com/drbfyibqm/image/upload/v1761840090/igrbqtuulb8jucvwugpt.jpg",
+              "rating": 4.9,
+              "reviews": 142,
+              "badges": ["Limited", "Bestseller"]
+            },
+            {
+              "name": "Designer Collection",
+              "href": "/new/designer",
+              "price": "2,499 MAD",
+              "image": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=280",
+              "rating": 4.8,
+              "reviews": 89,
+              "badges": ["Exclusive"]
+            }
+          ]
+        },
+        "quickLinks": [
+          {
+            "name": "Men's New Arrivals",
+            "href": "/new/men",
+            "count": 42
+          },
+          {
+            "name": "Women's New Arrivals",
+            "href": "/new/women",
+            "count": 38
+          },
+          {
+            "name": "Accessories",
+            "href": "/new/accessories",
+            "count": 25
+          }
+        ]
+      }
+    },
+    {
+      "name": "Men",
+      "href": "/men",
+      "badge": null,
+      "highlight": false,
+      "megaMenu": {
+        "type": "category",
+        "columns": [
+          {
+            "title": "Clothing",
+            "featured": {
+              "name": "Summer Essentials",
+              "href": "/men/summer",
+              "image": "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200"
+            },
+            "items": [
+              {
+                "name": "T-Shirts & Tops",
+                "href": "/browse?category=cmhcixnkx0001vddg4ksqpv7e",
+                "popular": true,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 234,
+                "badge": null
+              },
+              {
+                "name": "Jeans & Pants",
+                "href": "/men/pants",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 189,
+                "badge": null
+              },
+              {
+                "name": "Jackets & Coats",
+                "href": "/men/jackets",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 76,
+                "badge": null
+              },
+              {
+                "name": "Activewear",
+                "href": "/men/activewear",
+                "popular": false,
+                "trending": true,
+                "discount": null,
+                "highlight": false,
+                "count": 156,
+                "badge": null
+              },
+              {
+                "name": "Suits & Formal",
+                "href": "/men/formal",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 45,
+                "badge": null
+              }
+            ]
+          },
+          {
+            "title": "Footwear",
+            "featured": {
+              "name": "Running Collection",
+              "href": "/men/running",
+              "image": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=200"
+            },
+            "items": [
+              {
+                "name": "Sneakers",
+                "href": "/men/sneakers",
+                "popular": true,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 312,
+                "badge": null
+              },
+              {
+                "name": "Boots",
+                "href": "/men/boots",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 89,
+                "badge": null
+              },
+              {
+                "name": "Sandals",
+                "href": "/men/sandals",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 67,
+                "badge": null
+              },
+              {
+                "name": "Dress Shoes",
+                "href": "/men/dress-shoes",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 54,
+                "badge": null
+              }
+            ]
+          },
+          {
+            "title": "Brands & Offers",
+            "featured": {
+              "name": "Brand Spotlight",
+              "href": "/brands/spotlight",
+              "badge": "New"
+            },
+            "items": [
+              {
+                "name": "Nike",
+                "href": "/brands/nike",
+                "popular": true,
+                "trending": false,
+                "discount": "Up to 40% OFF",
+                "highlight": false,
+                "count": null,
+                "badge": null
+              },
+              {
+                "name": "Adidas",
+                "href": "/brands/adidas",
+                "popular": false,
+                "trending": false,
+                "discount": "Up to 35% OFF",
+                "highlight": false,
+                "count": null,
+                "badge": null
+              },
+              {
+                "name": "Puma",
+                "href": "/brands/puma",
+                "popular": false,
+                "trending": true,
+                "discount": null,
+                "highlight": false,
+                "count": null,
+                "badge": null
+              },
+              {
+                "name": "View All Brands →",
+                "href": "/brands",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": true,
+                "count": null,
+                "badge": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Women",
+      "href": "/women",
+      "badge": null,
+      "highlight": false,
+      "megaMenu": {
+        "type": "category",
+        "columns": [
+          {
+            "title": "Clothing",
+            "featured": {
+              "name": "Summer Dresses",
+              "href": "/women/dresses",
+              "image": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200"
+            },
+            "items": [
+              {
+                "name": "Dresses",
+                "href": "/women/dresses",
+                "popular": true,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 287,
+                "badge": null
+              },
+              {
+                "name": "Tops & Blouses",
+                "href": "/women/tops",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 234,
+                "badge": null
+              },
+              {
+                "name": "Jeans",
+                "href": "/women/jeans",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 156,
+                "badge": null
+              },
+              {
+                "name": "Activewear",
+                "href": "/women/activewear",
+                "popular": false,
+                "trending": true,
+                "discount": null,
+                "highlight": false,
+                "count": 189,
+                "badge": null
+              }
+            ]
+          },
+          {
+            "title": "Footwear & More",
+            "featured": {
+              "name": "Heels Collection",
+              "href": "/women/heels",
+              "image": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=200"
+            },
+            "items": [
+              {
+                "name": "Heels",
+                "href": "/women/heels",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 145,
+                "badge": null
+              },
+              {
+                "name": "Sneakers",
+                "href": "/women/sneakers",
+                "popular": true,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 278,
+                "badge": null
+              },
+              {
+                "name": "Boots",
+                "href": "/women/boots",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 98,
+                "badge": null
+              },
+              {
+                "name": "Flats",
+                "href": "/women/flats",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": 76,
+                "badge": null
+              }
+            ]
+          },
+          {
+            "title": "Featured Collections",
+            "featured": {
+              "name": "Best Sellers",
+              "href": "/women/bestsellers",
+              "count": "1.2K+"
+            },
+            "items": [
+              {
+                "name": "Summer Collection",
+                "href": "/women/summer",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": null,
+                "badge": "New"
+              },
+              {
+                "name": "Workwear Edit",
+                "href": "/women/workwear",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": false,
+                "count": null,
+                "badge": null
+              },
+              {
+                "name": "Vacation Style",
+                "href": "/women/vacation",
+                "popular": false,
+                "trending": true,
+                "discount": null,
+                "highlight": false,
+                "count": null,
+                "badge": null
+              },
+              {
+                "name": "View All →",
+                "href": "/women",
+                "popular": false,
+                "trending": false,
+                "discount": null,
+                "highlight": true,
+                "count": null,
+                "badge": null
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sale",
+      "href": "/sale",
+      "badge": {
+        "text": "60% OFF",
+        "color": "bg-gradient-to-r from-red-500 to-pink-600"
+      },
+      "highlight": true,
+      "megaMenu": {
+        "type": "sale",
+        "featured": {
+          "title": "Flash Sale - Limited Time! ⚡",
+          "subtitle": "Prices slashed for 24 hours only",
+          "timer": "23:59:45",
+          "items": [
+            {
+              "name": "Up to 60% Off Shoes",
+              "href": "/sale/shoes",
+              "discount": "60% OFF",
+              "image": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=200",
+              "originalPrice": "2,999 MAD",
+              "salePrice": "1,199 MAD"
+            },
+            {
+              "name": "50% Off Summer Wear",
+              "href": "/sale/summer",
+              "discount": "50% OFF",
+              "image": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200",
+              "originalPrice": "1,599 MAD",
+              "salePrice": "799 MAD"
+            },
+            {
+              "name": "Clearance Section",
+              "href": "/sale/clearance",
+              "discount": "70% OFF",
+              "image": "https://images.unsplash.com/photo-1445205170230-053b83016050?w=200",
+              "badge": "Last Chance"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

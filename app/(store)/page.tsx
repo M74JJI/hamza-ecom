@@ -23,6 +23,7 @@ const heroProducts = await prisma.product.findMany({
       include: {
         images: { orderBy: { sortOrder: 'asc' }, take: 6 },
         sizes: { orderBy: { priceMAD: 'asc' } },
+        reviews:true
       },
       orderBy: { sortOrder: 'asc' },
     },
@@ -48,7 +49,6 @@ const heroProducts = await prisma.product.findMany({
         status: "PUBLISHED",
         variants: {
           some: {
-            isActive: true,
             sizes: {
               some: {
                 stockQty: { gt: 0 },
@@ -103,51 +103,13 @@ const heroProducts = await prisma.product.findMany({
       }
     });
 
-    // Filter out products that have no active variants with images
-    const validProducts = topProducts.filter(product => 
-      product.variants.length > 0 && 
-      product.variants.some(variant => variant.images.length > 0)
-    );
-
-    if (validProducts.length === 0) {
-      console.log('No valid products found for TopSellers section');
-      return null;
-    }
-
-    // Transform the data to ensure proper serialization
-const serializedProducts = validProducts.map(product => ({
-  ...product,
-  createdAt: product.createdAt.toISOString(),
-  updatedAt: product.updatedAt.toISOString(),
-  variants: product.variants.map(variant => ({
-    ...variant,
-    color: variant.color ?? '', // ✅ added for safety
-    createdAt: variant.createdAt.toISOString(),
-    updatedAt: variant.updatedAt.toISOString(),
-    sizes: variant.sizes.map(size => ({
-      ...size,
-      priceMAD: size.priceMAD.toString(),
-    })),
-    images: variant.images.map(image => ({
-      ...image,
-      createdAt: image.createdAt.toISOString(),
-    })),
-    reviews: variant.reviews.map(review => ({
-      ...review,
-      createdAt: review.createdAt.toISOString(),
-    })),
-  })),
-  categories: product.categories.map(pc => ({
-    category: { ...pc.category },
-  })),
-}));
 
   return (
     <main className="min-h-screen">
       <div className="relative space-y-0">
         <HeroPro products={heroProducts as any}/>
         <FeaturedCategories/>
-        <TopSellers products={serializedProducts}/>
+        <TopSellers products={topProducts as any}/>
       </div>
     </main>
   );

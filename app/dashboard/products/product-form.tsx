@@ -10,8 +10,9 @@ import {
   ImagePlus, AlertCircle, Package, Sparkles, Tag, 
   Layers, Star, Zap, X, ArrowRight
 } from 'lucide-react';
+import RichHtmlEditor from './_components/RichHtmlEditor';
+import slugify from 'slugify';
 
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 
 
 type InputProps = HTMLMotionProps<"input"> & {
@@ -46,9 +47,21 @@ export function ProductForm({ categories, product }: { categories: any[], produc
   const [variants, setVariants] = useState<Array<any>>([]);
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | undefined>();
+  const [selectedCategoryPath, setSelectedCategoryPath] = useState<string[]>([]);
+const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   // hydrate variants once
   const hydratedOnce = useRef(false);
+
+
+  useEffect(() => {
+  // If user hasn’t manually edited slug and first variant title exists → auto-generate
+  if (!slugManuallyEdited && variants.length > 0 && variants[0].title) {
+    const autoSlug = slugify(variants[0].title, { lower: true, strict: true });
+    setSlug(autoSlug);
+  }
+}, [variants, slugManuallyEdited]);
+
   useEffect(() => {
     if (!hydratedOnce.current && product?.variants && product.variants.length) {
       const mapped = product.variants.map((v: any) => ({
@@ -144,7 +157,27 @@ export function ProductForm({ categories, product }: { categories: any[], produc
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Input label="Slug" value={slug} onChange={e => setSlug(e.target.value)} />
+           <div className="space-y-2">
+  <label className="text-sm font-semibold text-gray-900 dark:text-white">
+    Slug
+  </label>
+  <input
+    type="text"
+    value={slug}
+    onChange={(e) => {
+      setSlug(e.target.value);
+      setSlugManuallyEdited(true);
+    }}
+    placeholder="Auto-generated from first variant title"
+    className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-xl placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300"
+  />
+  {!slugManuallyEdited && (
+    <p className="text-xs text-gray-500 dark:text-gray-400">
+      (Auto-generated — you can edit manually)
+    </p>
+  )}
+</div>
+
             <Input label="Brand" value={brand} onChange={e => setBrand(e.target.value)} />
             
             <div className="space-y-2">
@@ -177,21 +210,14 @@ export function ProductForm({ categories, product }: { categories: any[], produc
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-4 bg-white/30 dark:bg-gray-700/30 rounded-xl border border-white/20 dark:border-gray-700/30">
-            {categories.map((c: any) => (
-              <motion.label
-                key={c.id}
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-white/20 dark:border-gray-700/30 cursor-pointer transition-all duration-300"
-              >
-                <input
-                  type="checkbox"
-                  checked={categoryIds.includes(c.id)}
-                  onChange={() => toggleCategory(c.id)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500/50"
-                />
-                <span className="text-sm text-gray-900 dark:text-white">{c.name}</span>
-              </motion.label>
-            ))}
+            <CategorySelector
+  categories={categories}
+  selectedPath={selectedCategoryPath}
+  onSelect={(path, lastSelected) => {
+    setSelectedCategoryPath(path);
+    setCategoryIds([lastSelected.id]); // single leaf category id to save
+  }}
+/>
           </div>
         </motion.div>
 
@@ -383,7 +409,28 @@ export function ProductForm({ categories, product }: { categories: any[], produc
                 <div className="grid md:grid-cols-3 gap-4 mb-6">
                   <Input label="Variant Title" value={v.title} onChange={e => updateVariant(vi, { title: e.target.value })} />
                   <Input label="Variant Label (e.g. Red)" value={v.name} onChange={e => updateVariant(vi, { name: e.target.value })} />
-                  <Input label="Color (hex or text)" value={v.color || ''} onChange={e => updateVariant(vi, { color: e.target.value })} />
+        <div className="space-y-2">
+  <label className="text-sm font-semibold text-gray-900 dark:text-white">
+    Color
+  </label>
+  <div className="flex items-center gap-3">
+    <input
+      type="color"
+      value={v.color || '#000000'}
+      onChange={(e) => updateVariant(vi, { color: e.target.value })}
+      className="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+      title="Pick a color"
+    />
+    <input
+      type="text"
+      value={v.color || ''}
+      onChange={(e) => updateVariant(vi, { color: e.target.value })}
+      placeholder="Color name or hex"
+      className="flex-1 px-4 py-3 bg-white/50 dark:bg-gray-800/50 border border-white/20 dark:border-gray-700/30 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300"
+    />
+  </div>
+</div>
+
                 </div>
 
                 {/* Style Image */}
@@ -463,7 +510,11 @@ export function ProductForm({ categories, product }: { categories: any[], produc
                       Full Description (HTML)
                     </summary>
                     <div className="mt-3 rounded-xl overflow-hidden border border-white/20 dark:border-gray-700/30 bg-white/50 dark:bg-gray-800/50">
-                      <ReactQuill theme="snow" value={v.contentHtml || ''} onChange={(val) => updateVariant(vi, { contentHtml: val })} />
+ <RichHtmlEditor
+          value={v.contentHtml || ''}
+          onChange={(val) => updateVariant(vi, { contentHtml: val })}
+          height={520}
+        />
                     </div>
                   </motion.details>
                 </div>
@@ -642,6 +693,77 @@ export function ProductForm({ categories, product }: { categories: any[], produc
           </motion.button>
         </motion.div>
       </form>
+    </div>
+  );
+}
+
+function CategorySelector({
+  categories,
+  level = 0,
+  selectedPath,
+  onSelect,
+}: {
+  categories: any[];
+  level?: number;
+  selectedPath: string[];
+  onSelect: (path: string[], category: any) => void;
+}) {
+  const selectedId = selectedPath[level] || '';
+  const currentCategory = categories.find((c) => c.id === selectedId);
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <Layers className="w-4 h-4" />
+          {level === 0 ? 'Main Category' : `Subcategory Level ${level + 1}`}
+        </label>
+        <motion.select
+          whileFocus={{ scale: 1.02 }}
+          value={selectedId}
+          onChange={(e) => {
+            const selected = categories.find((c) => c.id === e.target.value);
+            const newPath = [...selectedPath.slice(0, level), e.target.value];
+            onSelect(newPath, selected);
+          }}
+          className="w-full px-4 py-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300"
+        >
+          <option value="" className="text-gray-500 dark:text-gray-400">
+            Select {level === 0 ? 'a category' : 'subcategory'}...
+          </option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id} className="text-gray-900 dark:text-white">
+              {c.name}
+            </option>
+          ))}
+        </motion.select>
+      </div>
+
+      {/* If selected category has children, show next level */}
+      {currentCategory?.children?.length ? (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="ml-4 pl-4 border-l-2 border-blue-500/20"
+        >
+          <CategorySelector
+            categories={currentCategory.children}
+            level={level + 1}
+            selectedPath={selectedPath}
+            onSelect={onSelect}
+          />
+        </motion.div>
+      ) : selectedId && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400"
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          <span>Category selected: <strong>{currentCategory?.name}</strong></span>
+        </motion.div>
+      )}
     </div>
   );
 }

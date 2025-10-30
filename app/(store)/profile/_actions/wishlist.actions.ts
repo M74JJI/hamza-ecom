@@ -78,3 +78,21 @@ export async function moveWishlistToCart(productId: string, variantId: string) {
   // Optional: you could add to cart here in the future
   return { ok: true };
 }
+
+
+export async function isInWishlist(productId: string, variantId: string) {
+  const { user } = await requireUser();
+  if (!user) return false;
+
+  const item = await prisma.wishlistItem.findUnique({
+    where: {
+      userId_productId_variantId: {
+        userId: user.id,
+        productId,
+        variantId,
+      },
+    },
+  });
+
+  return !!item;
+}

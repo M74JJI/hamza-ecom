@@ -10,6 +10,7 @@ export const heroInclude = Prisma.validator<Prisma.ProductDefaultArgs>()({
             category:true
         }
     },
+    reviews:true,
     variants: {
       where: { isActive: true, images: { some: {} } },
       orderBy: { sortOrder: 'asc' },

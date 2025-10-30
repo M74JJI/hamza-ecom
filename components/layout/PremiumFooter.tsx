@@ -28,13 +28,11 @@ import {
   MessageCircle
 } from 'lucide-react';
 
-
-
 type FooterLink = {
   name: string;
   href: string;
-  icon?: React.ElementType; // optional Lucide icon
-  badge?: string;           // optional badge
+  icon?: React.ElementType;
+  badge?: string;
 };
 
 type FooterSection = {
@@ -42,57 +40,54 @@ type FooterSection = {
   links: FooterLink[];
 };
 
-
 export default function PremiumFooter() {
   const currentYear = new Date().getFullYear();
 
-  // Enhanced footer sections
-const footerSections: FooterSection[] = [
-  {
-    title: "Shop",
-    links: [
-      { name: "New Arrivals", href: "/new", badge: "HOT" },
-      { name: "Best Sellers", href: "/bestsellers", badge: "POPULAR" },
-      { name: "Men's Collection", href: "/men" },
-      { name: "Women's Collection", href: "/women" },
-      { name: "Sale & Offers", href: "/sale", badge: "60% OFF" },
-      { name: "Limited Editions", href: "/limited" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { name: "Contact Us", href: "/contact", icon: Phone },
-      { name: "Shipping Info", href: "/shipping", icon: Truck },
-      { name: "Returns & Exchanges", href: "/returns" },
-      { name: "Size Guide", href: "/size-guide" },
-      { name: "FAQs", href: "/faqs" },
-      { name: "Track Order", href: "/track-order" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { name: "About Us", href: "/about" },
-      { name: "Careers", href: "/careers", badge: "HIRING" },
-      { name: "Sustainability", href: "/sustainability" },
-      { name: "Press", href: "/press" },
-      { name: "Affiliate Program", href: "/affiliate" },
-      { name: "Store Locator", href: "/stores" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms of Service", href: "/terms" },
-      { name: "Cookie Policy", href: "/cookies" },
-      { name: "Disclaimer", href: "/disclaimer" },
-      { name: "Accessibility", href: "/accessibility" },
-    ],
-  },
-];
-
+  const footerSections: FooterSection[] = [
+    {
+      title: "Shop",
+      links: [
+        { name: "New Arrivals", href: "/new", badge: "HOT" },
+        { name: "Best Sellers", href: "/bestsellers", badge: "POPULAR" },
+        { name: "Men's Collection", href: "/men" },
+        { name: "Women's Collection", href: "/women" },
+        { name: "Sale & Offers", href: "/sale", badge: "60% OFF" },
+        { name: "Limited Editions", href: "/limited" },
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { name: "Contact Us", href: "/contact", icon: Phone },
+        { name: "Shipping Info", href: "/shipping", icon: Truck },
+        { name: "Returns & Exchanges", href: "/returns" },
+        { name: "Size Guide", href: "/size-guide" },
+        { name: "FAQs", href: "/faqs" },
+        { name: "Track Order", href: "/track-order" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { name: "About Us", href: "/about" },
+        { name: "Careers", href: "/careers", badge: "HIRING" },
+        { name: "Sustainability", href: "/sustainability" },
+        { name: "Press", href: "/press" },
+        { name: "Affiliate Program", href: "/affiliate" },
+        { name: "Store Locator", href: "/stores" },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { name: "Privacy Policy", href: "/privacy" },
+        { name: "Terms of Service", href: "/terms" },
+        { name: "Cookie Policy", href: "/cookies" },
+        { name: "Disclaimer", href: "/disclaimer" },
+        { name: "Accessibility", href: "/accessibility" },
+      ],
+    },
+  ];
 
   const trustBadges = [
     { icon: Shield, text: "Secure Payment", description: "256-bit encryption" },
@@ -120,10 +115,10 @@ const footerSections: FooterSection[] = [
 
   return (
     <footer className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 text-gray-900 overflow-hidden">
-      {/* Animated Background Elements */}
+      {/* Animated Background Elements - PERFORMANCE OPTIMIZED */}
       <div className="absolute inset-0">
-        {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
+        {/* Floating Particles - REDUCED COUNT & SLOWER */}
+        {[...Array(8)].map((_, i) => ( // Reduced from 20 to 8
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-full"
@@ -133,33 +128,33 @@ const footerSections: FooterSection[] = [
               scale: Math.random() * 0.5 + 0.5,
             }}
             animate={{
-              y: [null, -30, 0],
-              opacity: [0, 0.6, 0],
+              y: [null, -20, 0], // Reduced movement
+              opacity: [0, 0.4, 0], // Reduced opacity
             }}
             transition={{
-              duration: Math.random() * 4 + 3,
+              duration: Math.random() * 6 + 4, // Slower duration
               repeat: Infinity,
-              delay: Math.random() * 3,
+              delay: Math.random() * 5,
             }}
           />
         ))}
 
-        {/* Gradient Orbs */}
+        {/* Gradient Orbs - SLOWER & REDUCED OPACITY */}
         <motion.div
           className="absolute top-10 left-10 w-64 h-64 bg-red-500/5 rounded-full blur-3xl"
           animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3],
+            scale: [1, 1.1, 1], // Reduced scale
+            opacity: [0.2, 0.4, 0.2], // Reduced opacity
           }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} // Slower
         />
         <motion.div
           className="absolute bottom-10 right-10 w-80 h-80 bg-orange-500/5 rounded-full blur-3xl"
           animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.5, 0.2],
+            scale: [1.1, 1, 1.1], // Reduced scale
+            opacity: [0.1, 0.3, 0.1], // Reduced opacity
           }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} // Slower
         />
 
         {/* Grid Pattern */}
@@ -167,11 +162,12 @@ const footerSections: FooterSection[] = [
       </div>
 
       <div className="relative z-10">
-        {/* Trust Badges Section */}
+        {/* Trust Badges Section - PERFORMANCE OPTIMIZED */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }} // Faster
+          viewport={{ once: true }} // Only animate once
           className="border-b border-gray-200/50"
         >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -181,14 +177,15 @@ const footerSections: FooterSection[] = [
                   key={badge.text}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  whileHover={{ scale: 1.05, y: -2 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }} // Faster
+                  viewport={{ once: true }} // Only animate once
+                  whileHover={{ scale: 1.02, y: -1 }} // Reduced hover
                   className="text-center group"
                 >
                   <motion.div
                     className="w-16 h-16 bg-gradient-to-br from-red-500/10 to-orange-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-200/50 group-hover:border-red-300/50 transition-all duration-300 backdrop-blur-sm"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.8 }}
+                    whileHover={{ rotate: 180 }} // Reduced rotation
+                    transition={{ duration: 0.6 }} // Faster
                   >
                     <badge.icon className="w-8 h-8 text-red-500" />
                   </motion.div>
@@ -204,28 +201,29 @@ const footerSections: FooterSection[] = [
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             
-            {/* Left: Brand & Contact */}
+            {/* Left: Brand & Contact - PERFORMANCE OPTIMIZED */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.6 }} // Faster
+              viewport={{ once: true }} // Only animate once
               className="space-y-8"
             >
               {/* Enhanced Brand Section */}
               <div className="space-y-6">
                 <motion.div
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.01 }} // Reduced hover
                   className="flex items-center space-x-4"
                 >
                   <motion.div
                     className="w-16 h-16 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl flex items-center justify-center shadow-2xl border border-gray-300 relative"
-                    whileHover={{ rotateY: 180 }}
-                    transition={{ duration: 0.6 }}
+                    whileHover={{ rotateY: 90 }} // Reduced rotation
+                    transition={{ duration: 0.4 }} // Faster
                   >
                     <span className="text-white font-bold text-2xl">H</span>
                     <motion.div
                       className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg"
-                      whileHover={{ scale: 1.3, rotate: 180 }}
+                      whileHover={{ scale: 1.1, rotate: 90 }} // Reduced hover
                     >
                       <Crown className="w-3 h-3 text-white" />
                     </motion.div>
@@ -260,8 +258,9 @@ const footerSections: FooterSection[] = [
                       href={contact.href}
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ x: 5 }}
+                      transition={{ delay: index * 0.1, duration: 0.4 }} // Faster
+                      viewport={{ once: true }} // Only animate once
+                      whileHover={{ x: 3 }} // Reduced movement
                       className="flex items-center space-x-3 text-gray-600 hover:text-gray-900 transition-colors group"
                     >
                       <contact.icon className="w-4 h-4 text-red-500" />
@@ -272,7 +271,7 @@ const footerSections: FooterSection[] = [
                 </div>
               </div>
 
-              {/* Social Links */}
+              {/* Social Links - PERFORMANCE OPTIMIZED */}
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-900 text-lg">Follow Us</h3>
                 <div className="flex space-x-4">
@@ -284,8 +283,9 @@ const footerSections: FooterSection[] = [
                       rel="noopener noreferrer"
                       initial={{ opacity: 0, scale: 0.8 }}
                       whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ scale: 1.2, y: -2 }}
+                      transition={{ delay: index * 0.1, duration: 0.4 }} // Faster
+                      viewport={{ once: true }} // Only animate once
+                      whileHover={{ scale: 1.1, y: -1 }} // Reduced hover
                       className="w-12 h-12 bg-white/80 hover:bg-white rounded-2xl flex items-center justify-center border border-gray-200/60 hover:border-red-300/60 transition-all duration-300 backdrop-blur-sm group shadow-lg hover:shadow-xl"
                     >
                       <social.icon className="w-5 h-5 text-gray-600 group-hover:text-red-500 transition-colors" />
@@ -295,11 +295,12 @@ const footerSections: FooterSection[] = [
               </div>
             </motion.div>
 
-            {/* Right: Navigation Links */}
+            {/* Right: Navigation Links - PERFORMANCE OPTIMIZED */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.6 }} // Faster
+              viewport={{ once: true }} // Only animate once
               className="grid grid-cols-2 gap-8"
             >
               {footerSections.map((section, sectionIndex) => (
@@ -307,7 +308,8 @@ const footerSections: FooterSection[] = [
                   key={section.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: sectionIndex * 0.1 }}
+                  transition={{ delay: sectionIndex * 0.1, duration: 0.4 }} // Faster
+                  viewport={{ once: true }} // Only animate once
                   className="space-y-4"
                 >
                   <h3 className="font-bold text-gray-900 text-lg flex items-center space-x-2">
@@ -320,7 +322,8 @@ const footerSections: FooterSection[] = [
                         key={link.name}
                         initial={{ opacity: 0, x: -10 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ delay: (sectionIndex * 0.1) + (linkIndex * 0.05) }}
+                        transition={{ delay: (sectionIndex * 0.1) + (linkIndex * 0.05), duration: 0.3 }} // Faster
+                        viewport={{ once: true }} // Only animate once
                       >
                         <Link
                           href={link.href}
@@ -340,7 +343,7 @@ const footerSections: FooterSection[] = [
                                     ? 'bg-green-500 text-white'
                                     : 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
                                 }`}
-                                whileHover={{ scale: 1.1 }}
+                                whileHover={{ scale: 1.05 }} // Reduced hover
                               >
                                 {link.badge}
                               </motion.span>
@@ -356,11 +359,12 @@ const footerSections: FooterSection[] = [
             </motion.div>
           </div>
 
-          {/* Newsletter Section */}
+          {/* Newsletter Section - PERFORMANCE OPTIMIZED */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.3 }} // Faster
+            viewport={{ once: true }} // Only animate once
             className="mt-16 p-8 bg-gradient-to-r from-red-500/10 to-orange-500/10 rounded-3xl border border-red-200/50 backdrop-blur-sm shadow-lg"
           >
             <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -381,8 +385,8 @@ const footerSections: FooterSection[] = [
                   />
                   <motion.button
                     type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.03 }} // Reduced hover
+                    whileTap={{ scale: 0.97 }} // Reduced tap
                     className="px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-2xl font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-2 shadow-lg"
                   >
                     <span>Subscribe</span>
@@ -396,11 +400,12 @@ const footerSections: FooterSection[] = [
             </div>
           </motion.div>
 
-          {/* Bottom Footer */}
+          {/* Bottom Footer - PERFORMANCE OPTIMIZED */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.4 }} // Faster
+            viewport={{ once: true }} // Only animate once
             className="mt-12 pt-8 border-t border-gray-200/50"
           >
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -439,37 +444,38 @@ const footerSections: FooterSection[] = [
               </div>
             </div>
 
-            {/* Made With Love */}
+            {/* Made With Love - PERFORMANCE OPTIMIZED */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              transition={{ duration: 0.6, delay: 0.6 }} // Faster
+              viewport={{ once: true }} // Only animate once
               className="text-center mt-6"
             >
-            <p className="text-gray-500 text-sm flex items-center justify-center gap-2">
-  <span>Made with</span>
-  <motion.span
-    animate={{ scale: [1, 1.2, 1] }}
-    transition={{ duration: 1, repeat: Infinity }}
-    className="inline-flex items-center align-middle"
-    aria-hidden="true"
-  >
-    <Heart className="w-4 h-4 text-red-500" />
-  </motion.span>
-  <span>by HAJZEN</span>
-</p>
-
+              <p className="text-gray-500 text-sm flex items-center justify-center gap-2">
+                <span>Made with</span>
+                <motion.span
+                  animate={{ scale: [1, 1.1, 1] }} // Reduced scale
+                  transition={{ duration: 2, repeat: Infinity }} // Slower
+                  className="inline-flex items-center align-middle"
+                  aria-hidden="true"
+                >
+                  <Heart className="w-4 h-4 text-red-500" />
+                </motion.span>
+                <span>by HAJZEN</span>
+              </p>
             </motion.div>
           </motion.div>
         </div>
       </div>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button - PERFORMANCE OPTIMIZED */}
       <motion.button
         initial={{ opacity: 0, scale: 0 }}
         whileInView={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        viewport={{ once: true }} // Only animate once
+        whileHover={{ scale: 1.05 }} // Reduced hover
+        whileTap={{ scale: 0.95 }} // Reduced tap
         className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-2xl shadow-2xl border border-white/20 flex items-center justify-center z-50 backdrop-blur-sm"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >

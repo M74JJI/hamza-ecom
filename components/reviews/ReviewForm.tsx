@@ -1,8 +1,7 @@
-// ReviewForm.tsx - Updated with Hero Theme
 'use client';
 import { useState, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Send, Sparkles, Image, Smile, Award, Crown, Zap } from 'lucide-react';
+import { Star, Send, Image, Smile, Plus, Minus, ChevronDown } from 'lucide-react';
 
 export default function ReviewForm({ productId, variants }: { productId: string; variants: any[] }) {
   const [rating, setRating] = useState(5);
@@ -26,7 +25,7 @@ export default function ReviewForm({ productId, variants }: { productId: string;
       });
       const data = await res.json();
       if (!res.ok) { setMsg(data?.error || 'Failed to submit review'); return; }
-      setMsg('🎉 REVIEW SUBMITTED SUCCESSFULLY!');
+      setMsg('Thank you for your review!');
       setComment(''); setQty(1); setRating(5);
       setIsExpanded(false);
     });
@@ -38,79 +37,46 @@ export default function ReviewForm({ productId, variants }: { productId: string;
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-3xl shadow-2xl border-4 border-black overflow-hidden"
+      className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
     >
-      {/* Header */}
-      <motion.div
-        className="bg-black p-6 text-white border-b-4 border-yellow-500"
-        whileHover={{ scale: 1.02 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-yellow-500 rounded-2xl flex items-center justify-center border-2 border-white">
-            <Crown className="w-6 h-6 text-black" />
-          </div>
-          <div>
-            <h3 className="text-xl font-black">SHARE YOUR EXPERIENCE</h3>
-            <p className="text-yellow-400 text-sm font-bold">Help other customers make better choices</p>
-          </div>
-        </div>
-      </motion.div>
+      {/* Minimal Header */}
+      <div className="p-8 border-b border-gray-200">
+        <h3 className="text-2xl font-light text-black mb-2">Share Your Experience</h3>
+        <p className="text-gray-600 font-light">Your review helps others make informed decisions</p>
+      </div>
 
-      <form onSubmit={submit} className="p-6 space-y-6">
+      <form onSubmit={submit} className="p-8 space-y-8">
         {/* Rating Section */}
         <motion.div
           initial={false}
           animate={isExpanded ? { height: "auto", opacity: 1 } : { height: 0, opacity: 0 }}
           className="overflow-hidden"
         >
-          <div className="space-y-4">
+          <div className="space-y-8">
             {/* Star Rating */}
             <div className="text-center">
-              <label className="block text-sm font-black text-black mb-4">
-                HOW WOULD YOU RATE THIS PRODUCT?
+              <label className="block text-sm font-light text-black mb-6">
+                How would you rate this product?
               </label>
-              <div className="flex justify-center gap-2 mb-2">
+              <div className="flex justify-center gap-2 mb-4">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <motion.button
                     key={star}
                     type="button"
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setRating(star)}
                     className="relative"
                   >
-                    <motion.div
-                      animate={{
-                        scale: displayRating >= star ? [1, 1.2, 1] : 1,
-                        rotate: displayRating >= star ? [0, 10, -10, 0] : 0,
-                      }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <Star
-                        className={`w-12 h-12 transition-all duration-300 ${
-                          displayRating >= star
-                            ? 'fill-yellow-500 text-yellow-500 drop-shadow-lg'
-                            : 'fill-gray-300 text-gray-300'
-                        }`}
-                      />
-                    </motion.div>
-                    
-                    {/* Sparkle effect when selected */}
-                    <AnimatePresence>
-                      {rating === star && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          className="absolute inset-0"
-                        >
-                          <Sparkles className="w-12 h-12 text-yellow-300 fill-current" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <Star
+                      className={`w-10 h-10 transition-all duration-200 ${
+                        displayRating >= star
+                          ? 'fill-gray-800 text-gray-800'
+                          : 'fill-gray-200 text-gray-300'
+                      }`}
+                    />
                   </motion.button>
                 ))}
               </div>
@@ -119,16 +85,16 @@ export default function ReviewForm({ productId, variants }: { productId: string;
               <AnimatePresence mode="wait">
                 <motion.div
                   key={displayRating}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="text-lg font-black text-black"
+                  exit={{ opacity: 0, y: -5 }}
+                  className="text-lg font-light text-gray-700"
                 >
-                  {displayRating === 5 && 'EXCELLENT! 🌟'}
-                  {displayRating === 4 && 'VERY GOOD! 👍'}
-                  {displayRating === 3 && 'GOOD! 😊'}
-                  {displayRating === 2 && 'FAIR 👎'}
-                  {displayRating === 1 && 'POOR ❌'}
+                  {displayRating === 5 && 'Excellent'}
+                  {displayRating === 4 && 'Very Good'}
+                  {displayRating === 3 && 'Good'}
+                  {displayRating === 2 && 'Fair'}
+                  {displayRating === 1 && 'Poor'}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -138,99 +104,116 @@ export default function ReviewForm({ productId, variants }: { productId: string;
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="grid md:grid-cols-3 gap-4"
+              className="grid md:grid-cols-3 gap-6"
             >
-              {/* Variant Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-black text-black">
-                  PRODUCT VARIANT
+              {/* Variant Selection - Premium Custom Select */}
+              <div className="space-y-3">
+                <label className="text-sm font-light text-black">
+                  Product Variant
                 </label>
-                <motion.select
-                  whileFocus={{ scale: 1.02 }}
-                  className="w-full bg-gray-100 border-2 border-gray-300 rounded-2xl px-4 py-3 text-black font-bold focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-300"
-                  value={variantId}
-                  onChange={e => setVariantId(e.target.value)}
-                >
-                  <option value="">Select variant</option>
-                  {variants.map((v: any) => (
-                    <option key={v.id} value={v.id}>{v.title}</option>
-                  ))}
-                </motion.select>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 text-black focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 font-light cursor-pointer pr-10"
+                    value={variantId}
+                    onChange={e => setVariantId(e.target.value)}
+                  >
+                    <option value="">Select variant</option>
+                    {variants.map((v: any) => (
+                      <option key={v.id} value={v.id}>{v.title}</option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  </div>
+                </div>
               </div>
 
               {/* Size Input */}
-              <div className="space-y-2">
-                <label className="text-sm font-black text-black">
-                  SIZE
+              <div className="space-y-3">
+                <label className="text-sm font-light text-black">
+                  Size
                 </label>
-                <motion.input
-                  whileFocus={{ scale: 1.02 }}
+                <input
                   type="text"
-                  className="w-full bg-gray-100 border-2 border-gray-300 rounded-2xl px-4 py-3 text-black font-bold focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-300"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-black focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 font-light placeholder-gray-400"
                   value={size}
                   onChange={e => setSize(e.target.value)}
-                  placeholder="e.g., M, L, XL"
+                  placeholder="M, L, XL"
                 />
               </div>
 
-              {/* Quantity Input */}
-              <div className="space-y-2">
-                <label className="text-sm font-black text-black">
-                  QUANTITY
+              {/* Quantity Input - Premium Stepper */}
+              <div className="space-y-3">
+                <label className="text-sm font-light text-black">
+                  Quantity
                 </label>
-                <motion.div
-                  whileFocus={{ scale: 1.02 }}
-                  className="flex items-center bg-gray-100 border-2 border-gray-300 rounded-2xl overflow-hidden"
-                >
-                  <button
+                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
+                  <motion.button
                     type="button"
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setQty(Math.max(1, qty - 1))}
-                    className="px-4 py-3 text-gray-600 hover:text-black font-bold transition-colors"
+                    className="flex items-center justify-center w-12 h-12 text-gray-600 hover:text-black hover:bg-gray-50 transition-all duration-200 border-r border-gray-300"
+                    disabled={qty <= 1}
                   >
-                    −
-                  </button>
-                  <input
-                    type="number"
-                    min={1}
-                    className="flex-1 bg-transparent text-center text-black font-bold py-3 focus:outline-none"
-                    value={qty}
-                    onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-                  />
-                  <button
+                    <Minus className="w-4 h-4" />
+                  </motion.button>
+                  
+                  <div className="flex-1 text-center">
+                    <input
+                      type="number"
+                      min={1}
+                      max={99}
+                      className="w-full bg-transparent text-center text-black py-3 focus:outline-none font-light text-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={qty}
+                      onChange={e => {
+                        const value = parseInt(e.target.value);
+                        if (!isNaN(value) && value >= 1 && value <= 99) {
+                          setQty(value);
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <motion.button
                     type="button"
-                    onClick={() => setQty(qty + 1)}
-                    className="px-4 py-3 text-gray-600 hover:text-black font-bold transition-colors"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setQty(Math.min(99, qty + 1))}
+                    className="flex items-center justify-center w-12 h-12 text-gray-600 hover:text-black hover:bg-gray-50 transition-all duration-200 border-l border-gray-300"
+                    disabled={qty >= 99}
                   >
-                    +
-                  </button>
-                </motion.div>
+                    <Plus className="w-4 h-4" />
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
 
             {/* Comment Textarea */}
-            <div className="space-y-2">
-              <label className="text-sm font-black text-black">
-                SHARE YOUR EXPERIENCE
+            <div className="space-y-3">
+              <label className="text-sm font-light text-black">
+                Share your experience
               </label>
-              <motion.div
-                whileFocus={{ scale: 1.01 }}
-                className="relative"
-              >
+              <div className="relative">
                 <textarea
-                  className="w-full min-h-32 bg-gray-100 border-2 border-gray-300 rounded-2xl px-4 py-4 text-black font-bold focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none transition-all duration-300"
+                  className="w-full min-h-32 bg-white border border-gray-300 rounded-lg px-4 py-4 text-black focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none transition-all duration-200 font-light placeholder-gray-400 leading-relaxed"
                   value={comment}
                   onChange={e => setComment(e.target.value)}
                   placeholder="What did you love about this product? How does it fit? Any issues?"
                 />
-                <div className="absolute bottom-3 right-3 flex items-center gap-2 text-gray-400">
-                  <button type="button" className="p-1 hover:text-black transition-colors">
+                <div className="absolute bottom-3 right-3 flex items-center gap-1">
+                  <button 
+                    type="button" 
+                    className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded hover:bg-gray-100"
+                  >
                     <Smile className="w-4 h-4" />
                   </button>
-                  <button type="button" className="p-1 hover:text-black transition-colors">
+                  <button 
+                    type="button" 
+                    className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded hover:bg-gray-100"
+                  >
                     <Image className="w-4 h-4" />
                   </button>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             {/* Character Counter */}
@@ -239,8 +222,8 @@ export default function ReviewForm({ productId, variants }: { productId: string;
               animate={{ opacity: comment.length > 0 ? 1 : 0 }}
               className="text-right"
             >
-              <span className={`text-sm font-bold ${
-                comment.length > 500 ? 'text-red-500' : 'text-gray-600'
+              <span className={`text-sm font-light ${
+                comment.length > 500 ? 'text-rose-500' : 'text-gray-500'
               }`}>
                 {comment.length}/500
               </span>
@@ -249,66 +232,54 @@ export default function ReviewForm({ productId, variants }: { productId: string;
         </motion.div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-300">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-200">
           {!isExpanded ? (
             <motion.button
               type="button"
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsExpanded(true)}
-              className="px-6 py-3 bg-black text-white rounded-2xl font-black border-2 border-yellow-500 shadow-lg hover:bg-gray-900 transition-all duration-300 flex items-center gap-2"
+              className="px-8 py-3.5 bg-black text-white rounded-lg font-light hover:bg-gray-800 transition-all duration-200 flex items-center gap-3 shadow-sm"
             >
-              <Zap className="w-4 h-4" />
-              WRITE A REVIEW
+              <Star className="w-4 h-4" />
+              Write a Review
             </motion.button>
           ) : (
             <div className="flex items-center gap-3">
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.02, y: -1 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsExpanded(false)}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-2xl font-bold hover:border-black transition-all duration-300"
+                className="px-6 py-3.5 border border-gray-300 text-gray-700 rounded-lg font-light hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
               >
-                CANCEL
+                Cancel
               </motion.button>
               
               <motion.button
                 type="submit"
                 disabled={pending || !comment.trim()}
-                whileHover={{ scale: pending ? 1 : 1.02 }}
+                whileHover={{ scale: pending ? 1 : 1.02, y: pending ? 0 : -1 }}
                 whileTap={{ scale: pending ? 1 : 0.98 }}
-                className="px-8 py-3 bg-black text-white rounded-2xl font-black border-2 border-yellow-500 shadow-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-2"
+                className="px-8 py-3.5 bg-black text-white rounded-lg font-light hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-3 shadow-sm"
               >
                 {pending ? (
                   <>
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                     />
-                    SUBMITTING...
+                    Submitting...
                   </>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
-                    SUBMIT REVIEW
+                    Submit Review
                   </>
                 )}
               </motion.button>
             </div>
-          )}
-
-          {/* Review Benefits */}
-          {!isExpanded && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-right text-sm text-gray-700 font-bold"
-            >
-              <div>✓ HELP OTHER SHOPPERS</div>
-              <div>✓ EARN LOYALTY POINTS</div>
-            </motion.div>
           )}
         </div>
 
@@ -316,13 +287,13 @@ export default function ReviewForm({ productId, variants }: { productId: string;
         <AnimatePresence>
           {msg && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`p-4 rounded-2xl text-center font-black border-2 ${
-                msg.includes('🎉') 
-                  ? 'bg-green-100 text-green-700 border-green-500'
-                  : 'bg-red-100 text-red-700 border-red-500'
+              exit={{ opacity: 0, y: -5 }}
+              className={`p-4 rounded-lg text-center font-light border ${
+                msg.includes('Thank you') 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-rose-50 text-rose-700 border-rose-200'
               }`}
             >
               {msg}
@@ -330,22 +301,6 @@ export default function ReviewForm({ productId, variants }: { productId: string;
           )}
         </AnimatePresence>
       </form>
-
-      {/* Floating decoration */}
-      <motion.div
-        animate={{
-          y: [0, -10, 0],
-          rotate: [0, 5, 0],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="absolute top-4 right-4 opacity-10"
-      >
-        <Sparkles className="w-16 h-16 text-yellow-500" />
-      </motion.div>
     </motion.div>
   );
 }

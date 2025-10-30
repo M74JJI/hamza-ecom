@@ -10,6 +10,7 @@ import {
   CheckCircle, MapPin, Phone, Home, ArrowRight, Zap,
   Shield, Clock, Award, Heart, Star, ChevronRight
 } from 'lucide-react';
+import { AddressForm } from '../../profile/_components/AddressForm';
 
 // Color scheme constants for consistency
 const COLORS = {
@@ -232,156 +233,69 @@ function validAddress() {
             </motion.section>
 
             {/* Address Selection */}
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl lg:rounded-3xl shadow-lg border border-gray-100 p-6"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <MapPin className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Shipping Address</h2>
-              </div>
+          <motion.section
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.2 }}
+  className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"
+>
+  <div className="flex items-center gap-3 mb-6">
+    <MapPin className="w-6 h-6 text-blue-600" />
+    <h2 className="text-2xl font-bold text-gray-800">Shipping Address</h2>
+  </div>
 
-              {addresses.length > 0 && !addingNew && (
-                <div className="space-y-4">
-                  {addresses.map((addr, index) => (
-                    <motion.label
-                      key={addr.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        selectedAddressId === addr.id
-                          ? 'border-black bg-blue-50/50'
-                          : 'border-gray-200 hover:border-gray-400'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 mt-1 rounded-full border-2 flex items-center justify-center ${
-                        selectedAddressId === addr.id 
-                          ? 'bg-black border-black' 
-                          : 'border-gray-400'
-                      }`}>
-                        {selectedAddressId === addr.id && <div className="w-2 h-2 bg-white rounded-full" />}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="font-semibold text-gray-800">{addr.fullName}</div>
-                          {addr.isDefault && (
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600 mb-1">
-                          <Phone className="w-4 h-4" />
-                          {addr.phone}
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600 mb-1">
-                          <MapPin className="w-4 h-4" />
-                          {addr.city}
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Home className="w-4 h-4" />
-                        {addr.fullAddress}
+  {/* Existing addresses */}
+  {addresses.length > 0 && !addingNew && (
+    <div className="space-y-4">
+      {addresses.map((addr) => (
+        <motion.label
+          key={addr.id}
+          className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+            selectedAddressId === addr.id
+              ? 'border-black bg-blue-50/50'
+              : 'border-gray-200 hover:border-gray-400'
+          }`}
+        >
+          <input
+            type="radio"
+            name="address"
+            className="sr-only"
+            checked={selectedAddressId === addr.id}
+            onChange={() => setSelectedAddressId(addr.id)}
+          />
+          <div className="flex-1">
+            <div className="font-semibold text-gray-800">{addr.fullName}</div>
+            <div className="text-gray-600">{addr.phone}</div>
+            <div className="text-gray-600">{addr.city}</div>
+            <div className="text-gray-600">{addr.fullAddress}</div>
+          </div>
+        </motion.label>
+      ))}
 
-                        </div>
-                      </div>
-                      <input
-                        type="radio"
-                        name="address"
-                        className="sr-only"
-                        checked={selectedAddressId === addr.id}
-                        onChange={() => setSelectedAddressId(addr.id)}
-                      />
-                    </motion.label>
-                  ))}
-                  
-                  <motion.button
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setAddingNew(true)}
-                    className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-black hover:text-black transition-colors flex items-center justify-center gap-2"
-                  >
-                    <MapPin className="w-5 h-5" />
-                    Add New Address
-                  </motion.button>
-                </div>
-              )}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setAddingNew(true)}
+        className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-black hover:text-black transition-colors flex items-center justify-center gap-2"
+      >
+        <MapPin className="w-5 h-5" />
+        Add New Address
+      </motion.button>
+    </div>
+  )}
 
-              {(addingNew || addresses.length === 0) && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-                >
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Full Name</label>
-                      <input
-                        className="w-full px-4 py-3 text-black rounded-xl bg-gray-50 border border-gray-300 focus:border-black focus:ring-2 focus:ring-black/20 transition-colors"
-                        placeholder="Enter full name"
-                        value={newAddress.fullName}
-                        onChange={(e) => setNewAddress({ ...newAddress, fullName: e.target.value })}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">Phone Number</label>
-                      <input
-                        className="w-full px-4 py-3 text-black rounded-xl bg-gray-50 border border-gray-300 focus:border-black focus:ring-2 focus:ring-black/20 transition-colors"
-                        placeholder="+212 XXX XXX XXX"
-                        value={newAddress.phone}
-                        onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-2">City</label>
-                      <select
-                        className="w-full px-4 py-3 text-black rounded-xl bg-gray-50 border border-gray-300 focus:border-black focus:ring-2 focus:ring-black/20 transition-colors"
-                        value={newAddress.city}
-                        onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                      >
-                        {MA_CITIES.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    
-                    <div className="sm:col-span-2">
-                   <label className="block text-sm font-semibold text-gray-800 mb-2">Full Address</label>
-<input
-  className="w-full px-4 py-3 text-black rounded-xl bg-gray-50 border border-gray-300 focus:border-black focus:ring-2 focus:ring-black/20 transition-colors"
-  placeholder="Building, street, apartment, etc."
-  value={newAddress.fullAddress}
-  onChange={(e) => setNewAddress({ ...newAddress, fullAddress: e.target.value })}
-/>
+  {/* New Address Form */}
+  {(addingNew || addresses.length === 0) && (
+    <AddressForm
+      onDone={() => {
+        setAddingNew(false);
+       // handleAddressCreated();
+         window.location.reload();
 
-                    </div>
-                  </div>
-
-                  {addresses.length > 0 && (
-                    <div className="sm:col-span-2">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setAddingNew(false)}
-                        className="w-full py-3 border-2 border-gray-300 text-gray-600 rounded-xl font-semibold hover:border-black hover:text-black transition-colors"
-                      >
-                        Cancel
-                      </motion.button>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </motion.section>
+      }}
+    />
+  )}
+</motion.section>
 
             {/* Delivery Company */}
             <motion.section

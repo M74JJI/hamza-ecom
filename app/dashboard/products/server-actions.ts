@@ -4,6 +4,30 @@ import { prisma } from '@/lib/db';
 import { ProductUpsertSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
 import sanitizeHtml from 'sanitize-html';
+import slugify from 'slugify';
+
+// 🧠 Helper: generate a unique slug by checking DB and incrementing if needed
+async function generateUniqueSlug(db: typeof prisma, base: string, excludeId?: string) {
+  let slug = slugify(base, { lower: true, strict: true });
+  let uniqueSlug = slug;
+  let counter = 1;
+
+  while (true) {
+    const existing = await db.product.findFirst({
+      where: {
+        slug: uniqueSlug,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+      select: { id: true },
+    });
+
+    if (!existing) break;
+    counter++;
+    uniqueSlug = `${slug}-${counter}`;
+  }
+
+  return uniqueSlug;
+}
 
 export async function upsertProductAction(input: unknown) {
   const parsed = ProductUpsertSchema.safeParse(input);
@@ -12,17 +36,31 @@ export async function upsertProductAction(input: unknown) {
     return { error: 'Invalid input' };
   }
   const data = parsed.data;
-  console.log("data",data);
 
   try {
     const tx = await prisma.$transaction(async (db) => {
       let product;
 
+      // 🧩 Step 1: Determine base slug
+      let baseSlug = data.slug?.trim();
+        if (!baseSlug) {
+        const source = data.variants?.[0]?.title || `product-${Date.now()}`;
+        baseSlug = slugify(source, { lower: true, strict: true });
+      }
+
+      // 🧩 Step 2: Ensure slug uniqueness
+      const finalSlug = await generateUniqueSlug(prisma, baseSlug, data.id);
+
       // ============ UPDATE MODE ============
       if (data.id) {
         product = await db.product.update({
           where: { id: data.id },
-          data: { slug: data.slug, status: data.status,isFeaturedInHero:data.isFeaturedInHero,brand:data.brand },
+          data: {
+            slug: finalSlug,
+            status: data.status,
+            isFeaturedInHero: data.isFeaturedInHero,
+            brand: data.brand,
+          },
         });
 
         await db.productDetail.deleteMany({ where: { productId: product.id } });
@@ -33,7 +71,12 @@ export async function upsertProductAction(input: unknown) {
       // ============ CREATE MODE ============
       else {
         product = await db.product.create({
-          data: { slug: data.slug, status: data.status,isFeaturedInHero:data.isFeaturedInHero ,brand:data.brand},
+          data: {
+            slug: finalSlug,
+            status: data.status,
+            isFeaturedInHero: data.isFeaturedInHero,
+            brand: data.brand,
+          },
         });
       }
 
@@ -48,18 +91,18 @@ export async function upsertProductAction(input: unknown) {
         });
       }
 
-      
       // ============ HIGHLIGHTS ============
       if (data.highlights?.length) {
         await db.productHighlight.createMany({
-          data: data.highlights.map((d:any) => ({
+          data: data.highlights.map((d: any) => ({
             productId: product.id,
             label: d.label,
             value: d.value,
           })),
         });
       }
-// ============ CATEGORIES ============
+
+      // ============ CATEGORIES ============
       if (data.categoryIds?.length) {
         await db.productCategory.createMany({
           data: data.categoryIds.map((id) => ({
@@ -71,13 +114,11 @@ export async function upsertProductAction(input: unknown) {
 
       // ============ VARIANTS ============
       for (const [idx, v] of data.variants.entries()) {
-        // Try to find existing variant by ID
         let variant = v.id
           ? await db.variant.findUnique({ where: { id: v.id } })
           : null;
 
         if (variant) {
-          // Update existing variant
           variant = await db.variant.update({
             where: { id: v.id },
             data: {
@@ -86,16 +127,54 @@ export async function upsertProductAction(input: unknown) {
               color: v.color ?? null,
               variantStyleImg: v.variantStyleImg,
               shortDescription: v.shortDescription ?? null,
-              contentHtml: v.contentHtml ? sanitizeHtml(v.contentHtml) : null,
+              contentHtml: v.contentHtml
+                ? sanitizeHtml(v.contentHtml, {
+                    allowedTags: false,
+                    disallowedTagsMode: 'discard',
+                    allowedAttributes: {
+                      '*': [
+                        'class', 'id', 'style', 'src', 'href', 'alt', 'title', 'width', 'height',
+                        'target', 'rel', 'frameborder', 'allow', 'allowfullscreen', 'data-*',
+                      ],
+                    },
+                    allowedSchemes: ['http', 'https', 'data', 'mailto'],
+                    allowedSchemesByTag: {
+                      img: ['http', 'https', 'data'],
+                      iframe: ['http', 'https'],
+                      video: ['http', 'https'],
+                      audio: ['http', 'https'],
+                      source: ['http', 'https'],
+                    },
+                    allowedIframeHostnames: [
+                      'www.youtube.com',
+                      'player.vimeo.com',
+                      'embed.spotify.com',
+                      'w.soundcloud.com',
+                      'www.tiktok.com',
+                      'www.facebook.com',
+                    ],
+                    transformTags: {
+                      iframe: (tagName, attribs) => ({
+                        tagName: 'iframe',
+                        attribs: {
+                          ...attribs,
+                          loading: 'lazy',
+                          referrerpolicy: 'no-referrer',
+                          sandbox:
+                            'allow-same-origin allow-scripts allow-presentation allow-popups allow-forms allow-modals',
+                        },
+                      }),
+                    },
+                    nonTextTags: ['style', 'script', 'textarea', 'option'],
+                  })
+                : null,
               sortOrder: v.sortOrder ?? idx,
               isActive: v.isActive ?? true,
             },
           });
 
-          // Clean old variant images before re-inserting
           await db.variantImage.deleteMany({ where: { variantId: variant.id } });
         } else {
-          // Create new variant
           variant = await db.variant.create({
             data: {
               productId: product.id,
@@ -104,7 +183,47 @@ export async function upsertProductAction(input: unknown) {
               color: v.color ?? null,
               variantStyleImg: v.variantStyleImg,
               shortDescription: v.shortDescription ?? null,
-              contentHtml: v.contentHtml ? sanitizeHtml(v.contentHtml) : null,
+              contentHtml: v.contentHtml
+                ? sanitizeHtml(v.contentHtml, {
+                    allowedTags: false,
+                    disallowedTagsMode: 'discard',
+                    allowedAttributes: {
+                      '*': [
+                        'class', 'id', 'style', 'src', 'href', 'alt', 'title', 'width', 'height',
+                        'target', 'rel', 'frameborder', 'allow', 'allowfullscreen', 'data-*',
+                      ],
+                    },
+                    allowedSchemes: ['http', 'https', 'data', 'mailto'],
+                    allowedSchemesByTag: {
+                      img: ['http', 'https', 'data'],
+                      iframe: ['http', 'https'],
+                      video: ['http', 'https'],
+                      audio: ['http', 'https'],
+                      source: ['http', 'https'],
+                    },
+                    allowedIframeHostnames: [
+                      'www.youtube.com',
+                      'player.vimeo.com',
+                      'embed.spotify.com',
+                      'w.soundcloud.com',
+                      'www.tiktok.com',
+                      'www.facebook.com',
+                    ],
+                    transformTags: {
+                      iframe: (tagName, attribs) => ({
+                        tagName: 'iframe',
+                        attribs: {
+                          ...attribs,
+                          loading: 'lazy',
+                          referrerpolicy: 'no-referrer',
+                          sandbox:
+                            'allow-same-origin allow-scripts allow-presentation allow-popups allow-forms allow-modals',
+                        },
+                      }),
+                    },
+                    nonTextTags: ['style', 'script', 'textarea', 'option'],
+                  })
+                : null,
               sortOrder: v.sortOrder ?? idx,
               isActive: v.isActive ?? true,
             },
@@ -126,7 +245,6 @@ export async function upsertProductAction(input: unknown) {
         // ============ VARIANT SIZES ============
         if (v.sizes?.length) {
           for (const s of v.sizes) {
-            // If size exists by SKU, update it instead of recreating
             const existingSize = await db.variantSize.findUnique({
               where: { sku: s.sku },
             });
@@ -144,7 +262,6 @@ export async function upsertProductAction(input: unknown) {
                 },
               });
             } else {
-              // Create new size safely
               await db.variantSize.create({
                 data: {
                   variantId: variant.id,
@@ -164,7 +281,6 @@ export async function upsertProductAction(input: unknown) {
       return product;
     });
 
-    // ============ REVALIDATE PATHS ============
     revalidatePath('/dashboard/products');
     revalidatePath('/products');
 

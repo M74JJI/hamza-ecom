@@ -35,10 +35,9 @@ import { signOutAction } from '@/app/(store)/(auth)/actions';
 import { useCart } from '@/hooks/useCart';
 import { usePresence } from '@/hooks/usePresence';
 
-
+import navigationData from '@/data/nav.json';
 
 //-------------------------------
-
 
 type FeaturedItem = {
   name: string;
@@ -126,7 +125,7 @@ const FloatingParticles = () => (
     {[...Array(15)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1 h-1 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full"
+        className="absolute w-1 h-1 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full pointer-events-none"
         initial={{
           x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
           y: Math.random() * 100,
@@ -324,7 +323,6 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
   const headerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-
   const live = usePresence('global'); 
 
   // ---------- CATEGORIES (SWR once, no polling) ----------
@@ -347,7 +345,6 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
     }, 0);
   }, [cartItems]);
 
-
   // AI-powered search suggestions
   const searchSuggestions = useMemo(() => ({
     popular: ["Running Shoes", "Summer Dresses", "Smart Watch", "Backpack", "Designer Jeans", "Sports Bra"],
@@ -357,183 +354,8 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
 
   // ---------- Navigation (unchanged UI data) ----------
   const navigation: NavigationItem[] = useMemo(
-    () => [
-      {
-        name: 'New Arrivals',
-        href: '/new',
-        badge: { text: 'HOT', color: 'bg-red-500' },
-        featured: true,
-        megaMenu: {
-          type: 'featured',
-          featured: {
-            title: 'Just Dropped This Week',
-            subtitle: 'Fresh styles added daily',
-            items: [
-              {
-                name: 'Limited Edition Sneakers',
-                href: '/new/sneakers',
-                price: '1,299 MAD',
-                originalPrice: '1,899 MAD',
-                image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=280',
-                rating: 4.9,
-                reviews: 142,
-                badges: ['Limited', 'Bestseller'],
-              },
-              {
-                name: 'Designer Collection',
-                href: '/new/designer',
-                price: '2,499 MAD',
-                image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=280',
-                rating: 4.8,
-                reviews: 89,
-                badges: ['Exclusive'],
-              },
-            ],
-          },
-          quickLinks: [
-            { name: "Men's New Arrivals", href: '/new/men', count: 42 },
-            { name: "Women's New Arrivals", href: '/new/women', count: 38 },
-            { name: 'Accessories', href: '/new/accessories', count: 25 },
-          ],
-        },
-      },
-      {
-        name: 'Men',
-        href: '/men',
-        megaMenu: {
-          type: 'category',
-          columns: [
-            {
-              title: 'Clothing',
-              featured: {
-                name: 'Summer Essentials',
-                href: '/men/summer',
-                image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200',
-              },
-              items: [
-                { name: 'T-Shirts & Tops', href: '/men/tshirts', popular: true, count: 234 },
-                { name: 'Jeans & Pants', href: '/men/pants', count: 189 },
-                { name: 'Jackets & Coats', href: '/men/jackets', count: 76 },
-                { name: 'Activewear', href: '/men/activewear', trending: true, count: 156 },
-                { name: 'Suits & Formal', href: '/men/formal', count: 45 },
-              ],
-            },
-            {
-              title: 'Footwear',
-              featured: {
-                name: 'Running Collection',
-                href: '/men/running',
-                image: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=200',
-              },
-              items: [
-                { name: 'Sneakers', href: '/men/sneakers', popular: true, count: 312 },
-                { name: 'Boots', href: '/men/boots', count: 89 },
-                { name: 'Sandals', href: '/men/sandals', count: 67 },
-                { name: 'Dress Shoes', href: '/men/dress-shoes', count: 54 },
-              ],
-            },
-            {
-              title: 'Brands & Offers',
-              featured: { name: 'Brand Spotlight', href: '/brands/spotlight', badge: 'New' },
-              items: [
-                { name: 'Nike', href: '/brands/nike', popular: true, discount: 'Up to 40% OFF' },
-                { name: 'Adidas', href: '/brands/adidas', discount: 'Up to 35% OFF' },
-                { name: 'Puma', href: '/brands/puma', trending: true },
-                { name: 'View All Brands →', href: '/brands', highlight: true },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        name: 'Women',
-        href: '/women',
-        megaMenu: {
-          type: 'category',
-          columns: [
-            {
-              title: 'Clothing',
-              featured: {
-                name: 'Summer Dresses',
-                href: '/women/dresses',
-                image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200',
-              },
-              items: [
-                { name: 'Dresses', href: '/women/dresses', popular: true, count: 287 },
-                { name: 'Tops & Blouses', href: '/women/tops', count: 234 },
-                { name: 'Jeans', href: '/women/jeans', count: 156 },
-                { name: 'Activewear', href: '/women/activewear', trending: true, count: 189 },
-              ],
-            },
-            {
-              title: 'Footwear & More',
-              featured: {
-                name: 'Heels Collection',
-                href: '/women/heels',
-                image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=200',
-              },
-              items: [
-                { name: 'Heels', href: '/women/heels', count: 145 },
-                { name: 'Sneakers', href: '/women/sneakers', popular: true, count: 278 },
-                { name: 'Boots', href: '/women/boots', count: 98 },
-                { name: 'Flats', href: '/women/flats', count: 76 },
-              ],
-            },
-            {
-              title: 'Featured Collections',
-              featured: { name: 'Best Sellers', href: '/women/bestsellers', count: '1.2K+' },
-              items: [
-                { name: 'Summer Collection', href: '/women/summer', badge: 'New' },
-                { name: 'Workwear Edit', href: '/women/workwear' },
-                { name: 'Vacation Style', href: '/women/vacation', trending: true },
-                { name: 'View All →', href: '/women', highlight: true },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        name: 'Sale',
-        href: '/sale',
-        badge: { text: '60% OFF', color: 'bg-gradient-to-r from-red-500 to-pink-600' },
-        highlight: true,
-        megaMenu: {
-          type: 'sale',
-          featured: {
-            title: 'Flash Sale - Limited Time! ⚡',
-            subtitle: 'Prices slashed for 24 hours only',
-            timer: '23:59:45',
-            items: [
-              {
-                name: 'Up to 60% Off Shoes',
-                href: '/sale/shoes',
-                discount: '60% OFF',
-                image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=200',
-                originalPrice: '2,999 MAD',
-                salePrice: '1,199 MAD',
-              },
-              {
-                name: '50% Off Summer Wear',
-                href: '/sale/summer',
-                discount: '50% OFF',
-                image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=200',
-                originalPrice: '1,599 MAD',
-                salePrice: '799 MAD',
-              },
-              {
-                name: 'Clearance Section',
-                href: '/sale/clearance',
-                discount: '70% OFF',
-                image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=200',
-                badge: 'Last Chance',
-              },
-            ],
-          },
-        },
-      },
-  
-    ],
-    [headerCats]
+    () => navigationData.navigation as NavigationItem[],
+    []
   );
 
   // ---------- Search config ----------
@@ -585,7 +407,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
       setLoadingStates((p) => ({ ...p, search: true }));
       await new Promise((r) => setTimeout(r, 800));
       saveSearch(searchQuery);
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}&category=${activeSearchCategory}`);
+      router.push(`/browse?q=${encodeURIComponent(searchQuery)}&category=${activeSearchCategory}`);
       setSearchOpen(false);
       setLoadingStates((p) => ({ ...p, search: false }));
     },
@@ -604,22 +426,21 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
               <motion.div className="flex items-center space-x-2" whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 400 }}>
                 <div className="relative">
                   <Zap className="w-4 h-4 text-yellow-400" />
-                  <motion.div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                  <motion.div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full pointer-events-none" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
                 </div>
                 <span className="font-semibold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">FLASH SALE: 60% OFF</span>
               </motion.div>
 
               <motion.div className="hidden lg:flex items-center space-x-3 bg-black/30 px-3 py-1.5 rounded-full border border-white/10" whileHover={{ scale: 1.05 }}>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse pointer-events-none" />
                   <span className="text-xs font-medium">LIVE</span>
                 </div>
-            {typeof live === 'number' ? (
-  <span className="text-xs font-bold font-mono">{live.toLocaleString()}</span>
-) : (
-  <span className="text-xs font-mono opacity-60">—</span> // small placeholder before WS connects
-)}
-
+                {typeof live === 'number' ? (
+                  <span className="text-xs font-bold font-mono">{live.toLocaleString()}</span>
+                ) : (
+                  <span className="text-xs font-mono opacity-60">—</span>
+                )}
                 <span className="text-xs text-white/70">shopping now</span>
               </motion.div>
             </div>
@@ -645,12 +466,12 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
               <motion.div className="hidden xl:flex items-center space-x-2 text-xs hover:text-white/90 transition-colors cursor-pointer group" whileHover={{ x: 2 }}>
                 <Phone className="w-3.5 h-3.5" />
                 <span>+212 600-000000</span>
-                <motion.div className="w-1 h-1 bg-green-400 rounded-full" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                <motion.div className="w-1 h-1 bg-green-400 rounded-full pointer-events-none" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
               </motion.div>
             </div>
           </div>
         </div>
-        <motion.div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500" initial={{ width: '100%' }} animate={{ width: '25%' }} transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} />
+        <motion.div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 pointer-events-none" initial={{ width: '100%' }} animate={{ width: '25%' }} transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} />
       </div>
 
       {/* Header */}
@@ -665,7 +486,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
         }}
       >
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-24">
+          <div className="flex items-center h-24">
             {/* Logo */}
             <motion.div className="flex-shrink-0">
               <Link href="/">
@@ -674,10 +495,10 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                     <div className="w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl flex items-center justify-center shadow-2xl ring-2 ring-gray-900/10 group-hover:ring-gray-900/20 transition-all duration-500">
                       <span className="text-white font-bold text-xl">H</span>
                     </div>
-                    <motion.div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg" whileHover={{ scale: 1.3, rotate: 180 }} transition={{ type: 'spring', stiffness: 400 }}>
+                    <motion.div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg pointer-events-none" whileHover={{ scale: 1.3, rotate: 180 }} transition={{ type: 'spring', stiffness: 400 }}>
                       <Crown className="w-2.5 h-2.5 text-white" />
                     </motion.div>
-                    <motion.div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/20 to-orange-500/20 opacity-0 group-hover:opacity-100 blur-md" transition={{ duration: 0.3 }} />
+                    <motion.div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/20 to-orange-500/20 opacity-0 group-hover:opacity-100 blur-md pointer-events-none" transition={{ duration: 0.3 }} />
                   </motion.div>
                   <div className="hidden sm:block">
                     <motion.span className="text-3xl font-black bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent tracking-tighter" whileHover={{ backgroundPosition: '100%', transition: { duration: 0.8 } }} style={{ backgroundSize: '200% 100%' }}>
@@ -692,9 +513,8 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
               </Link>
             </motion.div>
 
-            {/* Desktop nav */}
-            <nav className="hidden xl:flex items-center space-x-1 " ref={megaMenuRef}>
-              {/* ... nav items unchanged (omitted for brevity) ... */}
+            {/* Desktop nav - positioned right after logo */}
+            <nav className="hidden xl:flex items-center space-x-1 ml-8" ref={megaMenuRef}>
               {navigation.map((item) => (
                 <div key={item.name} className="relative" onMouseEnter={() => setMegaMenuOpen(item.name)} onMouseLeave={() => setMegaMenuOpen(null)}>
                   <motion.div whileHover={{ y: -2 }} whileTap={{ y: 0 }} className="relative">
@@ -715,10 +535,10 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                           <ChevronDown className="w-4 h-4" />
                         </motion.div>
                       )}
-                      <motion.div className="absolute inset-0 bg-gradient-to-r from-gray-50/50 to-white/50 rounded-2xl opacity-0 group-hover:opacity-100" transition={{ duration: 0.3 }} />
+                      <motion.div className="absolute inset-0 bg-gradient-to-r from-gray-50/50 to-white/50 rounded-2xl opacity-0 group-hover:opacity-100 pointer-events-none" transition={{ duration: 0.3 }} />
                     </Link>
                     {pathname.startsWith(item.href) && (
-                      <motion.div className="absolute bottom-2 left-1/2 w-4/5 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transform -translate-x-1/2" layoutId="activeIndicator" transition={{ type: 'spring', stiffness: 400, damping: 35 }} />
+                      <motion.div className="absolute bottom-2 left-1/2 w-4/5 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transform -translate-x-1/2 pointer-events-none" layoutId="activeIndicator" transition={{ type: 'spring', stiffness: 400, damping: 35 }} />
                     )}
                   </motion.div>
 
@@ -731,7 +551,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                         style={{ originY: 0 }}
                       >
                         {/* Background Pattern */}
-                        <div className="absolute inset-0 opacity-[0.02] bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900" />
+                        <div className="absolute inset-0 opacity-[0.02] bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 pointer-events-none" />
                         
                         {/* Enhanced Featured Section */}
                         {item.megaMenu.featured && (
@@ -783,7 +603,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                                           className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
                                         />
                                         {/* Enhanced Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                                         
                                         {/* Enhanced Badges */}
                                         {featuredItem.badges && (
@@ -791,7 +611,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                                             {featuredItem.badges.map((badge, badgeIndex) => (
                                               <motion.span
                                                 key={badgeIndex}
-                                                className="px-3 py-1.5 bg-gray-900/90 text-white text-xs rounded-full font-bold backdrop-blur-sm"
+                                                className="px-3 py-1.5 bg-gray-900/90 text-white text-xs rounded-full font-bold backdrop-blur-sm pointer-events-none"
                                                 whileHover={{ scale: 1.1 }}
                                               >
                                                 {badge}
@@ -919,7 +739,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                                       >
                                         <Link
                                           href={subItem.href}
-                                          className={`flex items-center justify-between group text-sm transition-all duration-200 p-2 rounded-lg ${
+                                          className={`flex items-center justify-between group text-sm transition-all duration-200 p-2 rounded-lg z-50 ${
                                             subItem.highlight
                                               ? 'bg-blue-50 text-blue-600 font-semibold hover:bg-blue-100'
                                               : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
@@ -929,7 +749,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                                             <span>{subItem.name}</span>
                                             {subItem.popular && (
                                               <motion.span
-                                                className="px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium"
+                                                className="px-1.5 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium pointer-events-none"
                                                 whileHover={{ scale: 1.1 }}
                                               >
                                                 Popular
@@ -937,7 +757,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                                             )}
                                             {subItem.trending && (
                                               <motion.span
-                                                className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full font-medium"
+                                                className="px-1.5 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full font-medium pointer-events-none"
                                                 whileHover={{ scale: 1.1 }}
                                               >
                                                 Trending
@@ -994,30 +814,28 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
               ))}
             </nav>
 
-            {/* Actions (search, wishlist, user, cart, mobile) */}
-            <div className="flex items-center space-x-4">
-              {/* Search */}
+            {/* Search Bar - takes all available space */}
+            <div className="flex-1 max-w-2xl mx-8">
               <div className="relative" ref={searchRef}>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     setSearchOpen(!searchOpen);
                     setTimeout(() => searchInputRef.current?.focus(), 150);
                   }}
-                  className="flex items-center space-x-3 px-5 py-3.5 rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg group backdrop-blur-sm"
+                  className="flex items-center space-x-3 w-full px-6 py-3.5 rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg group backdrop-blur-sm"
                 >
-                  <Search className="w-5 h-5 group-hover:text-blue-600 transition-colors" />
-                  <span className="hidden lg:inline text-sm font-medium">Search luxury items...</span>
-                  <kbd className="hidden xl:inline-flex items-center px-2 py-1 text-xs border border-gray-300/60 rounded-lg bg-white/50 text-gray-500">⌘K</kbd>
+                  <Search className="w-5 h-5 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-500 flex-1 text-left">Search luxury items...</span>
+                  <kbd className="hidden lg:inline-flex items-center px-2 py-1 text-xs border border-gray-300/60 rounded-lg bg-white/50 text-gray-500 flex-shrink-0">⌘K</kbd>
                 </motion.button>
 
-            
                 <AnimatePresence>
                   {searchOpen && (
                     <motion.div
                       {...slideIn}
-                      className="absolute right-0 top-16 w-[700px] bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-gray-200/60 overflow-hidden"
+                      className="absolute left-0 top-16 w-full bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-gray-200/60 overflow-hidden z-50"
                     >
                       {/* Enhanced Search Header */}
                       <div className="p-6 border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
@@ -1029,7 +847,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Discover premium products, brands, and collections..."
-                            className="w-full pl-12 pr-32 py-4 border border-gray-300/60 rounded-2xl focus:ring-3 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-medium bg-white/50 backdrop-blur-sm"
+                            className="w-full pl-12 pr-32 py-4 text-black border border-gray-300/60 rounded-2xl focus:ring-3 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-medium bg-white/50 backdrop-blur-sm"
                             autoFocus
                           />
                           <motion.button
@@ -1043,7 +861,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                               <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full pointer-events-none"
                               />
                             ) : (
                               'Search'
@@ -1184,34 +1002,29 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                   )}
                 </AnimatePresence>
               </div>
+            </div>
 
-              {/* Theme toggle */}
-              <motion.button whileHover={{ scale: 1.05, rotate: 15 }} whileTap={{ scale: 0.95 }} onClick={() => setDarkMode(!darkMode)} className="p-3 rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg backdrop-blur-sm">
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </motion.button>
+            {/* Actions (wishlist, user, cart, mobile) */}
+            <div className="flex items-center space-x-3">
+          
 
               {/* Wishlist */}
-         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-  <Link
-    href="/wishlist"
-    aria-label="Wishlist"
-    className="relative inline-flex h-10 w-10 items-center justify-center m rounded-xl text-gray-700 hover:bg-white/80 transition-all duration-300 border border-transparent hover:border-gray-200/60 hover:shadow-lg group backdrop-blur-sm"
-  >
-    <Heart className="h-5 w-5 transition-colors group-hover:text-pink-500 pointer-events-none" />
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/profile/wishlist"
+                  aria-label="Wishlist"
+                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-gray-700 hover:bg-white/80 transition-all duration-300 border border-transparent hover:border-gray-200/60 hover:shadow-lg group backdrop-blur-sm"
+                >
+                  <Heart className="h-5 w-5 transition-colors group-hover:text-pink-500 pointer-events-none" />
+                  <motion.div
+                    className="hidden absolute -top-2 -right-2 h-5 w-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full text-[10px] leading-none font-bold shadow-lg items-center justify-center pointer-events-none"
+                    whileHover={{ scale: 1.2, rotate: 180 }}
+                    transition={{ type: 'spring', stiffness: 400 }}
+                  />
+                </Link>
+              </motion.div>
 
-    {/* Counter badge (kept, but hidden by default) */}
-    <motion.div
-      className="hidden absolute -top-2 -right-2 h-5 w-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full text-[10px] leading-none font-bold shadow-lg items-center justify-center"
-      whileHover={{ scale: 1.2, rotate: 180 }}
-      transition={{ type: 'spring', stiffness: 400 }}
-    />
-  </Link>
-</motion.div>
-
-
-              {/* Ultimate User Account */}
-             
-              {/* Enhanced User Account */}
+              {/* User Account */}
               {user ? (
                 <div className="relative" ref={userMenuRef}>
                   <motion.button
@@ -1223,7 +1036,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                     {/* Enhanced Online Status */}
                     <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white z-10 shadow-lg">
                       <motion.div
-                        className="w-full h-full bg-green-400 rounded-full"
+                        className="w-full h-full bg-green-400 rounded-full pointer-events-none"
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       />
@@ -1233,7 +1046,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white text-lg font-bold shadow-lg relative overflow-hidden group-hover:shadow-xl transition-all duration-500">
                       <span>{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>
                       {/* Enhanced Shine Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 pointer-events-none" />
                     </div>
                     
                     <ChevronDown className={`w-4 h-4 transition-transform duration-400 ${
@@ -1255,7 +1068,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                                 {user.name?.charAt(0)?.toUpperCase() || 'U'}
                               </div>
                               {/* Enhanced Tier Badge */}
-                              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg pointer-events-none">
                                 <Crown className="w-4 h-4 text-white" />
                               </div>
                             </div>
@@ -1279,7 +1092,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                             </div>
                             <div className="w-full bg-gray-200/60 rounded-full h-2.5 backdrop-blur-sm">
                               <motion.div
-                                className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2.5 rounded-full shadow-lg"
+                                className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2.5 rounded-full shadow-lg pointer-events-none"
                                 initial={{ width: 0 }}
                                 animate={{ width: `${(user.points / (user.points + user.pointsNeeded)) * 100}%` }}
                                 transition={{ duration: 1.5, ease: "easeOut" }}
@@ -1319,7 +1132,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                           </Link>
                           
                           <Link
-                            href="/orders"
+                            href="/profile/orders"
                             className="flex items-center space-x-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl transition-colors group"
                             onClick={() => setUserMenuOpen(false)}
                           >
@@ -1331,7 +1144,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                           </Link>
                           
                           <Link
-                            href="/wishlist"
+                            href="/profile/wishlist"
                             className="flex items-center space-x-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-xl transition-colors group"
                             onClick={() => setUserMenuOpen(false)}
                           >
@@ -1341,25 +1154,6 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                               12
                             </span>
                           </Link>
-
-                          {/* Rewards Section */}
-                        {/*
-                          <div className="px-3 py-2">
-                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your Rewards</div>
-                            <div className="space-y-2">
-                              {[].map((reward, index) => (
-                                <div key={index} className="flex items-center space-x-2 text-sm">
-                                  {reward.unlocked ? (
-                                    <CheckCircle className="w-4 h-4 text-green-500" />
-                                  ) : (
-                                    <div className="w-4 h-4 border-2 border-gray-300 rounded-full" />
-                                  )}
-                                  <span className={reward.unlocked ? 'text-gray-900' : 'text-gray-400'}>{reward.name}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        */}
 
                           {user.role === "ADMIN" && (
                             <Link
@@ -1394,11 +1188,11 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                 </div>
               ) : (
                 /* Enhanced Auth Buttons */
-                <div className="hidden md:flex items-center space-x-4">
+                <div className="hidden md:flex items-center space-x-3">
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Link
                       href="/signin"
-                      className="px-6 py-3.5 rounded-2xl text-sm font-semibold text-gray-700 hover:text-gray-900 transition-all duration-400 hover:bg-white/80 hover:shadow-lg border border-gray-200/60 hover:border-gray-300/60"
+                      className="px-4 py-2.5 rounded-2xl text-sm font-semibold text-gray-700 hover:text-gray-900 transition-all duration-400 hover:bg-white/80 hover:shadow-lg border border-gray-200/60 hover:border-gray-300/60"
                     >
                       Sign In
                     </Link>
@@ -1406,14 +1200,14 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Link
                       href="/signup"
-                      className="px-8 py-3.5 bg-gradient-to-r from-gray-900 to-gray-700 text-white rounded-2xl text-sm font-semibold hover:shadow-2xl transition-all duration-400 hover:from-gray-800 hover:to-gray-600 flex items-center space-x-3 shadow-lg"
+                      className="px-6 py-2.5 bg-gradient-to-r from-gray-900 to-gray-700 text-white rounded-2xl text-sm font-semibold hover:shadow-2xl transition-all duration-400 hover:from-gray-800 hover:to-gray-600 flex items-center space-x-2 shadow-lg"
                     >
-                      <User className="w-5 h-5" />
-                      <span>Create Account</span>
+                      <User className="w-4 h-4" />
+                      <span>Sign Up</span>
                     </Link>
                   </motion.div>
                 </div>
-    )}
+              )}
 
               {/* Cart */}
               <div className="relative" ref={cartRef}>
@@ -1425,8 +1219,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                   className="flex items-center space-x-3 px-4 py-3 rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg group backdrop-blur-sm relative"
                 >
                   <ShoppingBag className="w-5 h-5 group-hover:text-blue-600 transition-colors" />
-                  <span className="hidden lg:inline text-sm font-medium">Cart</span>
-                  <motion.div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-xs flex items-center justify-center font-bold shadow-lg" whileHover={{ scale: 1.3, rotate: 180 }} transition={{ type: 'spring', stiffness: 500 }}>
+                  <motion.div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-xs flex items-center justify-center font-bold shadow-lg pointer-events-none" whileHover={{ scale: 1.3, rotate: 180 }} transition={{ type: 'spring', stiffness: 500 }}>
                     {cartCount}
                   </motion.div>
                 </motion.button>
@@ -1457,62 +1250,58 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                       <div className="max-h-80 overflow-y-auto">
                         {cartItems.length === 0 && <div className="p-6 text-sm text-gray-500">Your cart is empty.</div>}
 
-                    {cartItems.map((item: any, i: number) => {
-  // ✅ Always prefer variantSizeId to avoid duplicate keys and to enable removal
-  const keyId =
-    item.variantSizeId ??
-    (item.variantId && (item.sizeId || item.size?.id) ? `${item.variantId}:${item.sizeId ?? item.size?.id}` : undefined) ??
-    getItemId(item) ??
-    String(i);
+                        {cartItems.map((item: any, i: number) => {
+                          const keyId =
+                            item.variantSizeId ??
+                            (item.variantId && (item.sizeId || item.size?.id) ? `${item.variantId}:${item.sizeId ?? item.size?.id}` : undefined) ??
+                            getItemId(item) ??
+                            String(i);
 
-  const qty = getItemQtySafe(item);
-  const title = getItemTitle(item);
-  const img = getItemImage(item);
-  const { unit, original } = getUnitPricing(item);
-  const isDiscounted = original > unit;
+                          const qty = getItemQtySafe(item);
+                          const title = getItemTitle(item);
+                          const img = getItemImage(item);
+                          const { unit, original } = getUnitPricing(item);
+                          const isDiscounted = original > unit;
 
-  return (
-    <motion.div
-      key={keyId}
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="p-4 border-b border-gray-200/50 hover:bg-white/50 transition-colors duration-300 group"
-    >
-      {/* ... */}
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center space-x-2">
-          <span className="font-bold text-gray-900 text-base">{fmtMAD(unit)}</span>
-          {isDiscounted && <span className="text-sm text-gray-500 line-through">{fmtMAD(original)}</span>}
-        </div>
+                          return (
+                            <motion.div
+                              key={keyId}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="p-4 border-b border-gray-200/50 hover:bg-white/50 transition-colors duration-300 group"
+                            >
+                              <div className="flex items-center justify-between mt-3">
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-bold text-gray-900 text-base">{fmtMAD(unit)}</span>
+                                  {isDiscounted && <span className="text-sm text-gray-500 line-through">{fmtMAD(original)}</span>}
+                                </div>
 
-        <div className="flex items-center space-x-3">
-          {isDiscounted && (
-            <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-lg">
-              -{Math.round(((original - unit) / (original || 1)) * 100)}%
-            </span>
-          )}
+                                <div className="flex items-center space-x-3">
+                                  {isDiscounted && (
+                                    <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-lg">
+                                      -{Math.round(((original - unit) / (original || 1)) * 100)}%
+                                    </span>
+                                  )}
 
-          {/* ✅ Remove by variantSizeId */}
-          <motion.button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (item.variantSizeId) remove(item.variantSizeId);
-            }}
-            className="text-red-500 hover:text-red-700 transition-colors p-1 rounded-lg hover:bg-red-50"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            aria-label="Remove from cart"
-            title="Remove"
-          >
-            <X className="w-4 h-4" />
-          </motion.button>
-        </div>
-      </div>
-      {/* ... */}
-    </motion.div>
-  );
-})}
-
+                                  {/* ✅ Remove by variantSizeId */}
+                                  <motion.button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (item.variantSizeId) remove(item.variantSizeId);
+                                    }}
+                                    className="text-red-500 hover:text-red-700 transition-colors p-1 rounded-lg hover:bg-red-50"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    aria-label="Remove from cart"
+                                    title="Remove"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </motion.button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
                       </div>
 
                       {/* Footer */}
@@ -1551,259 +1340,236 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setMobileMenuOpen(true)} className="xl:hidden p-3 rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg relative backdrop-blur-sm">
                 <Menu className="w-5 h-5" />
                 {notificationCount > 0 && (
-                  <motion.div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white shadow-lg" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                  <motion.div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-none" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
                 )}
               </motion.button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu (unchanged UI) */}
-        {/* ✅ Enhanced Mobile Menu - Fully Fixed Version */}
-<AnimatePresence>
-  {mobileMenuOpen && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9999] xl:hidden pointer-events-auto"
-    >
-      {/* ✅ Solid blurred backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/70 backdrop-blur-lg"
-        onClick={() => setMobileMenuOpen(false)}
-      />
-
-      {/* ✅ Menu Panel (scrolls internally only) */}
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 35, stiffness: 400 }}
-        className="
-          absolute right-0 top-0 h-screen w-full max-w-md
-          bg-white/95 backdrop-blur-2xl shadow-2xl border-l border-gray-200/50 z-[9999]
-          flex flex-col overflow-hidden
-        "
-      >
-        {/* ✅ Sticky Header */}
-        <div className="flex items-center justify-between p-8 border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80 sticky top-0 z-10">
-          <Link
-            href="/"
-            className="flex items-center space-x-4"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">H</span>
-            </div>
-            <div>
-              <span className="text-2xl font-black text-gray-900">HAMZA</span>
-              <p className="text-sm text-gray-500 -mt-1 font-semibold">
-                PREMIUM STORE
-              </p>
-            </div>
-          </Link>
-
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setMobileMenuOpen(false)}
-            className="p-3 rounded-2xl hover:bg-white/80 transition-colors border border-gray-200/60"
-          >
-            <X className="w-6 h-6 text-gray-600" />
-          </motion.button>
-        </div>
-
-        {/* ✅ Scrollable inner content */}
-        <div className="flex-1 overflow-y-auto">
-          {/* User Section */}
-          <div className="p-8 border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
-                    {user.name?.charAt(0)?.toUpperCase() || "U"}
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-gray-900 text-lg">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
-                  <div className="flex items-center space-x-3 mt-2">
-                    <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full">
-                      {user.tier} Member
-                    </span>
-                    <span className="text-xs text-gray-500">{user.points} points</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-gray-600 text-lg font-medium">Welcome to HAJZEN</p>
-                <div className="flex space-x-3">
-                  <Link
-                    href="/signin"
-                    className="flex-1 text-center py-3 border-2 border-gray-300/60 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="flex-1 text-center py-3 bg-gradient-to-r from-gray-900 to-gray-700 text-white rounded-xl font-medium hover:from-gray-800 hover:to-gray-600 transition-all duration-300 shadow-lg"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Create Account
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Search */}
-          <div className="p-6 border-b border-gray-200/50">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products, brands, categories..."
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300/60 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium bg-white/50 backdrop-blur-sm"
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] xl:hidden pointer-events-auto"
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/70 backdrop-blur-lg pointer-events-auto"
+                onClick={() => setMobileMenuOpen(false)}
               />
-              <motion.button
-                type="submit"
-                whileTap={{ scale: 0.95 }}
-                className="absolute right-2 top-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                Go
-              </motion.button>
-            </form>
-          </div>
 
-          {/* Navigation */}
-          <nav className="p-6 space-y-1">
-            {navigation.map((item) => (
-              <div
-                key={item.name}
-                className="border-b border-gray-100/50 last:border-b-0 pb-6 last:pb-0"
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 35, stiffness: 400 }}
+                className="
+                  absolute right-0 top-0 h-screen w-full max-w-md
+                  bg-white/95 backdrop-blur-2xl shadow-2xl border-l border-gray-200/50 z-[9999]
+                  flex flex-col overflow-hidden pointer-events-auto
+                "
               >
-                <Link
-                  href={item.href}
-                  className={`flex items-center justify-between py-4 text-lg font-bold transition-colors ${
-                    item.highlight ? "text-red-600" : "text-gray-900"
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="flex items-center space-x-3">
-                    <span>{item.name}</span>
-                    {item.badge && (
-                      <span
-                        className={`px-2 py-1 text-white text-xs rounded-full font-bold ${item.badge.color}`}
-                      >
-                        {item.badge.text}
-                      </span>
-                    )}
-                  </span>
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
+                <div className="flex items-center justify-between p-8 border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80 sticky top-0 z-10">
+                  <Link
+                    href="/"
+                    className="flex items-center space-x-4"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-xl">H</span>
+                    </div>
+                    <div>
+                      <span className="text-2xl font-black text-gray-900">HAMZA</span>
+                      <p className="text-sm text-gray-500 -mt-1 font-semibold">
+                        PREMIUM STORE
+                      </p>
+                    </div>
+                  </Link>
 
-                {item.megaMenu && (
-                  <div className="ml-4 space-y-4 border-l-2 border-gray-200/50 pl-4 mt-4">
-                    {item.megaMenu.featured && (
-                      <div className="mb-4">
-                        <p className="font-semibold text-gray-900 text-sm mb-3">
-                          {item.megaMenu.featured.title}
-                        </p>
-                        <div className="space-y-3">
-                          {item.megaMenu.featured.items
-                            ?.slice(0, 2)
-                            .map((featuredItem, index) => (
-                              <Link
-                                key={index}
-                                href={featuredItem.href}
-                                className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100/50"
-                                onClick={() => setMobileMenuOpen(false)}
-                              >
-                                {featuredItem.image && (
-                                  <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                    <img
-                                      src={featuredItem.image}
-                                      alt={featuredItem.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-gray-900 text-sm leading-tight">
-                                    {featuredItem.name}
-                                  </p>
-                                  <div className="flex items-center space-x-2 mt-1">
-                                    {featuredItem.salePrice ? (
-                                      <>
-                                        <span className="font-bold text-gray-900 text-sm">
-                                          {featuredItem.salePrice}
-                                        </span>
-                                        <span className="text-xs text-gray-500 line-through">
-                                          {featuredItem.originalPrice}
-                                        </span>
-                                      </>
-                                    ) : (
-                                      <span className="font-bold text-gray-900 text-sm">
-                                        {featuredItem.price}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </Link>
-                            ))}
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 rounded-2xl hover:bg-white/80 transition-colors border border-gray-200/60"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </motion.button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto">
+                  {/* User Section */}
+                  <div className="p-8 border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
+                    {user ? (
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+                            {user.name?.charAt(0)?.toUpperCase() || "U"}
+                          </div>
+                          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900 text-lg">{user.name}</p>
+                          <p className="text-sm text-gray-500">{user.email}</p>
+                          <div className="flex items-center space-x-3 mt-2">
+                            <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full">
+                              {user.tier} Member
+                            </span>
+                            <span className="text-xs text-gray-500">{user.points} points</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <p className="text-gray-600 text-lg font-medium">Welcome to HAJZEN</p>
+                        <div className="flex space-x-3">
+                          <Link
+                            href="/signin"
+                            className="flex-1 text-center py-3 border-2 border-gray-300/60 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            Sign In
+                          </Link>
+                          <Link
+                            href="/signup"
+                            className="flex-1 text-center py-3 bg-gradient-to-r from-gray-900 to-gray-700 text-white rounded-xl font-medium hover:from-gray-800 hover:to-gray-600 transition-all duration-300 shadow-lg"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            Create Account
+                          </Link>
                         </div>
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            ))}
-          </nav>
 
-          {/* Quick Links */}
-          <div className="p-6 border-t border-gray-200/50 bg-gray-50/50">
-          {/*
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              {[].map((action) => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-white/80"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <action.icon className={`w-4 h-4 ${action.color}`} />
-                  <span>{action.label}</span>
-                </Link>
-              ))}
-            </div>
-          */}
-          </div>
+                  {/* Search */}
+                  <div className="p-6 border-b border-gray-200/50">
+                    <form onSubmit={handleSearch} className="relative">
+                      <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search products, brands, categories..."
+                        className="w-full pl-10 pr-4 py-3 border-2 border-gray-300/60 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium bg-white/50 backdrop-blur-sm"
+                      />
+                      <motion.button
+                        type="submit"
+                        whileTap={{ scale: 0.95 }}
+                        className="absolute right-2 top-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Go
+                      </motion.button>
+                    </form>
+                  </div>
 
-          {/* Footer */}
-          <div className="p-6 border-t border-gray-200/50 bg-white/80">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>© {new Date().getFullYear()} HAJZEN</span>
-              <div className="flex items-center space-x-1">
-                <Shield className="w-3 h-3 text-green-600" />
-                <span>Secure</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
+                  {/* Navigation */}
+                  <nav className="p-6 space-y-1">
+                    {navigation.map((item) => (
+                      <div
+                        key={item.name}
+                        className="border-b border-gray-100/50 last:border-b-0 pb-6 last:pb-0"
+                      >
+                        <Link
+                          href={item.href}
+                          className={`flex items-center justify-between py-4 text-lg font-bold transition-colors ${
+                            item.highlight ? "text-red-600" : "text-gray-900"
+                          }`}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <span className="flex items-center space-x-3">
+                            <span>{item.name}</span>
+                            {item.badge && (
+                              <span
+                                className={`px-2 py-1 text-white text-xs rounded-full font-bold ${item.badge.color}`}
+                              >
+                                {item.badge.text}
+                              </span>
+                            )}
+                          </span>
+                          <ArrowRight className="w-5 h-5" />
+                        </Link>
 
+                        {item.megaMenu && (
+                          <div className="ml-4 space-y-4 border-l-2 border-gray-200/50 pl-4 mt-4">
+                            {item.megaMenu.featured && (
+                              <div className="mb-4">
+                                <p className="font-semibold text-gray-900 text-sm mb-3">
+                                  {item.megaMenu.featured.title}
+                                </p>
+                                <div className="space-y-3">
+                                  {item.megaMenu.featured.items
+                                    ?.slice(0, 2)
+                                    .map((featuredItem, index) => (
+                                      <Link
+                                        key={index}
+                                        href={featuredItem.href}
+                                        className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors border border-gray-100/50"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                      >
+                                        {featuredItem.image && (
+                                          <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                            <img
+                                              src={featuredItem.image}
+                                              alt={featuredItem.name}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium text-gray-900 text-sm leading-tight">
+                                            {featuredItem.name}
+                                          </p>
+                                          <div className="flex items-center space-x-2 mt-1">
+                                            {featuredItem.salePrice ? (
+                                              <>
+                                                <span className="font-bold text-gray-900 text-sm">
+                                                  {featuredItem.salePrice}
+                                                </span>
+                                                <span className="text-xs text-gray-500 line-through">
+                                                  {featuredItem.originalPrice}
+                                                </span>
+                                              </>
+                                            ) : (
+                                              <span className="font-bold text-gray-900 text-sm">
+                                                {featuredItem.price}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </Link>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </nav>
+
+                  <div className="p-6 border-t border-gray-200/50 bg-gray-50/50">
+                  </div>
+
+                  <div className="p-6 border-t border-gray-200/50 bg-white/80">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>© {new Date().getFullYear()} HAJZEN</span>
+                      <div className="flex items-center space-x-1">
+                        <Shield className="w-3 h-3 text-green-600" />
+                        <span>Secure</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
     </LazyMotion>
   );
