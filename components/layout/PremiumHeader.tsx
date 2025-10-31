@@ -1013,7 +1013,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                 <Link
                   href="/profile/wishlist"
                   aria-label="Wishlist"
-                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-gray-700 hover:bg-white/80 transition-all duration-300 border border-transparent hover:border-gray-200/60 hover:shadow-lg group backdrop-blur-sm"
+                  className="hidden md:inline-flex relative h-10 w-10 items-center justify-center rounded-xl text-gray-700 hover:bg-white/80 transition-all duration-300 border border-transparent hover:border-gray-200/60 hover:shadow-lg group backdrop-blur-sm"
                 >
                   <Heart className="h-5 w-5 transition-colors group-hover:text-pink-500 pointer-events-none" />
                   <motion.div
