@@ -376,8 +376,8 @@ export default function PremiumFooter() {
                   Get exclusive access to new collections, special offers, and insider updates.
                 </p>
               </div>
-              <div className="flex-1 w-full max-w-md">
-                <form className="flex space-x-3">
+              <div className="flex-1 w-full max-w-md ">
+                <form className="flex flex-col gap-y-3 space-x-3 sm:flex-row">
                   <input
                     type="email"
                     placeholder="Enter your email"

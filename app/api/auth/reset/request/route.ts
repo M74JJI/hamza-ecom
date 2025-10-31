@@ -22,3 +22,4 @@ export async function POST(req: Request){
   await sendResetEmail(email, url);
   return NextResponse.json({ ok: true });
 }
+

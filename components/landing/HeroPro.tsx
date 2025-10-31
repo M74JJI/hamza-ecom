@@ -188,7 +188,7 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
               transition={{ delay: 0.4 }}
               className="space-y-8"
             >
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.85]">
+              <h1 className="text-[14vw] md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.85]">
                 <span className="text-stone-900">ELEVATE</span>
                 <br />
                 <motion.span
@@ -315,7 +315,7 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative"
+            className="relative p-5 md:p-0"
           >
             
             {/* Luxury Main Product Display */}

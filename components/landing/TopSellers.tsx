@@ -178,7 +178,7 @@ export function TopSellers({ products }: TopSellersProps) {
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-20">
+    <section className="relative bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 py-20 px-4">
       {/* Background Elements - PERFORMANCE OPTIMIZED */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
