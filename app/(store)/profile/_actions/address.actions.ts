@@ -23,7 +23,7 @@ export async function createAddress(input: unknown) {
     });
   }
 
-  await prisma.address.create({
+  const addr=await prisma.address.create({
     data: {
       userId: user.id,
       fullName: data.fullName,
@@ -33,6 +33,7 @@ export async function createAddress(input: unknown) {
       isDefault: !!data.isDefault,
     },
   });
+  return addr
 }
 
 export async function updateAddress(id: string, input: unknown) {
@@ -46,7 +47,7 @@ export async function updateAddress(id: string, input: unknown) {
     });
   }
 
-  await prisma.address.update({
+  const addr=await prisma.address.update({
     where: { id },
     data: {
       fullName: data.fullName,
@@ -56,6 +57,7 @@ export async function updateAddress(id: string, input: unknown) {
       isDefault: !!data.isDefault,
     },
   });
+  return addr
 }
 
 export async function deleteAddress(id: string) {

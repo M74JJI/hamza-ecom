@@ -6,6 +6,12 @@ import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { Heart, ShoppingBag, Star, TrendingUp, Zap } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Wishlist",
+};
+
 
 export default async function WishlistPage() {
   const { user } = await requireUser();

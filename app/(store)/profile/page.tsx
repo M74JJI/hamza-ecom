@@ -22,6 +22,13 @@ import {
   Truck,
   Clock
 } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profile",
+};
+
+
 
 export default async function ProfileOverview(){
   const { user } = await requireUser();

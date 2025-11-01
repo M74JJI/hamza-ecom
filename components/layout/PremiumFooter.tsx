@@ -109,7 +109,7 @@ export default function PremiumFooter() {
   const contactInfo = [
     { icon: Phone, text: "+212 600-000000", href: "tel:+212600000000" },
     { icon: Mail, text: "support@hajzen.com", href: "mailto:support@hajzen.com" },
-    { icon: MapPin, text: "Casablanca, Morocco", href: "#" },
+    { icon: MapPin, text: "Ksar El Kebir, Morocco", href: "#" },
     { icon: Clock, text: "Mon-Sun: 9AM-11PM", href: "#" },
   ];
 
@@ -230,7 +230,7 @@ export default function PremiumFooter() {
                   </motion.div>
                   <div>
                     <h2 className="text-4xl font-black bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      HAJZEN
+                      HAMZA
                     </h2>
                     <p className="text-gray-600 text-sm font-semibold flex items-center space-x-2 mt-1">
                       <Sparkles className="w-4 h-4 text-orange-500" />
@@ -411,7 +411,7 @@ export default function PremiumFooter() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               {/* Copyright */}
               <div className="flex items-center space-x-4 text-gray-600 text-sm">
-                <span>© {currentYear} HAJZEN. All rights reserved.</span>
+                <span>© {currentYear} HAMZA. All rights reserved.</span>
                 <div className="flex items-center space-x-1">
                   <Globe className="w-3 h-3" />
                   <span>Morocco</span>
@@ -462,7 +462,7 @@ export default function PremiumFooter() {
                 >
                   <Heart className="w-4 h-4 text-red-500" />
                 </motion.span>
-                <span>by HAJZEN</span>
+                <span>by M.HAJJI</span>
               </p>
             </motion.div>
           </motion.div>

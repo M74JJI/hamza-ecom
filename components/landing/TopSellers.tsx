@@ -251,7 +251,7 @@ export function TopSellers({ products }: TopSellersProps) {
           viewport={{ once: true }} // Only animate once
           className="text-center mt-12"
         >
-          <Link href="/products">
+          <Link href="/browse">
             <motion.div
               whileHover={{ scale: 1.03, y: -1 }} // Reduced hover effect
               whileTap={{ scale: 0.98 }} // Reduced tap effect

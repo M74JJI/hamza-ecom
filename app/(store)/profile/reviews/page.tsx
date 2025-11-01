@@ -6,6 +6,12 @@ import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { Star, MessageSquare, Award, TrendingUp } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Reviews",
+};
+
 
 export default async function ReviewsPage(){
   const { user } = await requireUser();

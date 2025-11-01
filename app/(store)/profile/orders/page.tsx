@@ -6,6 +6,12 @@ import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { Package, ShoppingBag, ArrowRight, TrendingUp } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Orders",
+};
+
 
 export default async function OrdersPage(){
   const { user } = await requireUser();

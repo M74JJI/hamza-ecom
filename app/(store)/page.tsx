@@ -5,6 +5,12 @@ import FeaturedCategories from "@/components/landing/FeaturedCategories";
 import Trust from "@/components/landing/Trust";
 import { TopSellers } from "@/components/landing/TopSellers";
 import { prisma } from "@/lib/db";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "HAMZA Store",
+};
 
 export default async function PremiumHome(){
 

@@ -601,7 +601,7 @@ function PriceInputs({
           value={localMin}
           onChange={(e) => handleMinChange(e.target.value)}
           onBlur={handleBlur}
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+          className="text-gray-700 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
           placeholder={String(minLimit)}
         />
       </div>
@@ -616,7 +616,7 @@ function PriceInputs({
           value={localMax}
           onChange={(e) => handleMaxChange(e.target.value)}
           onBlur={handleBlur}
-          className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+          className="text-gray-700 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
           placeholder={String(maxLimit)}
         />
       </div>

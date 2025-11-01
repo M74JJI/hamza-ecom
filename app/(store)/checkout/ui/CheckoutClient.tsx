@@ -11,6 +11,7 @@ import {
   Shield, Clock, Award, Heart, Star, ChevronRight
 } from 'lucide-react';
 import { AddressForm } from '../../profile/_components/AddressForm';
+import { Address } from '@prisma/client';
 
 // Color scheme constants for consistency
 const COLORS = {
@@ -36,11 +37,13 @@ const COLORS = {
 
 function fmt(n:number){ return n.toFixed(2) + ' MAD'; }
 
-export default function CheckoutClient({ companies, dbCart, addresses = [] }: { 
+export default function 
+CheckoutClient({ companies, dbCart, addresses = [] }: { 
   companies: any[], 
   dbCart: any,  
   addresses?: any[];
 }) {
+
   const [selectedAddressId, setSelectedAddressId] = useState(
     addresses.find((a) => a.isDefault)?.id || addresses[0]?.id || 'new'
   );
@@ -54,6 +57,7 @@ const [newAddress, setNewAddress] = useState({
   fullAddress: '',
   isDefault: true,
 });
+const [addressesState, setAddresses] = useState(addresses || []);
   const [companyId, setCompanyId] = useState(companies[0]?.id || '');
   const [couponCode, setCouponCode] = useState('');
   const [couponPercent, setCouponPercent] = useState<number>(0);
@@ -146,7 +150,7 @@ function validAddress() {
           className="flex items-center justify-center mb-8 sm:mb-12"
         >
           <div className="flex items-center gap-4 sm:gap-8 flex-wrap justify-center">
-            {['Cart', 'Checkout', 'Payment', 'Confirmation'].map((step, index) => (
+            {['Cart', 'Checkout'].map((step, index) => (
               <div key={step} className="flex items-center gap-2 sm:gap-4">
                 <motion.div
                   whileHover={{ scale: 1.1 }}
@@ -161,7 +165,7 @@ function validAddress() {
                 <span className={`font-medium text-sm sm:text-base ${index <= 1 ? 'text-black' : 'text-gray-500'}`}>
                   {step}
                 </span>
-                {index < 3 && (
+                {index < 1 && (
                   <div className="w-6 sm:w-12 h-0.5 bg-gray-300" />
                 )}
               </div>
@@ -245,9 +249,9 @@ function validAddress() {
   </div>
 
   {/* Existing addresses */}
-  {addresses.length > 0 && !addingNew && (
+  {addressesState.length > 0 && !addingNew && (
     <div className="space-y-4">
-      {addresses.map((addr) => (
+      {addressesState.map((addr) => (
         <motion.label
           key={addr.id}
           className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -285,15 +289,14 @@ function validAddress() {
   )}
 
   {/* New Address Form */}
-  {(addingNew || addresses.length === 0) && (
-    <AddressForm
-      onDone={() => {
-        setAddingNew(false);
-       // handleAddressCreated();
-         window.location.reload();
-
-      }}
-    />
+  {(addingNew || addressesState.length === 0) && (
+<AddressForm
+  onDone={(newAddr:Address) => {
+    setAddresses(prev => [...prev, newAddr]);
+    setSelectedAddressId(newAddr.id);
+    setAddingNew(false);
+  }}
+/>
   )}
 </motion.section>
 

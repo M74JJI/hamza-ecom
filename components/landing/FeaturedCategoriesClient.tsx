@@ -106,7 +106,7 @@ export function FeaturedCategoriesClient({ categories }: FeaturedCategoriesClien
               className="group relative"
             >
               <Link
-                href={`/products?category=${category.id}`}
+                href={`/browse?category=${category.id}`}
                 className="block relative h-80 rounded-2xl overflow-hidden bg-white/95 backdrop-blur-md border border-stone-300/50 shadow-lg hover:shadow-xl transition-all duration-300"
                 prefetch={false}
               >
@@ -165,7 +165,7 @@ export function FeaturedCategoriesClient({ categories }: FeaturedCategoriesClien
           viewport={{ once: true }}
           className="text-center mt-8"
         >
-          <Link href="/categories">
+          <Link href="/browse">
             <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg border-2 border-white shadow-lg cursor-pointer group hover:shadow-xl transition-all duration-300">
               <span className="font-black text-base">VIEW ALL CATEGORIES</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

@@ -7,6 +7,12 @@ import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { cookies } from 'next/headers';
 import { Shield, Monitor, Smartphone, Globe, Cpu } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sessions",
+};
+
 
 export default async function SessionsPage(){
   const { user } = await requireUser();

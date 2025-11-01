@@ -2,6 +2,13 @@ import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import ProductViewClient from "./ProductViewClient";
 import { Decimal } from "@prisma/client/runtime/library";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Product Details",
+};
+
+
 
 export default async function ProductDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

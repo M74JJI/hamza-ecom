@@ -6,6 +6,12 @@ import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { Shield, User, Lock, Key, Award } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Security",
+};
+
 
 export default async function SecurityPage(){
   const { user } = await requireUser();

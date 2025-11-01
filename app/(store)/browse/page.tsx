@@ -1,5 +1,5 @@
 'use client';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ProductCard from '@/components/store/ProductCard';
 import { FilterSidebar } from '@/components/search/FilterSidebar';
@@ -9,6 +9,10 @@ import {
   Zap, ArrowRight, ChevronDown, X, SlidersHorizontal,
   Tag, Truck, Award, Shield
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { FilterControls } from '@/components/search/FilterControls';
+import { MobileFilterSheet } from '@/components/search/MobileFilterSheet';
+
 
 const COLORS = {
   primary: {
@@ -32,6 +36,8 @@ const COLORS = {
 } as const;
 
 export default function SearchPage() {
+  const router = useRouter();
+const pathname = usePathname();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<any>({});
   const [data, setData] = useState<any[]>([]);
@@ -40,8 +46,10 @@ export default function SearchPage() {
   const [sortOpen, setSortOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [categoryNameMap, setCategoryNameMap] = useState<Record<string, string>>({});
+const [isHydrated, setIsHydrated] = useState(false);
 
-  const q = searchParams.get('q') || '';
+ const q = searchParams.get('q') || '';
+
   const sortOptions = [
     { value: 'newest', label: 'New Arrivals', icon: Sparkles },
     { value: 'popular', label: 'Most Popular', icon: Zap },
@@ -51,7 +59,6 @@ export default function SearchPage() {
   ];
 
 useEffect(() => {
-  // Build initial filters from URL params
   const initialFilters: any = {};
 
   const urlCategory = searchParams.getAll('category');
@@ -62,6 +69,7 @@ useEffect(() => {
   const urlMax = searchParams.get('max');
   const urlRating = searchParams.get('rating');
   const urlSort = searchParams.get('sort');
+  const urlQ = searchParams.get('q');
 
   if (urlCategory.length) initialFilters.category = urlCategory;
   if (urlBrand.length) initialFilters.brand = urlBrand;
@@ -71,9 +79,12 @@ useEffect(() => {
   if (urlMax) initialFilters.max = Number(urlMax);
   if (urlRating) initialFilters.rating = Number(urlRating);
   if (urlSort) initialFilters.sort = urlSort;
+  if (urlQ) initialFilters.q = urlQ;
 
   setFilters(initialFilters);
-}, [searchParams]);
+    setIsHydrated(true); // ✅ mark ready
+}, []); // 👈 run once only
+
 
 
   /* ---------------------- Data Fetch ---------------------- */
@@ -81,21 +92,52 @@ useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
 
-    if (q) params.set('q', q);
-    for (const [key, value] of Object.entries(filters)) {
-      if (Array.isArray(value)) value.forEach((v) => params.append(key, v));
-      else if (value !== undefined && value !== '') params.set(key, String(value));
-    }
+for (const [key, value] of Object.entries(filters)) {
+  if (Array.isArray(value)) value.forEach((v) => params.append(key, v));
+  else if (value !== undefined && value !== '') params.set(key, String(value));
+}
+
 
     const res = await fetch(`/api/search?${params.toString()}`, { cache: 'no-store' });
     const json = await res.json();
     setData(json.data || []);
     setLoading(false);
   };
+useEffect(() => {
+   if (!isHydrated) return;
+  fetchData();
+  // Sync URL with filters
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, val]) => {
+    if (Array.isArray(val)) val.forEach((v) => params.append(key, v));
+    else if (val !== undefined && val !== '') params.set(key, String(val));
+  });
+  router.replace(`${pathname}?${params.toString()}`);
+}, [filters]);
 
-  useEffect(() => {
-    fetchData();
-  }, [q, filters]);
+
+
+// 🧠 Detect q changes from URL (e.g., when navigating from another page)
+useEffect(() => {
+  const qParam = searchParams.get('q');
+
+  setFilters((prev: any) => {
+    const updated = { ...prev };
+
+    // If q exists in the URL, apply it
+    if (qParam && qParam.trim() !== '') {
+      if (prev.q === qParam) return prev; // no change
+      updated.q = qParam;
+    } else {
+      // if q is missing from URL but was previously set, remove it
+      if (!prev.q) return prev;
+      delete updated.q;
+    }
+
+    return updated;
+  });
+}, [searchParams]);
+
 
   /* ---------------------- Fetch Category Names ---------------------- */
   useEffect(() => {
@@ -124,7 +166,7 @@ useEffect(() => {
                 animate={{ opacity: 1, x: 0 }}
                 className="text-3xl sm:text-4xl font-light text-gray-800"
               >
-                {q ? `"${q}"` : 'Curated Collection'}
+                {q ? `"${q}"` : 'Our Products'}
               </motion.h1>
               {!loading && (
                 <motion.p
@@ -136,101 +178,18 @@ useEffect(() => {
                 </motion.p>
               )}
             </div>
-
-            {/* Controls */}
-            <div className="flex items-center gap-3">
-              {/* View Mode */}
-              <div className="flex bg-white rounded-xl border border-gray-200 p-1">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-black text-white'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-black text-white'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                </motion.button>
-              </div>
-
-              {/* Filter Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowFilters(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors shadow-lg"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                Filter
-              </motion.button>
-
-              {/* Sort Dropdown */}
-              <div className="relative">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSortOpen(!sortOpen)}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium hover:border-gray-300 hover:text-gray-800 transition-colors bg-white"
-                >
-                  <SortAsc className="w-4 h-4" />
-                  Sort
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      sortOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </motion.button>
-                <AnimatePresence>
-                  {sortOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50"
-                    >
-                      {sortOptions.map((option) => {
-                        const Icon = option.icon;
-                        return (
-                          <motion.button
-                            key={option.value}
-                            whileHover={{ backgroundColor: '#f8fafc' }}
-                            onClick={() => {
-                              setFilters((prev: any) => ({
-                                ...prev,
-                                sort: option.value,
-                              }));
-                              setSortOpen(false);
-                            }}
-                            className={`w-full text-left px-4 py-3 text-sm hover:text-gray-800 transition-colors flex items-center gap-3 ${
-                              filters.sort === option.value
-                                ? 'text-blue-600 bg-blue-50'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            <Icon className="w-4 h-4" />
-                            {option.label}
-                          </motion.button>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
+ {/* Filter Controls */}
+            <FilterControls
+              showFilters={showFilters}
+              setShowFilters={setShowFilters}
+              sortOpen={sortOpen}
+              setSortOpen={setSortOpen}
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              filters={filters}
+              setFilters={setFilters}
+              dataLength={data.length}
+            />
           </div>
         </div>
       </div>
@@ -238,70 +197,21 @@ useEffect(() => {
       {/* ---------------------- Main ---------------------- */}
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
-          {/* Desktop Sidebar */}
+        {/* Desktop Sidebar */}
           <div className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-8">
-<FilterSidebar
-  onChange={(update) => setFilters(update)}
-/>
-
+              <FilterSidebar onChange={(update) => setFilters(update)} />
             </div>
           </div>
 
-          {/* Mobile Filters */}
-          <AnimatePresence>
-            {showFilters && (
-              <>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/50 z-50 lg:hidden"
-                  onClick={() => setShowFilters(false)}
-                />
-                <motion.div
-                  initial={{ x: '100%' }}
-                  animate={{ x: 0 }}
-                  exit={{ x: '100%' }}
-                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                  className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 lg:hidden shadow-2xl flex flex-col"
-                >
-                  <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-white">
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-800">Filters</h2>
-                      <p className="text-sm text-gray-600">Refine your search</p>
-                    </div>
-                    <motion.button
-                      whileHover={{ scale: 1.1, rotate: 90 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setShowFilters(false)}
-                      className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200"
-                    >
-                      <X className="w-5 h-5 text-gray-600" />
-                    </motion.button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    <FilterSidebar
-                      onChange={(update) =>
-                        setFilters((prev: any) => ({ ...prev, ...update }))
-                      }
-                    />
-                  </div>
-                  <div className="p-6 border-t border-gray-100 bg-white">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowFilters(false)}
-                      className={`w-full ${COLORS.primary.bg} ${COLORS.primary.text} py-4 rounded-xl font-semibold text-lg ${COLORS.primary.hover} transition-colors flex items-center justify-center gap-3 shadow-lg`}
-                    >
-                      Show Results
-                      <ArrowRight className="w-5 h-5" />
-                    </motion.button>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
+          {/* Mobile Filter Sheet */}
+          <MobileFilterSheet
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            filters={filters}
+            setFilters={setFilters}
+            dataLength={data.length}
+          />
 
           {/* Product Section */}
           <section className="flex-1">
@@ -312,42 +222,42 @@ useEffect(() => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-wrap gap-2 mb-6"
               >
-                {Object.entries(filters).map(([key, val]) => {
-                  if (!val) return null;
-                  const vals = Array.isArray(val) ? val : [val];
-                  return vals.map((v) => (
-                    <motion.div
-                      key={`${key}-${v}`}
-                      whileHover={{ scale: 1.05 }}
-                      className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200"
-                    >
-                      <span className="capitalize">{key}:</span>
-                      <span>
-                        {key === 'category'
-                          ? categoryNameMap[v] || v
-                          : String(v)}
-                      </span>
-                      <button
-                        onClick={() =>
-                          setFilters((prev: any) => {
-                            const updated = { ...prev };
-                            if (Array.isArray(updated[key])) {
-                              updated[key] = updated[key].filter(
-                                (item: string) => item !== v
-                              );
-                              if (updated[key].length === 0)
-                                delete updated[key];
-                            } else delete updated[key];
-                            return updated;
-                          })
-                        }
-                        className="text-blue-500 hover:text-blue-700 transition-colors"
-                      >
-                        ×
-                      </button>
-                    </motion.div>
-                  ));
-                })}
+            {Object.entries(filters).map(([key, val]) => {
+  if (!val) return null;
+  const vals = Array.isArray(val) ? val : [val];
+  return vals.map((v) => (
+    <motion.div
+      key={`${key}-${v}`}
+      whileHover={{ scale: 1.05 }}
+      className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200"
+    >
+      <span className="capitalize">
+        {key === 'q' ? 'Search' : key}:
+      </span>
+      <span>{key === 'q' ? `"${v}"` : String(v)}</span>
+      <button
+        onClick={() =>
+          setFilters((prev: any) => {
+            const updated = { ...prev };
+            if (key === 'q') {
+              delete updated.q; // remove q from filters
+            } else if (Array.isArray(updated[key])) {
+              updated[key] = updated[key].filter((item: string) => item !== v);
+              if (updated[key].length === 0) delete updated[key];
+            } else {
+              delete updated[key];
+            }
+            return updated;
+          })
+        }
+        className="text-blue-500 hover:text-blue-700 transition-colors"
+      >
+        ×
+      </button>
+    </motion.div>
+  ));
+})}
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setFilters({})}

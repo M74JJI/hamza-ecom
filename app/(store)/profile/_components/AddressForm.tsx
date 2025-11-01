@@ -6,7 +6,13 @@ import { CheckCircle2, Loader2, Plus, MapPin, User, Phone, Home } from 'lucide-r
 import { motion } from 'framer-motion';
 import { MA_CITIES } from '@/lib/ma-cities';
 
-export function AddressForm({ address, onDone }: { address?: any; onDone?: () => void }) {
+export function AddressForm({
+  address,
+  onDone,
+}: {
+  address?: any;
+  onDone?: (newAddr: any) => void;
+}){
   const [pending, start] = useTransition();
   const [form, setForm] = useState({
     fullName: address?.fullName ?? '',
@@ -15,15 +21,12 @@ export function AddressForm({ address, onDone }: { address?: any; onDone?: () =>
     fullAddress: address?.fullAddress ?? '',
     isDefault: address?.isDefault ?? false,
   });
-
   function submit() {
     start(async () => {
-      if (address) {
-        await updateAddress(address.id, form);
-      } else {
-        await createAddress(form);
-      }
-      onDone?.();
+      const result = address
+        ? await updateAddress(address.id, form)
+        : await createAddress(form);
+      onDone?.(result); // 
     });
   }
 

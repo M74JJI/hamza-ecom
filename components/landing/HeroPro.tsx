@@ -273,7 +273,8 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
             </motion.div>
 
             {/* Premium CTA Section */}
-            <motion.div
+            <motion.a
+            href='/browse'
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1 }}
@@ -282,7 +283,7 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
               <motion.button
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center justify-between px-8 py-6 bg-gradient-to-r from-stone-900 to-stone-800 text-white rounded-2xl border border-amber-400/30 shadow-2xl relative overflow-hidden group"
+                className="mt-6 w-full flex items-center justify-between px-8 py-6 bg-gradient-to-r from-stone-900 to-stone-800 text-white rounded-2xl border border-amber-400/30 shadow-2xl relative overflow-hidden group"
               >
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100"
@@ -307,7 +308,7 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
               </motion.button>
 
           
-            </motion.div>
+            </motion.a>
           </motion.div>
 
           {/* Right: Luxury Product Showcase */}
@@ -345,96 +346,102 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
               </motion.button>
 
               {/* Luxury Product Card */}
-              <div className="relative bg-white/95 backdrop-blur-md border border-stone-300/50 shadow-2xl rounded-3xl overflow-hidden ">
+              <div  className="relative bg-white/95 backdrop-blur-md border border-stone-300/50 shadow-2xl rounded-3xl overflow-hidden ">
                 
-                {/* Premium Product Image */}
-                <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-stone-200 to-stone-300 group">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`${currentProduct.id}-${activeVariant}`}
-                      initial={{ opacity: 0, scale: 1.1 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.6, ease: "easeInOut" }}
-                      className="w-full h-full"
-                    >
-                      <Image
-                        src={currentVariant.images[0].url}
-                        alt={currentVariant.name}
-                        fill
-                        className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                        priority
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                  
-                  {/* Luxury Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-orange-500/5 mix-blend-overlay" />
-                  <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-stone-900/95 via-stone-900/50 to-transparent" />
-                  
-                  {/* Limited Edition Badge */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="absolute top-6 left-6 bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-2 rounded-full border border-amber-300/30 shadow-lg"
-                  >
-                    <span className="text-white font-black text-xs tracking-wider">LIMITED EDITION</span>
-                  </motion.div>
+          {/* Premium Product Image */}
+<div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-stone-200 to-stone-300 group">
+  {/* Link covering the entire image container */}
+  <Link 
+    href={`/products/${currentProduct.slug}`}
+    className="absolute inset-0 z-10"
+  >
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={`${currentProduct.id}-${activeVariant}`}
+        initial={{ opacity: 0, scale: 1.1 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
+        className="w-full h-full"
+      >
+        <Image
+          src={currentVariant.images[0].url}
+          alt={currentVariant.name}
+          fill
+          className="object-cover transition-transform duration-1000 group-hover:scale-105"
+          priority
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      </motion.div>
+    </AnimatePresence>
+  </Link>
+  
+  {/* Luxury Overlays */}
+  <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-orange-500/5 mix-blend-overlay z-15" />
+  <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-stone-900/95 via-stone-900/50 to-transparent z-15" />
+  
+  {/* Limited Edition Badge */}
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    className="absolute top-6 left-6 bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-2 rounded-full border border-amber-300/30 shadow-lg z-20"
+  >
+    <span className="text-white font-black text-xs tracking-wider">LIMITED EDITION</span>
+  </motion.div>
 
-                  {/* Premium Product Info Overlay */}
-                  <div className="absolute bottom-6 left-6 right-6">
-                    <div className="flex items-end justify-between">
-                      <div className="flex-1 min-w-0 mr-6">
-                        <motion.h3
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-3xl font-black text-white mb-1 tracking-wide line-clamp-1"
-                        >
-                          {currentVariant.title}
-                        </motion.h3>
-                        <motion.p
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 0.2 }}
-                          className="text-amber-300 font-medium text-base tracking-wide"
-                        >
-                          {currentProduct.categories?.[0]?.category?.name || "Luxury Collection"}
-                        </motion.p>
-                      </div>
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 12 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center border border-amber-300/30 cursor-pointer flex-shrink-0 hover:from-amber-600 hover:to-amber-800 transition-all duration-300 shadow-lg"
-                      >
-                        <Heart className="w-6 h-6 text-white" />
-                      </motion.div>
-                    </div>
-                  </div>
+  {/* Premium Product Info Overlay */}
+  <div className="absolute bottom-6 left-6 right-6 z-20">
+    <div className="flex items-end justify-between">
+      <div className="flex-1 min-w-0 mr-6">
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-black text-white mb-1 tracking-wide line-clamp-1"
+        >
+          {currentVariant.title}
+        </motion.h3>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-amber-300 font-medium text-base tracking-wide"
+        >
+          {currentProduct.categories?.[0]?.category?.name || "Luxury Collection"}
+        </motion.p>
+      </div>
+      <motion.div
+        whileHover={{ scale: 1.1, rotate: 12 }}
+        whileTap={{ scale: 0.9 }}
+        className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center border border-amber-300/30 cursor-pointer flex-shrink-0 hover:from-amber-600 hover:to-amber-800 transition-all duration-300 shadow-lg z-30" // increased z-index to be safe
+      >
+        <Heart className="w-6 h-6 text-white" />
+      </motion.div>
+    </div>
+  </div>
 
-                  {/* Premium Price Display */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 20, y: -20 }}
-                    animate={{ opacity: 1, x: 0, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="absolute top-6 right-6 bg-gradient-to-br from-amber-500 to-amber-700 px-5 py-3 rounded-2xl border border-amber-300/30 shadow-2xl text-center"
-                  >
-                    <div className="text-white font-black text-2xl mb-1">{currentVariantPrice.discounted} MAD</div>
-                    {currentVariantPrice.hasDiscount && (
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="text-amber-200 text-sm line-through font-medium">
-                          {currentVariantPrice.original} MAD
-                        </div>
-                        <div className="bg-white text-amber-700 px-2 py-1 rounded-full text-xs font-black">
-                          -{currentVariantPrice.discountPercent}%
-                        </div>
-                      </div>
-                    )}
-                    <div className="text-amber-200 text-xs font-medium mt-1">
-                      Best: {currentVariantPrice.size}
-                    </div>
-                  </motion.div>
-                </div>
+  {/* Premium Price Display */}
+  <motion.div
+    initial={{ opacity: 0, x: 20, y: -20 }}
+    animate={{ opacity: 1, x: 0, y: 0 }}
+    transition={{ delay: 0.3 }}
+    className="absolute top-6 right-6 bg-gradient-to-br from-amber-500 to-amber-700 px-5 py-3 rounded-2xl border border-amber-300/30 shadow-2xl text-center z-20"
+  >
+    <div className="text-white font-black text-2xl mb-1">{currentVariantPrice.discounted} MAD</div>
+    {currentVariantPrice.hasDiscount && (
+      <div className="flex items-center justify-center gap-2">
+        <div className="text-amber-200 text-sm line-through font-medium">
+          {currentVariantPrice.original} MAD
+        </div>
+        <div className="bg-white text-amber-700 px-2 py-1 rounded-full text-xs font-black">
+          -{currentVariantPrice.discountPercent}%
+        </div>
+      </div>
+    )}
+    <div className="text-amber-200 text-xs font-medium mt-1">
+      Best: {currentVariantPrice.size}
+    </div>
+  </motion.div>
+</div>
 
                 {/* Luxury Product Details */}
                 <div className="p-4 space-y-4 border-t border-stone-300/30">

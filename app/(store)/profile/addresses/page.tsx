@@ -7,6 +7,12 @@ import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { MapPin, Plus, Home, Truck } from 'lucide-react';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Addresses",
+};
+
 
 export default async function AddressesPage(){
   const { user } = await requireUser();

@@ -41,6 +41,10 @@ export default function CartPageClient() {
   const [savedForLater, setSavedForLater] = useState<CartItem[]>([]);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [imageLoadStates, setImageLoadStates] = useState<Record<string, boolean>>({});
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+
+  console.log(cart);
 
   useEffect(() => {
     setCart(getCart());
@@ -99,6 +103,17 @@ export default function CartPageClient() {
   function handleImageLoad(id: string) {
     setImageLoadStates(prev => ({ ...prev, [id]: true }));
   }
+
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Navigate to checkout
+    window.location.href = '/checkout';
+  };
+
 
   // Enhanced Mobile Drawer with consistent styling
   const CartDrawer = () => (
@@ -255,6 +270,89 @@ export default function CartPageClient() {
                     <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
+                 <motion.button
+    whileHover={isCheckingOut ? {} : { scale: 1.02, y: -2 }}
+    whileTap={isCheckingOut ? {} : { scale: 0.98 }}
+    onClick={handleCheckout}
+    disabled={isCheckingOut}
+    className={`w-full ${COLORS.primary.bg} ${COLORS.primary.text} py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg ${COLORS.primary.hover} transition-all flex items-center justify-center gap-3 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden`}
+  >
+    {/* Animated background gradient */}
+    {isCheckingOut && (
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600"
+        animate={{
+          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        style={{
+          backgroundSize: '200% 200%',
+        }}
+      />
+    )}
+    
+    {/* Content */}
+    <div className="relative z-10 flex items-center gap-3">
+      {isCheckingOut ? (
+        <>
+          <motion.div
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.2, 1]
+            }}
+            transition={{ 
+              rotate: { duration: 1, repeat: Infinity, ease: "linear" },
+              scale: { duration: 0.5, repeat: Infinity, ease: "easeInOut" }
+            }}
+            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+          />
+          <motion.span
+            key="processing"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="font-semibold"
+          >
+            Securing Your Order...
+          </motion.span>
+        </>
+      ) : (
+        <>
+          <Lock className="w-5 h-5" />
+          <span>Proceed to Checkout</span>
+          <ArrowRight className="w-5 h-5" />
+        </>
+      )}
+    </div>
+
+    {/* Loading dots animation */}
+    {isCheckingOut && (
+      <motion.div
+        className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        {[0, 1, 2].map((index) => (
+          <motion.div
+            key={index}
+            className="w-1 h-1 bg-white/80 rounded-full"
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
+              delay: index * 0.2,
+            }}
+          />
+        ))}
+      </motion.div>
+    )}
+  </motion.button>
                 
                 <Link href="/browse" onClick={() => setIsDrawerOpen(false)}>
                   <motion.button
@@ -408,7 +506,7 @@ export default function CartPageClient() {
                 <span className={`font-medium text-sm md:text-base ${index === 0 ? 'text-black' : 'text-gray-500'}`}>
                   {step}
                 </span>
-                {index < 3 && (
+                {index < 1 && (
                   <div className="w-6 md:w-12 h-0.5 bg-gray-300" />
                 )}
               </div>
@@ -741,7 +839,7 @@ export default function CartPageClient() {
                   
                   <div className="flex justify-between text-gray-600 text-sm sm:text-base">
                     <span>Shipping</span>
-                    <span className="text-green-600 font-semibold">FREE</span>
+                    <span className="text-green-600 font-semibold">Calculated Later</span>
                   </div>
                   
                   <div className="flex justify-between text-gray-600 text-sm sm:text-base">
@@ -766,17 +864,35 @@ export default function CartPageClient() {
 
                 {/* Enhanced Checkout Button */}
                 <div className="p-4 sm:p-6 border-t border-gray-100">
-                  <Link href="/checkout">
-                    <motion.button
-                      whileHover={{ scale: 1.02, y: -2 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`w-full ${COLORS.primary.bg} ${COLORS.primary.text} py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg ${COLORS.primary.hover} transition-all flex items-center justify-center gap-3 shadow-lg`}
-                    >
-                      <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Proceed to Checkout
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </motion.button>
-                  </Link>
+                  <Link href="/checkout" onClick={() => setIsDrawerOpen(false)}>
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={(e) => {
+        e.preventDefault();
+        handleCheckout();
+      }}
+      disabled={isCheckingOut}
+      className={`w-full ${COLORS.primary.bg} ${COLORS.primary.text} py-4 rounded-xl font-semibold text-lg ${COLORS.primary.hover} transition-colors flex items-center justify-center gap-3 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed`}
+    >
+      {isCheckingOut ? (
+        <>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+          />
+          Processing...
+        </>
+      ) : (
+        <>
+          <Lock className="w-5 h-5" />
+          Secure Checkout
+          <ArrowRight className="w-5 h-5" />
+        </>
+      )}
+    </motion.button>
+  </Link>
 
                   {/* Security & Trust */}
                   <div className="flex items-center justify-center gap-2 sm:gap-4 mt-3 sm:mt-4 text-gray-500 text-xs sm:text-sm flex-wrap">
