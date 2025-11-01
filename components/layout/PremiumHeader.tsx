@@ -310,7 +310,6 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [activeSearchCategory, setActiveSearchCategory] = useState('all');
   const [notificationCount] = useState(3);
-  const [darkMode, setDarkMode] = useState(false);
   const [loadingStates, setLoadingStates] = useState({ search: false, cart: false });
 
   const pathname = usePathname();
@@ -333,7 +332,6 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false, revalidateOnReconnect: false }
   );
-  const headerCats = catData?.items ?? [];
 
   // ---------- CART ----------
   const { cart, count: cartCount, remove } = useCart();
@@ -363,10 +361,9 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
   // ---------- Search config ----------
   const searchCategories = [
     { id: 'all', name: 'All Categories', count: '10K+' },
-    { id: 'men', name: "Men's Fashion", count: '2.3K' },
-    { id: 'women', name: "Women's Fashion", count: '3.1K' },
-    { id: 'electronics', name: 'Electronics', count: '1.2K' },
-    { id: 'accessories', name: 'Accessories', count: '1.8K' },
+    { id: 'cmhci78b6000bvdy4utekixma', name: "Men's Fashion", count: '2.3K' },
+    { id: 'cmhdofcvl003fvddgwvmo3f0f', name: "Women's Fashion", count: '3.1K' },
+    { id: 'cmhggk3qo000nvd5gjkt5s6tj', name: 'Kids Clothing', count: '1.2K' },
   ];
 
   // ---------- effects ----------
@@ -415,9 +412,16 @@ useEffect(() => {
       e.preventDefault();
       if (!searchQuery.trim()) return;
       setLoadingStates((p) => ({ ...p, search: true }));
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 500));
       saveSearch(searchQuery);
-      router.push(`/browse?q=${encodeURIComponent(searchQuery)}`);
+      if(activeSearchCategory==="all"){
+        router.push(`/browse?q=${encodeURIComponent(searchQuery)}`);
+      }else{
+        router.push(`/browse?q=${encodeURIComponent(searchQuery)}&category=${activeSearchCategory}`);
+      }
+
+
+
       setSearchOpen(false);
       setLoadingStates((p) => ({ ...p, search: false }));
     },

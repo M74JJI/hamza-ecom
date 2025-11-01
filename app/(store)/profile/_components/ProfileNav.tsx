@@ -12,9 +12,114 @@ import {
   LogOut,
   ChevronRight,
   Crown,
-  Sparkles
+  Sparkles,
+  Award,
+  Star,
+  Trophy
 } from 'lucide-react';
+// Loyalty system configuration
+const LOYALTY_TIERS = {
+  BRONZE: { 
+    name: 'Bronze', 
+    minOrders: 0, 
+    color: 'from-amber-600 to-amber-700',
+    bgColor: 'from-amber-50 to-amber-100',
+    borderColor: 'border-amber-200',
+    icon: Star,
+    description: 'Getting started'
+  },
+  SILVER: { 
+    name: 'Silver', 
+    minOrders: 5, 
+    color: 'from-gray-400 to-gray-500',
+    bgColor: 'from-gray-50 to-gray-100',
+    borderColor: 'border-gray-200',
+    icon: Award,
+    description: 'Regular shopper'
+  },
+  GOLD: { 
+    name: 'Gold', 
+    minOrders: 15, 
+    color: 'from-yellow-500 to-yellow-600',
+    bgColor: 'from-yellow-50 to-yellow-100',
+    borderColor: 'border-yellow-200',
+    icon: Crown,
+    description: 'Valued member'
+  },
+  PLATINUM: { 
+    name: 'Platinum', 
+    minOrders: 30, 
+    color: 'from-blue-400 to-blue-600',
+    bgColor: 'from-blue-50 to-blue-100',
+    borderColor: 'border-blue-200',
+    icon: Trophy,
+    description: 'Elite shopper'
+  },
+  DIAMOND: { 
+    name: 'Diamond', 
+    minOrders: 50, 
+    color: 'from-purple-500 to-pink-500',
+    bgColor: 'from-purple-50 to-pink-100',
+    borderColor: 'border-purple-200',
+    icon: Sparkles,
+    description: 'VIP member'
+  }
+};
 
+// Calculate user's loyalty tier
+function calculateLoyaltyTier(ordersCount: number, userSince: number) {
+  const tiers = Object.values(LOYALTY_TIERS);
+  
+  // Find the highest tier user qualifies for based on orders
+  let userTier = LOYALTY_TIERS.BRONZE;
+  
+  for (const tier of tiers) {
+    if (ordersCount >= tier.minOrders) {
+      userTier = tier;
+    } else {
+      break;
+    }
+  }
+  
+  // Calculate progress to next tier
+  const currentTierIndex = tiers.findIndex(t => t.name === userTier.name);
+  const nextTier = tiers[currentTierIndex + 1];
+  
+let progress = 0;
+if (nextTier) {
+  const ordersInCurrentTier = ordersCount - userTier.minOrders;
+  const ordersNeededForNextTier = nextTier.minOrders - userTier.minOrders;
+  progress = Math.min((ordersInCurrentTier / ordersNeededForNextTier) * 100, 100);
+  
+  // Ensure minimum progress display
+  if (ordersInCurrentTier > 0 && progress < 1) {
+    progress = 1;
+  }
+} else {
+  progress = 100; // Max tier reached
+}
+  
+  // Ensure progress is at least 1% if user has orders in current tier
+  if (ordersCount > userTier.minOrders && progress === 0) {
+    progress = 1;
+  }
+  
+  return {
+    currentTier: userTier,
+    nextTier,
+    progress,
+    ordersToNextTier: nextTier ? nextTier.minOrders - ordersCount : 0
+  };
+}
+
+// Calculate tenure bonus (longer membership = higher starting tier)
+function calculateTenureBonus(userSince: number) {
+  if (userSince >= 365) return 10; // 1+ year = 10 order bonus
+  if (userSince >= 180) return 5;  // 6+ months = 5 order bonus
+  if (userSince >= 90) return 3;   // 3+ months = 3 order bonus
+  if (userSince >= 30) return 1;   // 1+ month = 1 order bonus
+  return 0;
+}
 const links = [
   { 
     href: '/profile', 
@@ -60,8 +165,21 @@ const links = [
   },
 ];
 
-export default function ProfileNav(){
+export default function ProfileNav({ordersCount,userSince}:{ordersCount:number,userSince:number}){
   const pathname = usePathname();
+
+  // Calculate dynamic loyalty data
+  const tenureBonus = calculateTenureBonus(userSince);
+  const effectiveOrders = ordersCount + tenureBonus;
+  const loyaltyData = calculateLoyaltyTier(effectiveOrders, userSince);
+  const TierIcon = loyaltyData.currentTier.icon;
+
+
+  const createdText = userSince === 0 
+  ? 'today'
+  : userSince === 1 
+    ? 'yesterday'
+    : `${userSince} days ago`;
   
   return (
     <motion.nav
@@ -71,7 +189,7 @@ export default function ProfileNav(){
       className="bg-white/80 backdrop-blur-2xl border-2 border-gray-300 rounded-2xl lg:rounded-3xl p-6 h-fit sticky top-24 shadow-2xl relative overflow-hidden"
     >
       {/* Premium Background Effects */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+  <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${loyaltyData.currentTier.color}`} />
       <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl" />
       <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl" />
       
@@ -93,14 +211,23 @@ export default function ProfileNav(){
         </div>
         
         {/* Premium Status Badge */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full border-2 border-yellow-300 shadow-lg"
-        >
-          <Crown className="w-4 h-4 text-yellow-800" />
-          <span className="text-yellow-900 font-black text-sm">PREMIUM MEMBER</span>
-          <Sparkles className="w-3 h-3 text-yellow-700" />
-        </motion.div>
+     <motion.div
+  whileHover={{ scale: 1.05 }}
+  className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r ${loyaltyData.currentTier.color} rounded-full border-2 ${loyaltyData.currentTier.borderColor} shadow-lg`}
+>
+  <TierIcon className="w-4 h-4 text-white" />
+  <span className="text-white font-black text-sm">{loyaltyData.currentTier.name.toUpperCase()} MEMBER</span>
+  <Sparkles className="w-3 h-3 text-white/80" />
+</motion.div>
+{tenureBonus > 0 && (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="flex items-center gap-1 mt-2 text-xs text-gray-600"
+  >
+    <span>🎁 +{tenureBonus} order bonus for loyalty</span>
+  </motion.div>
+)}
       </motion.div>
 
       {/* Navigation Links */}
@@ -206,36 +333,86 @@ export default function ProfileNav(){
       >
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-black text-gray-800">12</div>
+            <div className="text-2xl font-black text-gray-800">{ordersCount}</div>
             <div className="text-xs text-gray-600 font-medium">ORDERS</div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-black text-gray-800">2Y</div>
-            <div className="text-xs text-gray-600 font-medium">MEMBER</div>
-          </div>
+  <div className="text-center">
+  <div className="text-xs text-gray-500 font-medium mb-1">Joined</div>
+  <div className="text-sm font-semibold text-gray-800 bg-gray-100 rounded-lg px-2 py-1">
+    {createdText}
+  </div>
+</div>
         </div>
         
-        {/* Progress Bar */}
-        <div className="mt-4">
-          <div className="flex justify-between text-xs text-gray-600 mb-2">
-            <span>Loyalty Level</span>
-            <span>Gold Tier</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '75%' }}
-              transition={{ delay: 1, duration: 1 }}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2 rounded-full relative"
-            >
-              <motion.div
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 bg-white/30 rounded-full"
-              />
-            </motion.div>
-          </div>
-        </div>
+     {/* Progress Bar */}
+<div className="mt-4">
+  <div className="flex justify-between items-center text-xs text-gray-600 mb-2">
+    <div className="flex items-center gap-2">
+      <span className="font-semibold">{loyaltyData.currentTier.name} Tier</span>
+      <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+      <span className="text-gray-500">{loyaltyData.currentTier.description}</span>
+    </div>
+    {loyaltyData.nextTier ? (
+      <div className="text-right">
+        <div className="font-semibold text-gray-700">{loyaltyData.nextTier.name}</div>
+        <div className="text-gray-500">{loyaltyData.ordersToNextTier} orders away</div>
+      </div>
+    ) : (
+      <div className="text-right">
+        <div className="font-semibold text-green-600">Max Tier!</div>
+        <div className="text-gray-500">Elite status</div>
+      </div>
+    )}
+  </div>
+  
+  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden relative">
+    {/* Always show minimum 10% visually */}
+    <div 
+      className={`absolute inset-0 bg-gradient-to-r ${loyaltyData.currentTier.color} rounded-full`}
+      style={{ width: `${Math.max(10, loyaltyData.progress)}%` }}
+    />
+    
+    {/* Animated progress overlay */}
+    <motion.div
+      initial={{ width: 0 }}
+      animate={{ width: `${loyaltyData.progress}%` }}
+      transition={{ delay: 1, duration: 1.5, ease: "easeOut" }}
+      className={`bg-gradient-to-r ${loyaltyData.currentTier.color} h-3 rounded-full relative`}
+    >
+      {/* Animated shine effect */}
+      <motion.div
+        animate={{ x: ['-100%', '100%'] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+      />
+      
+      {/* Progress percentage indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+        className="absolute top-1/2 transform -translate-y-1/2 text-white text-[10px] font-bold "
+      >
+        {Math.round(loyaltyData.progress)}%
+      </motion.div>
+    </motion.div>
+  </div>
+  
+  {/* Tier benefits preview */}
+  {loyaltyData.nextTier && (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.5 }}
+      className="mt-3 text-center"
+    >
+      <div className="text-xs text-gray-600">
+        Unlock <span className="font-semibold text-gray-800">{loyaltyData.nextTier.name}</span> with{' '}
+        <span className="font-bold text-blue-600">{loyaltyData.ordersToNextTier}</span> more orders
+      </div>
+    </motion.div>
+  )}
+</div>
       </motion.div>
 
       {/* Decorative Elements */}

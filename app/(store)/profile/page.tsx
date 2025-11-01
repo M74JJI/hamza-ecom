@@ -88,7 +88,7 @@ export default async function ProfileOverview(){
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-8">
-          <ProfileNav />
+          <ProfileNav ordersCount={ordersCount} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
           
           <div className="space-y-6 lg:space-y-8">
             {/* Account Stats */}

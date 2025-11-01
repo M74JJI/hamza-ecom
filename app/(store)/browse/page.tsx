@@ -234,7 +234,13 @@ useEffect(() => {
       <span className="capitalize">
         {key === 'q' ? 'Search' : key}:
       </span>
-      <span>{key === 'q' ? `"${v}"` : String(v)}</span>
+      <span>
+  {key === 'category'
+    ? categoryNameMap[v] || v   // 👈 show name if known
+    : key === 'q'
+      ? `"${v}"`
+      : String(v)}
+</span>
       <button
         onClick={() =>
           setFilters((prev: any) => {

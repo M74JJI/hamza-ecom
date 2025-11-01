@@ -594,7 +594,7 @@ export default function ProductCard({ product, viewMode = 'grid' }: ProductCardP
           )}
 
           {/* Quick Actions */}
-          <div className="absolute top-4 right-4 flex flex-col gap-3">
+          <div className="hidden absolute top-4 right-4  flex-col gap-3">
             <motion.button
               whileHover={{ scale: 1.1}}
               whileTap={{ scale: 0.9 }}
