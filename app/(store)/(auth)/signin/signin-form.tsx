@@ -4,8 +4,11 @@ import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export function SignInForm(){
+    const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +23,8 @@ export function SignInForm(){
     setError(undefined);
     
     const data = new FormData(e.currentTarget);
+    data.append("callbackUrl", callbackUrl);
+
     const res = await fetch('/auth/signin', { 
       method: 'POST', 
       body: data 

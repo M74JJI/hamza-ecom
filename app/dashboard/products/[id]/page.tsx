@@ -7,7 +7,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const product = await prisma.product.findUnique({
     where: { id },
     include: {
-      categories: true,
+     categories: { include: { category: true } },
       details: true,
       variants: {
         orderBy: { sortOrder: 'asc' },
@@ -21,7 +21,27 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
 
   if(!product) return <div className="container py-12">Product not found.</div>;
 
-  const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+
+  function buildCategoryTree(flatCategories: any[]) {
+  const map: Record<string, any> = {};
+  const roots: any[] = [];
+
+  flatCategories.forEach(cat => (map[cat.id] = { ...cat, children: [] }));
+
+  flatCategories.forEach(cat => {
+    if (cat.parentId && map[cat.parentId]) {
+      map[cat.parentId].children.push(map[cat.id]);
+    } else {
+      roots.push(map[cat.id]);
+    }
+  });
+
+  return roots;
+}
+const categoriesFlat = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+
+const categories = buildCategoryTree(categoriesFlat);
+
 
   return (
     <div className="container py-8">

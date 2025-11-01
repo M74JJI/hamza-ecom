@@ -14,11 +14,10 @@ function CategoryTree({
 }: {
   nodes: any[];
   selectedIds: string[];
-  onToggle: (id: string) => void;
+  onToggle: (id: string, node: any, level?: number) => void;
   level?: number;
 }) {
   const [openNodes, setOpenNodes] = useState<Record<string, boolean>>({});
-  
   const toggle = (id: string) =>
     setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   
@@ -28,7 +27,7 @@ function CategoryTree({
         <div key={node.id} className="mb-1">
           <div className="flex items-center justify-between">
             <motion.button
-              onClick={() => onToggle(node.id)}
+              onClick={() => onToggle(node.id, node, level)}
               whileHover={{ x: 3 }}
               className={`flex-1 text-left py-2 px-3 rounded-xl text-sm transition-all ${
                 selectedIds.includes(node.id)
@@ -234,7 +233,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
 
 
       {/* Category */}
-      <div className="border-b border-gray-100 pb-6">
+     <div className="border-b border-gray-100 pb-6">
         <motion.button
           whileHover={{ backgroundColor: "#f8fafc" }}
           className="flex items-center justify-between w-full text-left p-3 rounded-xl"
@@ -247,6 +246,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
             }`}
           />
         </motion.button>
+
         <AnimatePresence>
           {openSections.category && (
             <motion.div
@@ -258,11 +258,48 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
               <CategoryTree
                 nodes={data.categories || []}
                 selectedIds={filters.category || []}
-                onToggle={(id) => {
+                onToggle={(id, node) => {
                   const selected = new Set(filters.category || []);
-                  selected.has(id)
-                    ? selected.delete(id)
-                    : selected.add(id);
+
+                  const findNode = (nodes: any[]): any =>
+                    nodes
+                      .map((n) =>
+                        n.id === id ? n : n.children ? findNode(n.children) : null
+                      )
+                      .find(Boolean);
+
+                  const currentNode = findNode(data.categories);
+
+                  const removeDescendants = (n: any) => {
+                    if (!n?.children) return;
+                    for (const c of n.children) {
+                      selected.delete(c.id);
+                      removeDescendants(c);
+                    }
+                  };
+
+                  const removeAncestors = (targetId: string, nodes: any[]): boolean => {
+                    for (const n of nodes) {
+                      if (n.id === targetId) return true;
+                      if (n.children?.length) {
+                        const found = removeAncestors(targetId, n.children);
+                        if (found) {
+                          selected.delete(n.id);
+                          return true;
+                        }
+                      }
+                    }
+                    return false;
+                  };
+
+                  if (selected.has(id)) {
+                    selected.delete(id);
+                  } else {
+                    selected.add(id);
+                    if (currentNode?.children?.length) removeDescendants(currentNode);
+                    removeAncestors(id, data.categories);
+                  }
+
                   updateFilters({ category: Array.from(selected) });
                 }}
               />

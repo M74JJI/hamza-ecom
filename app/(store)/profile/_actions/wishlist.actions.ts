@@ -1,5 +1,6 @@
 'use server';
 
+import { getSessionUser } from '@/lib/auth-utils';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 
@@ -81,7 +82,7 @@ export async function moveWishlistToCart(productId: string, variantId: string) {
 
 
 export async function isInWishlist(productId: string, variantId: string) {
-  const { user } = await requireUser();
+  const user = await getSessionUser();
   if (!user) return false;
 
   const item = await prisma.wishlistItem.findUnique({

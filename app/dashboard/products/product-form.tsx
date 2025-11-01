@@ -41,7 +41,11 @@ export function ProductForm({ categories, product }: { categories: any[], produc
   const [status, setStatus] = useState(product?.status || 'DRAFT');
   const [isFeaturedInHero, setIsFeaturedInHero] = useState<boolean>(!!product?.isFeaturedInHero);
   const [brand, setBrand] = useState<string>(product?.brand ?? '');
-  const [categoryIds, setCategoryIds] = useState<string[]>(Array.isArray((product as any)?.categories) ? (product as any).categories.map((c: any) => c.categoryId ?? c.id) : []);
+const [categoryIds, setCategoryIds] = useState<string[]>(
+  Array.isArray(product?.categories)
+    ? product.categories.map((c: any) => c.category?.id ?? c.categoryId ?? c.id)
+    : []
+);
   const [detailList, setDetailList] = useState<any[]>(product?.details || []);
   const [highlightList, setHighlightList] = useState<any[]>(product?.highlights || []);
   const [variants, setVariants] = useState<Array<any>>([]);
@@ -80,6 +84,33 @@ const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
       hydratedOnce.current = true;
     }
   }, [product]);
+
+useEffect(() => {
+  if (categoryIds.length > 0 && categories.length > 0) {
+    const leafId = categoryIds[0];
+    const path: string[] = [];
+    let current = findCategoryById(categories, leafId);
+
+    while (current) {
+      path.unshift(current.id);
+      current = current.parentId
+        ? findCategoryById(categories, current.parentId)
+        : null;
+    }
+
+    setSelectedCategoryPath(path);
+  }
+}, [categoryIds, categories]);
+
+
+function findCategoryById(tree: any[], id: string): any | null {
+  for (const cat of tree) {
+    if (cat.id === id) return cat;
+    const found = findCategoryById(cat.children || [], id);
+    if (found) return found;
+  }
+  return null;
+}
 
   function toggleCategory(id: string) { setCategoryIds(v => v.includes(id) ? v.filter(x => x !== id) : [...v, id]); }
   function addDetail() { setDetailList(v => [...v, { label: '', value: '' }]); }
@@ -210,14 +241,15 @@ const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-4 bg-white/30 dark:bg-gray-700/30 rounded-xl border border-white/20 dark:border-gray-700/30">
-            <CategorySelector
+<CategorySelector
   categories={categories}
   selectedPath={selectedCategoryPath}
   onSelect={(path, lastSelected) => {
     setSelectedCategoryPath(path);
-    setCategoryIds([lastSelected.id]); // single leaf category id to save
+    setCategoryIds(path); 
   }}
 />
+
           </div>
         </motion.div>
 
@@ -693,6 +725,7 @@ const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
           </motion.button>
         </motion.div>
       </form>
+
     </div>
   );
 }

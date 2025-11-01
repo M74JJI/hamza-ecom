@@ -310,285 +310,285 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
             </motion.div>
           </motion.div>
 
-       {/* Right: Luxury Product Showcase */}
-<motion.div
-  initial={{ opacity: 0, x: 50 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.8, ease: "easeOut" }}
-  className="relative p-4 sm:p-5 md:p-0"
->
-  
-  {/* Luxury Main Product Display */}
-  <motion.div
-    initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
-    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-    transition={{ delay: 0.4, duration: 0.8, type: "spring", stiffness: 100 }}
-    className="relative"
-  >
-    {/* Premium Navigation Arrows - Mobile Optimized */}
-    <motion.button
-      whileHover={{ scale: 1.1, x: -2, backgroundColor: "#1c1917" }}
-      whileTap={{ scale: 0.9 }}
-      onClick={prevProduct}
-      className="absolute -left-2 sm:-left-4 md:-left-8 top-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-stone-900 text-amber-300 rounded-full border border-amber-400/30 shadow-lg sm:shadow-xl md:shadow-2xl flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
-    >
-      <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-    </motion.button>
-
-    <motion.button
-      whileHover={{ scale: 1.1, x: 2, backgroundColor: "#1c1917" }}
-      whileTap={{ scale: 0.9 }}
-      onClick={nextProduct}
-      className="absolute -right-2 sm:-right-4 md:-right-8 top-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-stone-900 text-amber-300 rounded-full border border-amber-400/30 shadow-lg sm:shadow-xl md:shadow-2xl flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
-    >
-      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-    </motion.button>
-
-    {/* Luxury Product Card */}
-    <div className="relative bg-white/95 backdrop-blur-md border border-stone-300/50 shadow-xl sm:shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden">
-      
-      {/* Premium Product Image */}
-      <div className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-gradient-to-br from-stone-200 to-stone-300 group">
-        <AnimatePresence mode="wait">
+          {/* Right: Luxury Product Showcase */}
           <motion.div
-            key={`${currentProduct.id}-${activeVariant}`}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="w-full h-full"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative p-5 md:p-0"
           >
-            <Image
-              src={currentVariant.images[0].url}
-              alt={currentVariant.name}
-              fill
-              className="object-cover transition-transform duration-1000 group-hover:scale-105"
-              priority
-              sizes="(max-width: 640px) 90vw, (max-width: 768px) 80vw, (max-width: 1024px) 50vw, 40vw"
-            />
-          </motion.div>
-        </AnimatePresence>
-        
-        {/* Luxury Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-orange-500/5 mix-blend-overlay" />
-        <div className="absolute bottom-0 left-0 w-full h-24 sm:h-32 bg-gradient-to-t from-stone-900/95 via-stone-900/50 to-transparent" />
-        
-        {/* Limited Edition Badge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-gradient-to-r from-amber-500 to-amber-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-amber-300/30 shadow-lg"
-        >
-          <span className="text-white font-black text-xs tracking-wider whitespace-nowrap">LIMITED EDITION</span>
-        </motion.div>
-
-        {/* Premium Product Info Overlay */}
-        <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-          <div className="flex items-end justify-between">
-            <div className="flex-1 min-w-0 mr-3 sm:mr-6">
-              <motion.h3
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 tracking-wide line-clamp-2 sm:line-clamp-1"
-              >
-                {currentVariant.title}
-              </motion.h3>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="text-amber-300 font-medium text-sm sm:text-base tracking-wide truncate"
-              >
-                {currentProduct.categories?.[0]?.category?.name || "Luxury Collection"}
-              </motion.p>
-            </div>
+            
+            {/* Luxury Main Product Display */}
             <motion.div
-              whileHover={{ scale: 1.1, rotate: 12 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center border border-amber-300/30 cursor-pointer flex-shrink-0 hover:from-amber-600 hover:to-amber-800 transition-all duration-300 shadow-lg"
+              initial={{ opacity: 0, scale: 0.9, rotate: -1 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ delay: 0.4, duration: 0.8, type: "spring", stiffness: 100 }}
+              className="relative"
             >
-              <Heart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Premium Price Display */}
-        <motion.div
-          initial={{ opacity: 0, x: 20, y: -20 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-gradient-to-br from-amber-500 to-amber-700 px-3 py-2 sm:px-4 sm:py-3 md:px-5 md:py-3 rounded-xl sm:rounded-2xl border border-amber-300/30 shadow-lg sm:shadow-2xl text-center min-w-[80px] sm:min-w-[90px] md:min-w-[100px]"
-        >
-          <div className="text-white font-black text-lg sm:text-xl md:text-2xl mb-1 whitespace-nowrap">{currentVariantPrice.discounted} MAD</div>
-          {currentVariantPrice.hasDiscount && (
-            <div className="flex items-center justify-center gap-1 sm:gap-2">
-              <div className="text-amber-200 text-xs line-through font-medium whitespace-nowrap">
-                {currentVariantPrice.original} MAD
-              </div>
-              <div className="bg-white text-amber-700 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-black whitespace-nowrap">
-                -{currentVariantPrice.discountPercent}%
-              </div>
-            </div>
-          )}
-          <div className="text-amber-200 text-xs font-medium mt-1 whitespace-nowrap">
-            Best: {currentVariantPrice.size}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Luxury Product Details */}
-      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 border-t border-stone-300/30">
-        <div className="space-y-3 sm:space-y-4">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2 sm:space-y-3 flex-1 min-w-0">
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${
-                      i < Math.floor(currentProduct.rating || 5)
-                        ? 'fill-amber-400 text-amber-400'
-                        : 'text-stone-300'
-                    }`}
-                  />
-                ))}
-                <span className="text-xs sm:text-sm text-stone-600 whitespace-nowrap flex-shrink-0">
-                  ({currentProduct.reviews?.length || 5} reviews)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Luxury Color Selection */}
-        <div className="space-y-3 sm:space-y-4">
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-3 sm:mx-0 px-3 sm:px-0">
-            {currentProduct.variants.map((variant, index) => (
-              <motion.div
-                key={variant.id}
-                className="relative flex-shrink-0"
-                onMouseEnter={() => setHoveredVariant(index)}
-                onMouseLeave={() => setHoveredVariant(null)}
+              {/* Premium Navigation Arrows */}
+              <motion.button
+                whileHover={{ scale: 1.1, x: -2, backgroundColor: "#1c1917" }}
+                whileTap={{ scale: 0.9 }}
+                onClick={prevProduct}
+                className="absolute -left-8 top-1/2 z-20 w-14 h-14 bg-stone-900 text-amber-300 rounded-full border border-amber-400/30 shadow-2xl flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
               >
-                <motion.button
-                  whileHover={{ scale: 1.15, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveVariant(index)}
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl border-2 transition-all duration-300 shadow-lg relative overflow-hidden group ${
-                    activeVariant === index
-                      ? 'border-amber-500 ring-2 ring-amber-200'
-                      : 'border-stone-300 hover:border-amber-400'
-                  }`}
-                >
-                  <Image
-                    src={variant.variantStyleImg}
-                    alt={variant.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 48px"
-                  />
-                  {activeVariant === index && (
-                    <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                    </div>
-                  )}
-                </motion.button>
+                <ArrowLeft className="w-6 h-6" />
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.1, x: 2, backgroundColor: "#1c1917" }}
+                whileTap={{ scale: 0.9 }}
+                onClick={nextProduct}
+                className="absolute -right-8 top-1/2 z-20 w-14 h-14 bg-stone-900 text-amber-300 rounded-full border border-amber-400/30 shadow-2xl flex items-center justify-center transition-all duration-300 backdrop-blur-sm"
+              >
+                <ArrowRight className="w-6 h-6" />
+              </motion.button>
+
+              {/* Luxury Product Card */}
+              <div className="relative bg-white/95 backdrop-blur-md border border-stone-300/50 shadow-2xl rounded-3xl overflow-hidden ">
                 
-                {/* Luxury Hover Preview - Hidden on mobile */}
-                <AnimatePresence>
-                  {hoveredVariant === index && (
+                {/* Premium Product Image */}
+                <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-stone-200 to-stone-300 group">
+                  <AnimatePresence mode="wait">
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                      className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 z-30 hidden sm:block"
+                      key={`${currentProduct.id}-${activeVariant}`}
+                      initial={{ opacity: 0, scale: 1.1 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.6, ease: "easeInOut" }}
+                      className="w-full h-full"
                     >
-                      <div className="bg-white border border-stone-300/50 rounded-2xl shadow-2xl p-3 backdrop-blur-sm">
-                        <div className="w-32 h-32 relative rounded-xl overflow-hidden border border-stone-300/30">
-                          <Image
-                            src={variant.images[0].url}
-                            alt={variant.name}
-                            fill
-                            className="object-cover"
-                          />
+                      <Image
+                        src={currentVariant.images[0].url}
+                        alt={currentVariant.name}
+                        fill
+                        className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                        priority
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                  
+                  {/* Luxury Overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-orange-500/5 mix-blend-overlay" />
+                  <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-stone-900/95 via-stone-900/50 to-transparent" />
+                  
+                  {/* Limited Edition Badge */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="absolute top-6 left-6 bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-2 rounded-full border border-amber-300/30 shadow-lg"
+                  >
+                    <span className="text-white font-black text-xs tracking-wider">LIMITED EDITION</span>
+                  </motion.div>
+
+                  {/* Premium Product Info Overlay */}
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="flex items-end justify-between">
+                      <div className="flex-1 min-w-0 mr-6">
+                        <motion.h3
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-3xl font-black text-white mb-1 tracking-wide line-clamp-1"
+                        >
+                          {currentVariant.title}
+                        </motion.h3>
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                          className="text-amber-300 font-medium text-base tracking-wide"
+                        >
+                          {currentProduct.categories?.[0]?.category?.name || "Luxury Collection"}
+                        </motion.p>
+                      </div>
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 12 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center border border-amber-300/30 cursor-pointer flex-shrink-0 hover:from-amber-600 hover:to-amber-800 transition-all duration-300 shadow-lg"
+                      >
+                        <Heart className="w-6 h-6 text-white" />
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  {/* Premium Price Display */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20, y: -20 }}
+                    animate={{ opacity: 1, x: 0, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="absolute top-6 right-6 bg-gradient-to-br from-amber-500 to-amber-700 px-5 py-3 rounded-2xl border border-amber-300/30 shadow-2xl text-center"
+                  >
+                    <div className="text-white font-black text-2xl mb-1">{currentVariantPrice.discounted} MAD</div>
+                    {currentVariantPrice.hasDiscount && (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="text-amber-200 text-sm line-through font-medium">
+                          {currentVariantPrice.original} MAD
                         </div>
-                        <div className="text-sm font-bold text-center mt-2 text-stone-900 max-w-[120px] truncate">
-                          {variant.name}
-                        </div>
-                        <div className="text-xs text-amber-600 text-center font-medium">
-                          {getCheapestSize(variant).size} • {calculateDiscountedPrice(getCheapestSize(variant).priceMAD, getCheapestSize(variant).discountPercent).toFixed(0)} MAD
+                        <div className="bg-white text-amber-700 px-2 py-1 rounded-full text-xs font-black">
+                          -{currentVariantPrice.discountPercent}%
                         </div>
                       </div>
-                      {/* Tooltip arrow */}
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-8 border-transparent border-t-white" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+                    )}
+                    <div className="text-amber-200 text-xs font-medium mt-1">
+                      Best: {currentVariantPrice.size}
+                    </div>
+                  </motion.div>
+                </div>
 
-    {/* Luxury Decorative Elements */}
-    <motion.div
-      className="absolute -top-4 -left-4 sm:-top-6 sm:-left-6 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-amber-500 border border-amber-400/30 rounded-xl sm:rounded-2xl z-10 shadow-lg sm:shadow-2xl"
-      animate={{ rotate: [0, 180, 0], scale: [1, 1.1, 1] }}
-      transition={{ duration: 20, repeat: Infinity }}
-    />
-  </motion.div>
+                {/* Luxury Product Details */}
+                <div className="p-4 space-y-4 border-t border-stone-300/30">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 flex-1 min-w-0">
+                        <div className="flex items-center gap-3">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-5 h-5 ${
+                                i < Math.floor(currentProduct.rating || 5)
+                                  ? 'fill-amber-400 text-amber-400'
+                                  : 'text-stone-300'
+                              }`}
+                            />
+                          ))}
+                          <span className="text-sm text-stone-600 whitespace-nowrap">
+                            ({currentProduct.reviews?.length || 5} reviews)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-  {/* Luxury Product Navigation */}
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.8 }}
-    className="flex gap-4 sm:gap-6 mt-4 sm:mt-6 overflow-x-auto pb-4 -mx-4 sm:mx-0 px-4 sm:px-0"
-  >
-    {products.map((product, index) => {
-      const productMinPrice = Math.min(...product.variants.flatMap(variant => 
-        variant.sizes.map(size => calculateDiscountedPrice(size.priceMAD, size.discountPercent))
-      ));
-      
-      return (
-        <motion.button
-          key={product.id}
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            setActiveProduct(index);
-            setActiveVariant(0);
-          }}
-          className={`flex-shrink-0 w-32 sm:flex-1 p-3 sm:p-4 md:p-5 bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl border transition-all duration-500 shadow-lg hover:shadow-xl ${
-            activeProduct === index
-              ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50'
-              : 'border-stone-300/50 hover:border-amber-300'
-          }`}
-        >
-          <div className="aspect-square relative bg-stone-200 mb-3 sm:mb-4 rounded-lg sm:rounded-xl overflow-hidden border border-stone-300/30">
-            <Image
-              src={product.variants[0].images[0].url}
-              alt={product.variants[0].id}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 128px, (max-width: 768px) 150px, 200px"
-            />
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <h4 className="font-bold text-xs sm:text-sm text-stone-900 truncate tracking-wide">{product.variants[0].name}</h4>
-            <div className="text-xs text-stone-600 font-light truncate">
-              {product.categories?.[0]?.category?.name || "Luxury"}
-            </div>
-            <div className="font-black text-stone-900 text-sm sm:text-base">
-              From {Math.round(productMinPrice)} MAD
-            </div>
-          </div>
-        </motion.button>
-      );
-    })}
-  </motion.div>
-</motion.div>
+                  {/* Luxury Color Selection */}
+                  <div className="space-y-4">
+                    <div className="flex gap-3">
+                      {currentProduct.variants.map((variant, index) => (
+                        <motion.div
+                          key={variant.id}
+                          className="relative"
+                          onMouseEnter={() => setHoveredVariant(index)}
+                          onMouseLeave={() => setHoveredVariant(null)}
+                        >
+                          <motion.button
+                            whileHover={{ scale: 1.15, y: -3 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setActiveVariant(index)}
+                            className={`w-12 h-12 rounded-xl border-2 transition-all duration-300 shadow-lg relative overflow-hidden group ${
+                              activeVariant === index
+                                ? 'border-amber-500 ring-2 ring-amber-200'
+                                : 'border-stone-300 hover:border-amber-400'
+                            }`}
+                          >
+                            <Image
+                              src={variant.variantStyleImg}
+                              alt={variant.name}
+                              fill
+                              className="object-cover"
+                            />
+                            {activeVariant === index && (
+                              <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center">
+                                <Check className="w-4 h-4 text-white" />
+                              </div>
+                            )}
+                          </motion.button>
+                          
+                          {/* Luxury Hover Preview */}
+                          <AnimatePresence>
+                            {hoveredVariant === index && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                                className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 z-30"
+                              >
+                                <div className="bg-white border border-stone-300/50 rounded-2xl shadow-2xl p-3 backdrop-blur-sm">
+                                  <div className="w-32 h-32 relative rounded-xl overflow-hidden border border-stone-300/30">
+                                    <Image
+                                      src={variant.images[0].url}
+                                      alt={variant.name}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                  <div className="text-sm font-bold text-center mt-2 text-stone-900 max-w-[120px] truncate">
+                                    {variant.name}
+                                  </div>
+                                  <div className="text-xs text-amber-600 text-center font-medium">
+                                    {getCheapestSize(variant).size} • {calculateDiscountedPrice(getCheapestSize(variant).priceMAD, getCheapestSize(variant).discountPercent).toFixed(0)} MAD
+                                  </div>
+                                </div>
+                                {/* Tooltip arrow */}
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-8 border-transparent border-t-white" />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Luxury Decorative Elements */}
+              <motion.div
+                className="absolute -top-6 -left-6 w-12 h-12 bg-amber-500 border border-amber-400/30 rounded-2xl z-10 shadow-2xl"
+                animate={{ rotate: [0, 180, 0], scale: [1, 1.1, 1] }}
+                transition={{ duration: 20, repeat: Infinity }}
+              />
+          
+            </motion.div>
+
+            {/* Luxury Product Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="flex gap-6 mt-2"
+            >
+              {products.map((product, index) => {
+                const productMinPrice = Math.min(...product.variants.flatMap(variant => 
+                  variant.sizes.map(size => calculateDiscountedPrice(size.priceMAD, size.discountPercent))
+                ));
+                
+                return (
+                  <motion.button
+                    key={product.id}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setActiveProduct(index);
+                      setActiveVariant(0);
+                    }}
+                    className={`flex-1 p-5 bg-white/90 backdrop-blur-sm rounded-2xl border transition-all duration-500 shadow-lg hover:shadow-xl ${
+                      activeProduct === index
+                        ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50'
+                        : 'border-stone-300/50 hover:border-amber-300'
+                    }`}
+                  >
+                    <div className="aspect-square relative bg-stone-200 mb-4 rounded-xl overflow-hidden border border-stone-300/30">
+                      <Image
+                        src={product.variants[0].images[0].url}
+                        alt={product.variants[0].id}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="font-bold text-sm text-stone-900 truncate tracking-wide">{product.variants[0].name}</h4>
+                      <div className="text-xs text-stone-600 font-light truncate">
+                        {product.categories?.[0]?.category?.name || "Luxury"}
+                      </div>
+                      <div className="font-black text-stone-900 text-base">
+                        From {Math.round(productMinPrice)} MAD
+                      </div>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </motion.div>
+          </motion.div>
         </div>
 
       

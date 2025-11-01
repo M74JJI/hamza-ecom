@@ -50,6 +50,32 @@ export default function SearchPage() {
     { value: 'price-desc', label: 'Price: High to Low', icon: SortAsc },
   ];
 
+useEffect(() => {
+  // Build initial filters from URL params
+  const initialFilters: any = {};
+
+  const urlCategory = searchParams.getAll('category');
+  const urlBrand = searchParams.getAll('brand');
+  const urlColor = searchParams.getAll('color');
+  const urlSize = searchParams.getAll('size');
+  const urlMin = searchParams.get('min');
+  const urlMax = searchParams.get('max');
+  const urlRating = searchParams.get('rating');
+  const urlSort = searchParams.get('sort');
+
+  if (urlCategory.length) initialFilters.category = urlCategory;
+  if (urlBrand.length) initialFilters.brand = urlBrand;
+  if (urlColor.length) initialFilters.color = urlColor;
+  if (urlSize.length) initialFilters.size = urlSize;
+  if (urlMin) initialFilters.min = Number(urlMin);
+  if (urlMax) initialFilters.max = Number(urlMax);
+  if (urlRating) initialFilters.rating = Number(urlRating);
+  if (urlSort) initialFilters.sort = urlSort;
+
+  setFilters(initialFilters);
+}, [searchParams]);
+
+
   /* ---------------------- Data Fetch ---------------------- */
   const fetchData = async () => {
     setLoading(true);

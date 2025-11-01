@@ -11,6 +11,8 @@ const schema = z.object({
 export async function POST(req: Request){
   const form = await req.formData();
   const data = Object.fromEntries(form) as any;
+  const callbackUrl = (data.callbackUrl as string) || "/";
+
   const parsed = schema.safeParse(data);
   if(!parsed.success){
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
@@ -28,5 +30,6 @@ export async function POST(req: Request){
     return NextResponse.json({ error: "Please verify your email first." }, { status: 403 });
   }
   await createSession(user.id);
-  return NextResponse.redirect(new URL("/", req.url));
+   return NextResponse.redirect(new URL(callbackUrl, req.url));
+
 }

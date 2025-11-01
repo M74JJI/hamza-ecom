@@ -39,12 +39,14 @@ export async function GET(req: Request) {
   }
 
   // 🔹 Category filter (multi-select)
-  if (categories.length > 0) {
-    andFilters.push({
-      categories: {
-        some: { category: { id: { in: categories } } },
-      },
-    });
+if (categories.length > 0) {
+andFilters.push({
+  categories: {
+    some: {
+      categoryId: { in: categories }, // strictly the selected IDs
+    },
+  },
+});
   }
 
   // 🔹 Brand filter
@@ -173,3 +175,4 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ data, total });
 }
+

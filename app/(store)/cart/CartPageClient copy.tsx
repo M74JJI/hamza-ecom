@@ -256,7 +256,7 @@ export default function CartPageClient() {
                   </motion.button>
                 </Link>
                 
-                <Link href="/browse" onClick={() => setIsDrawerOpen(false)}>
+                <Link href="/products" onClick={() => setIsDrawerOpen(false)}>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -321,7 +321,7 @@ export default function CartPageClient() {
             transition={{ delay: 0.4 }}
             className="space-y-4"
           >
-            <Link href="/browse" className="block">
+            <Link href="/products" className="block">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -385,7 +385,7 @@ export default function CartPageClient() {
       <CartDrawer />
 
       {/* Enhanced Desktop Layout */}
-      <div className="container mx-auto px-4 py-8  lg:block">
+      <div className="container mx-auto px-4 py-8 hidden lg:block">
         {/* Progress Indicator */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

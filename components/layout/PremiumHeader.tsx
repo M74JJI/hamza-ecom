@@ -815,7 +815,7 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
             </nav>
 
             {/* Search Bar - takes all available space */}
-            <div className="flex-1 max-w-2xl mx-8">
+            <div className="hidden md:block flex-1 max-w-2xl mx-8">
               <div className="relative" ref={searchRef}>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -1003,7 +1003,218 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
                 </AnimatePresence>
               </div>
             </div>
+{/* Search Bar - takes all available space */}
+<div className="md:hidden flex-1 max-w-2xl mx-4 sm:mx-6 lg:mx-8">
+  <div className="relative" ref={searchRef}>
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => {
+        setSearchOpen(!searchOpen);
+        setTimeout(() => searchInputRef.current?.focus(), 150);
+      }}
+      className="flex items-center space-x-3 w-full px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg group backdrop-blur-sm"
+    >
+      <Search className="w-4 h-4 sm:w-5 sm:h-5 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+      <span className="text-sm font-medium text-gray-500 flex-1 text-left truncate">Search luxury items...</span>
+      <kbd className="hidden lg:inline-flex items-center px-2 py-1 text-xs border border-gray-300/60 rounded-lg bg-white/50 text-gray-500 flex-shrink-0">⌘K</kbd>
+    </motion.button>
 
+    <AnimatePresence>
+      {searchOpen && (
+        <motion.div
+          {...slideIn}
+          className="fixed inset-0 sm:absolute sm:left-0 sm:top-16 sm:w-full bg-white/95 backdrop-blur-2xl sm:rounded-3xl shadow-2xl border border-gray-200/60 overflow-hidden z-50"
+        >
+          {/* Enhanced Search Header */}
+          <div className="p-4 sm:p-6 border-b border-gray-200/50 bg-gradient-to-r from-gray-50/80 to-white/80">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between mb-4 sm:hidden">
+              <h3 className="font-bold text-gray-900 text-lg">Search</h3>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSearchOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </motion.button>
+            </div>
+
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Discover premium products, brands, and collections..."
+                className="w-full pl-10 sm:pl-12 pr-28 sm:pr-32 py-3 sm:py-4 text-black border border-gray-300/60 rounded-xl sm:rounded-2xl focus:ring-3 focus:ring-blue-500/20 focus:border-blue-500 text-base sm:text-lg font-medium bg-white/50 backdrop-blur-sm"
+                autoFocus
+              />
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={loadingStates.search}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
+              >
+                {loadingStates.search ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full pointer-events-none"
+                  />
+                ) : (
+                  'Search'
+                )}
+              </motion.button>
+            </form>
+
+            {/* Enhanced Search Categories */}
+            <div className="flex space-x-2 sm:space-x-3 mt-4 overflow-x-auto pb-2 -mx-1 sm:mx-0 px-1 sm:px-0">
+              {searchCategories.map((category) => (
+                <motion.button
+                  key={category.id}
+                  onClick={() => setActiveSearchCategory(category.id)}
+                  whileHover={{ scale: 1.05, y: -1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-300 backdrop-blur-sm flex-shrink-0 ${
+                    activeSearchCategory === category.id
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                      : 'bg-white/60 text-gray-700 hover:bg-white/80 hover:shadow-md border border-gray-200/60'
+                  }`}
+                >
+                  <span>{category.name}</span>
+                  <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs ${
+                    activeSearchCategory === category.id
+                      ? 'bg-white/20 text-white/90'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {category.count}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          {/* Enhanced Search Content */}
+          <div className="h-[calc(100vh-200px)] sm:max-h-96 overflow-y-auto">
+            {/* Loading State */}
+            {loadingStates.search && (
+              <div className="p-4 sm:p-6 space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <ShimmerLoader className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <ShimmerLoader className="h-3 sm:h-4 rounded" />
+                      <ShimmerLoader className="h-2 sm:h-3 rounded w-3/4" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Recent Searches */}
+            {recentSearches.length > 0 && !loadingStates.search && (
+              <div className="p-4 sm:p-6 border-b border-gray-200/50">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recent Searches</div>
+                  <button
+                    onClick={() => {
+                      setRecentSearches([]);
+                      localStorage.removeItem('hajzen-recent-searches');
+                    }}
+                    className="text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {recentSearches.map((search, index) => (
+                    <motion.button
+                      key={index}
+                      onClick={() => {
+                        setSearchQuery(search);
+                        handleSearch({ preventDefault: () => {} } as React.FormEvent);
+                      }}
+                      className="flex items-center justify-between w-full p-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors group"
+                      whileHover={{ x: 4 }}
+                    >
+                      <span className="flex items-center space-x-3">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="truncate">{search}</span>
+                      </span>
+                      <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2">
+                        ↩
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Popular Searches */}
+            {!loadingStates.search && (
+              <div className="p-4 sm:p-6 border-b border-gray-200/50">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Popular Now</div>
+                <div className="flex flex-wrap gap-2">
+                  {searchSuggestions.popular.map((term, index) => (
+                    <motion.button
+                      key={index}
+                      onClick={() => {
+                        setSearchQuery(term);
+                        handleSearch({ preventDefault: () => {} } as React.FormEvent);
+                      }}
+                      className="px-2 sm:px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs sm:text-sm transition-colors flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <TrendingUp className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{term}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trending Searches */}
+            {!loadingStates.search && (
+              <div className="p-4 sm:p-6">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Trending</div>
+                <div className="space-y-2">
+                  {searchSuggestions.trending.map((term, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSearchQuery(term);
+                        handleSearch({ preventDefault: () => {} } as React.FormEvent);
+                      }}
+                      className="flex items-center space-x-3 w-full p-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                      <span className="truncate">{term}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Close Button */}
+          <div className="sm:hidden p-4 border-t border-gray-200/50 bg-white/80">
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSearchOpen(false)}
+              className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+            >
+              Close Search
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+</div>
             {/* Actions (wishlist, user, cart, mobile) */}
             <div className="flex items-center space-x-3">
           

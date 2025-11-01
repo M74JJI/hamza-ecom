@@ -41,7 +41,7 @@ function priceAfterDiscount(base: number, pct?: number | null) {
 
 export async function ensureLoggedInOrRedirectCart() {
   const user = await getCurrentUser();
-  if (!user) redirect('/cart?auth=required');
+  if (!user) redirect('/signin?callbackUrl=/cart');
   return user;
 }
 
