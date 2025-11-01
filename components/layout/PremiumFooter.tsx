@@ -108,7 +108,7 @@ export default function PremiumFooter() {
 
   const contactInfo = [
     { icon: Phone, text: "+212 600-000000", href: "tel:+212600000000" },
-    { icon: Mail, text: "support@hajzen.com", href: "mailto:support@hajzen.com" },
+    { icon: Mail, text: "support@hamza.com", href: "mailto:support@hajzen.com" },
     { icon: MapPin, text: "Ksar El Kebir, Morocco", href: "#" },
     { icon: Clock, text: "Mon-Sun: 9AM-11PM", href: "#" },
   ];

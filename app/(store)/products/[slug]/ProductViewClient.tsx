@@ -154,6 +154,32 @@ export default function ProductViewClient({ product }: { product: any }) {
   const alreadyQty = selectedSizeId ? inCartQty(selectedSizeId) : 0;
   const maxAddable = Math.max(0, (maxStock || 0) - (alreadyQty || 0));
 
+
+const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
+  const order = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+  
+  const aVal = a.size?.toString().toUpperCase();
+  const bVal = b.size?.toString().toUpperCase();
+
+  // both are known textual sizes (S, M, L, etc.)
+  const aIndex = order.indexOf(aVal);
+  const bIndex = order.indexOf(bVal);
+  if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+
+  // if one is known and other isn't, prioritize known sizes
+  if (aIndex !== -1) return -1;
+  if (bIndex !== -1) return 1;
+
+  // numeric sizes (like 36, 38)
+  const aNum = parseFloat(aVal);
+  const bNum = parseFloat(bVal);
+  if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+
+  // fallback alphabetical
+  return aVal.localeCompare(bVal, undefined, { numeric: true });
+});
+
+
   const luxuryFeatures = [
     { icon: Crown, text: "Luxury Collection", description: "Exclusive designer pieces", color: "from-amber-500 to-yellow-500" },
     { icon: Gem, text: "Premium Materials", description: "Finest quality craftsmanship", color: "from-blue-500 to-cyan-500" },
@@ -688,7 +714,7 @@ export default function ProductViewClient({ product }: { product: any }) {
             </motion.button>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 sm:gap-3">
-            {(variant.sizes || []).map((s: any, i: number) => {
+            {(orderedSizes || []).map((s: any, i: number) => {
               const disabled = s.stockQty <= 0;
               const isLowStock = !disabled && s.stockQty < 10;
               return (
@@ -863,3 +889,4 @@ export default function ProductViewClient({ product }: { product: any }) {
 </div>
   );
 }
+

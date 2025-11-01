@@ -438,7 +438,7 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
       </div>
     )}
     <div className="text-amber-200 text-xs font-medium mt-1">
-      Best: {currentVariantPrice.size}
+      Size : {currentVariantPrice.size}
     </div>
   </motion.div>
 </div>
