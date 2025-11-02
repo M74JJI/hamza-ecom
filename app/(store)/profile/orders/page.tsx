@@ -21,6 +21,8 @@ export default async function OrdersPage(){
     include: { _count: { select: { items: true } } }
   });
 
+
+
   const rows = orders.map(o => ({
     id: o.id,
     status: o.status,
@@ -51,7 +53,8 @@ export default async function OrdersPage(){
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-8">
-          <ProfileNav />
+        <ProfileNav ordersCount={orders.length} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
+
           
           <div className="space-y-6 lg:space-y-8">
             {/* Order Stats */}

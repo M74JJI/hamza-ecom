@@ -19,7 +19,17 @@ export default async function SessionsPage(){
   const c = await cookies();
   const token = c.get('session')?.value || null;
   const [sessions, current] = await Promise.all([
-    prisma.session.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' } }),
+    prisma.session.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' },include:{
+      user:{
+        select:{
+          _count:{
+            select:{
+              orders:true
+            }
+          }
+        }
+      }
+    } }),
     token ? prisma.session.findFirst({ where: { userId: user.id, token } }) : Promise.resolve(null)
   ]);
 
@@ -45,7 +55,8 @@ export default async function SessionsPage(){
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-8">
-          <ProfileNav />
+        <ProfileNav ordersCount={sessions[0].user._count.orders} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
+       
           
           <div className="space-y-6 lg:space-y-8">
             {/* Session Stats */}

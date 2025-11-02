@@ -15,7 +15,15 @@ export const metadata: Metadata = {
 
 export default async function SecurityPage(){
   const { user } = await requireUser();
-  const u = await prisma.user.findUnique({ where: { id: user.id } });
+  const u = await prisma.user.findUnique({ where: { id: user.id },include:{
+    _count:{
+      select:{
+        orders:true
+      }
+    }
+  } });
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 py-8">
@@ -34,7 +42,8 @@ export default async function SecurityPage(){
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-8">
-          <ProfileNav />
+      <ProfileNav ordersCount={u?._count.orders || 0} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
+       
           
           <div className="space-y-6 lg:space-y-8">
             {/* Security Status */}
