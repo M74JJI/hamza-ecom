@@ -27,11 +27,21 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
               },
             },
           },
+          
         },
       },
       shippingAddress: true,
       shippingCompany: true,
       coupon: true,
+      user:{
+        select:{
+          _count:{
+            select:{
+              orders:true
+            }
+          }
+        }
+      }
     },
   });
 
@@ -115,8 +125,8 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-8">
-          <ProfileNav />
-
+         <ProfileNav ordersCount={order.user?._count.orders || 0} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
+       
           <div className="space-y-6 lg:space-y-8">
             {/* Order Status & Timeline */}
             <SectionCard 
