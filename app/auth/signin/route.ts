@@ -10,8 +10,14 @@ const schema = z.object({
 
 export async function POST(req: Request){
   const form = await req.formData();
-  const data = Object.fromEntries(form) as any;
-  const callbackUrl = (data.callbackUrl as string) || "/";
+  const data = Object.fromEntries(form) as Record<string, FormDataEntryValue>;
+  const requestedCallback = typeof data.callbackUrl === "string" ? data.callbackUrl : "/";
+  const callbackUrl =
+    requestedCallback.startsWith("/") &&
+    !requestedCallback.startsWith("//") &&
+    !requestedCallback.includes("\\")
+      ? requestedCallback
+      : "/";
 
   const parsed = schema.safeParse(data);
   if(!parsed.success){
