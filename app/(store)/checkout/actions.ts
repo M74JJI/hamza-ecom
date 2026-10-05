@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
-import { ApplyCouponSchema, CheckoutSchema } from '@/lib/zod-checkout';
+import { CheckoutSchema } from '@/lib/zod-checkout';
 import { sendEmail } from '@/lib/send-email';
 import { renderEmail } from '@/lib/render-email';
 import OrderConfirmationEmail from '@/emails/order-confirmation';
@@ -257,8 +257,15 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   const discountMAD = couponPercent ? Number((subtotal * couponPercent / 100).toFixed(2)) : 0;
   const totalMAD = Number((subtotal - discountMAD + shippingFee).toFixed(2));
 
-  // --- Transaction: atomically reserve stock + create order ---
+  // --- Transaction: claim cart, atomically reserve stock, then create order ---
   const order = await prisma.$transaction(async (tx) => {
+      const claimedCart = await tx.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+      if (claimedCart.count !== cart.items.length) {
+        throw new Error('CART_ALREADY_CHECKED_OUT');
+      }
+
       for (const ci of cart.items) {
         const reserved = await tx.variantSize.updateMany({
           where: {
@@ -304,17 +311,19 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
       include: { items: true, shippingCompany: true, shippingAddress: true },
     });
 
-      await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
       return created;
     }).catch((error: unknown) => {
-      if (error instanceof Error && error.message === 'STOCK_RACE') {
+      if (
+        error instanceof Error &&
+        (error.message === 'STOCK_RACE' || error.message === 'CART_ALREADY_CHECKED_OUT')
+      ) {
         return null;
       }
       throw error;
     });
 
   if (!order) {
-    return { ok: false, error: 'Stock changed while placing your order. Please review your cart and try again.' };
+    return { ok: false, error: 'Your cart changed while placing the order. Please review it and try again.' };
   }
 
   // --- Clear cookie snapshot ---
