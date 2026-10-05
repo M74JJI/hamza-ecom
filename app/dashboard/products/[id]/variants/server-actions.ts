@@ -74,22 +74,34 @@ export async function adjustVariantStockAction({
     return { error: "Invalid stock adjustment" };
   }
 
-  const size = await prisma.variantSize.findUnique({
-    where: { id },
-    include: { variant: true },
-  });
-  if (!size) return { error: "Variant size not found" };
+  if (delta < 0) {
+    const adjusted = await prisma.variantSize.updateMany({
+      where: {
+        id,
+        stockQty: { gte: Math.abs(delta) },
+      },
+      data: {
+        stockQty: { increment: delta },
+      },
+    });
 
-  const nextStock = size.stockQty + delta;
-  if (nextStock < 0) {
-    return { error: "Stock cannot be negative" };
+    if (adjusted.count !== 1) {
+      return { error: "Insufficient stock or variant size not found" };
+    }
+  } else {
+    await prisma.variantSize.update({
+      where: { id },
+      data: {
+        stockQty: { increment: delta },
+      },
+    });
   }
 
-  const updated = await prisma.variantSize.update({
+  const updated = await prisma.variantSize.findUnique({
     where: { id },
-    data: { stockQty: nextStock },
     include: { variant: true },
   });
+  if (!updated) return { error: "Variant size not found" };
 
   revalidatePath(`/dashboard/products/${updated.variant.productId}/variants`);
   return { ok: true, stockQty: updated.stockQty };
