@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ShoppingBag, Star, Heart, Eye, ChevronRight, Zap, Sparkles, ArrowRight, ArrowLeft, Shield, Truck, Clock, Award, Crown, Gem, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { heroInclude, type HeroProduct } from '@/types/hero';
+import type { HeroProduct } from '@/types/hero';
 
 export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
   if (!products || products.length === 0) {

@@ -43,6 +43,7 @@ jest-html-reporters-*
 test-results/
 
 # Prisma
+generated/
 prisma/dev.db
 prisma/dev.db-journal
 *.sqlite

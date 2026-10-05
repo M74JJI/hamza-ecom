@@ -11,7 +11,7 @@ import {
   Shield, Clock, Award, Heart, Star, ChevronRight
 } from 'lucide-react';
 import { AddressForm } from '../../profile/_components/AddressForm';
-import { Address } from '@prisma/client';
+import type { Address } from '@/generated/prisma/browser';
 
 // Color scheme constants for consistency
 const COLORS = {
