@@ -45,7 +45,6 @@ test-results/
 # Prisma
 prisma/dev.db
 prisma/dev.db-journal
-prisma/migrations/
 *.sqlite
 
 # Next.js cache
