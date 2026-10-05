@@ -97,22 +97,29 @@ export async function syncCartToDBAndValidate() {
     return { ok: false, problems };
   }
 
-  // Upsert Cart snapshot
-  const existing = await prisma.cart.findFirst({ where: { userId: user.id } });
-  const cartId = existing?.id ?? (await prisma.cart.create({ data: { userId: user.id } })).id;
-  await prisma.cartItem.deleteMany({ where: { cartId } });
-  await prisma.cartItem.createMany({
-    data: items.map((it) => {
-      const size = byId.get(it.variantSizeId);
-      if (!size) throw new Error('CART_SIZE_MISSING');
-      return {
-        cartId,
-        variantSizeId: it.variantSizeId,
-        quantity: it.qty,
-        unitPriceMAD: priceAfterDiscount(Number(size.priceMAD), size.discountPercent ?? null),
-      };
-    })
+  // Upsert the user's cart and replace its items atomically.
+  const cart = await prisma.cart.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { userId: user.id },
+    select: { id: true },
   });
+
+  const itemData = items.map((it) => {
+    const size = byId.get(it.variantSizeId);
+    if (!size) throw new Error('CART_SIZE_MISSING');
+    return {
+      cartId: cart.id,
+      variantSizeId: it.variantSizeId,
+      quantity: it.qty,
+      unitPriceMAD: priceAfterDiscount(Number(size.priceMAD), size.discountPercent ?? null),
+    };
+  });
+
+  await prisma.$transaction([
+    prisma.cartItem.deleteMany({ where: { cartId: cart.id } }),
+    prisma.cartItem.createMany({ data: itemData }),
+  ]);
   return { ok: true, problems: [], items };
 }
 
@@ -251,9 +258,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   const totalMAD = Number((subtotal - discountMAD + shippingFee).toFixed(2));
 
   // --- Transaction: atomically reserve stock + create order ---
-  let order;
-  try {
-    order = await prisma.$transaction(async (tx) => {
+  const order = await prisma.$transaction(async (tx) => {
       for (const ci of cart.items) {
         const reserved = await tx.variantSize.updateMany({
           where: {
@@ -301,12 +306,15 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
 
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
       return created;
+    }).catch((error: unknown) => {
+      if (error instanceof Error && error.message === 'STOCK_RACE') {
+        return null;
+      }
+      throw error;
     });
-  } catch (error) {
-    if (error instanceof Error && error.message === 'STOCK_RACE') {
-      return { ok: false, error: 'Stock changed while placing your order. Please review your cart and try again.' };
-    }
-    throw error;
+
+  if (!order) {
+    return { ok: false, error: 'Stock changed while placing your order. Please review your cart and try again.' };
   }
 
   // --- Clear cookie snapshot ---
