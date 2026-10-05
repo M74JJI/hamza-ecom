@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { OrdersClient } from "./OrdersClient";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
