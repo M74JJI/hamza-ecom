@@ -1,7 +1,7 @@
+@import "react-quill-new/dist/quill.snow.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "react-quill-new/dist/quill.snow.css";
 
 :root{
   --bg: 14 14 16;
