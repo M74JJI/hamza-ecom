@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/require-admin";
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { OrderStatus } from "@prisma/client"; // ✅ import the generated enum
+import { OrderStatus } from "@/generated/prisma/enums";
 
 export async function updateOrderStatusAction(orderId: string, status: string) {
   await requireAdmin();
