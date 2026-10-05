@@ -67,11 +67,16 @@ export async function updateCartItemQuantityAction(id: string, quantity: number)
   const { user } = await requireUser();
   const parsedQuantity = CartQuantitySchema.parse(quantity);
 
+  const cart = await prisma.cart.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  if (!cart) {
+    throw new Error("Cart item not found");
+  }
+
   const owned = await prisma.cartItem.findFirst({
-    where: {
-      id,
-      cart: { userId: user.id },
-    },
+    where: { id, cartId: cart.id },
     select: { id: true },
   });
   if (!owned) {
@@ -93,11 +98,16 @@ export async function updateCartItemQuantityAction(id: string, quantity: number)
 export async function removeCartItemAction(id: string) {
   const { user } = await requireUser();
 
+  const cart = await prisma.cart.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  if (!cart) {
+    throw new Error("Cart item not found");
+  }
+
   const deleted = await prisma.cartItem.deleteMany({
-    where: {
-      id,
-      cart: { userId: user.id },
-    },
+    where: { id, cartId: cart.id },
   });
 
   if (deleted.count !== 1) {
