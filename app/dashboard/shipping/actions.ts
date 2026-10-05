@@ -1,8 +1,11 @@
 'use server';
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { prisma } from '@/lib/db';
 
 export async function createDeliveryCompany(formData: FormData) {
+  await requireAdmin();
   const name = String(formData.get('name')||'').trim();
   const priceMAD = Number(formData.get('priceMAD')||0);
   const avgDays = Number(formData.get('avgDays')||2);
@@ -12,6 +15,7 @@ export async function createDeliveryCompany(formData: FormData) {
 }
 
 export async function updateDeliveryCompany(id: string, formData: FormData) {
+  await requireAdmin();
   const name = String(formData.get('name')||'').trim();
   const priceMAD = Number(formData.get('priceMAD')||0);
   const avgDays = Number(formData.get('avgDays')||2);
@@ -24,6 +28,7 @@ export async function updateDeliveryCompany(id: string, formData: FormData) {
 }
 
 export async function deleteDeliveryCompanyAction(id: string) {
+  await requireAdmin();
   try {
     await prisma.deliveryCompany.delete({
       where: { id }
