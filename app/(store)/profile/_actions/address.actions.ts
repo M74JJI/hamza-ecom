@@ -23,7 +23,7 @@ export async function createAddress(input: unknown) {
     });
   }
 
-  const addr=await prisma.address.create({
+  return prisma.address.create({
     data: {
       userId: user.id,
       fullName: data.fullName,
@@ -33,12 +33,19 @@ export async function createAddress(input: unknown) {
       isDefault: !!data.isDefault,
     },
   });
-  return addr
 }
 
 export async function updateAddress(id: string, input: unknown) {
   const { user } = await requireUser();
   const data = addressSchema.parse(input);
+
+  const owned = await prisma.address.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true },
+  });
+  if (!owned) {
+    throw new Error('Address not found');
+  }
 
   if (data.isDefault) {
     await prisma.address.updateMany({
@@ -47,8 +54,8 @@ export async function updateAddress(id: string, input: unknown) {
     });
   }
 
-  const addr=await prisma.address.update({
-    where: { id },
+  return prisma.address.update({
+    where: { id: owned.id },
     data: {
       fullName: data.fullName,
       phone: data.phone,
@@ -57,10 +64,16 @@ export async function updateAddress(id: string, input: unknown) {
       isDefault: !!data.isDefault,
     },
   });
-  return addr
 }
 
 export async function deleteAddress(id: string) {
   const { user } = await requireUser();
-  await prisma.address.delete({ where: { id } });
+
+  const deleted = await prisma.address.deleteMany({
+    where: { id, userId: user.id },
+  });
+
+  if (deleted.count !== 1) {
+    throw new Error('Address not found');
+  }
 }

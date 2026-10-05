@@ -1,9 +1,12 @@
 'use server';
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function updateOrderStatusAction(orderId: string, status: "PENDING"|"CONFIRMED"|"SHIPPED"|"DELIVERED"|"CANCELLED"){
+  await requireAdmin();
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
   if(!order) return { error: "Order not found" };
 

@@ -1,8 +1,11 @@
 'use server';
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { prisma } from '@/lib/db';
 
 export async function createCoupon(formData: FormData) {
+  await requireAdmin();
   const code = String(formData.get('code')||'').trim().toUpperCase();
   const percent = Math.max(0, Math.min(100, Number(formData.get('percent')||0)));
   const startsAtStr = String(formData.get('startsAt')||'');
@@ -19,6 +22,7 @@ export async function createCoupon(formData: FormData) {
 }
 
 export async function updateCoupon(id: string, formData: FormData) {
+  await requireAdmin();
   const code = String(formData.get('code')||'').trim().toUpperCase();
   const percent = Math.max(0, Math.min(100, Number(formData.get('percent')||0)));
   const startsAtStr = String(formData.get('startsAt')||'');
@@ -36,6 +40,7 @@ export async function updateCoupon(id: string, formData: FormData) {
 }
 
 export async function deleteCouponAction(id: string) {
+  await requireAdmin();
   try {
     await prisma.coupon.delete({
       where: { id }

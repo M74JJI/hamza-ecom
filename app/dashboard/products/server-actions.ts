@@ -1,5 +1,7 @@
 'use server';
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { prisma } from '@/lib/db';
 import { ProductUpsertSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
@@ -30,6 +32,7 @@ async function generateUniqueSlug(db: typeof prisma, base: string, excludeId?: s
 }
 
 export async function upsertProductAction(input: unknown) {
+  await requireAdmin();
   const parsed = ProductUpsertSchema.safeParse(input);
   if (!parsed.success) {
     console.error(parsed.error.flatten());

@@ -28,9 +28,15 @@ export async function addAddressAction(input: unknown){
 
 export async function setDefaultAddressAction(id: string){
   const { user } = await requireUser();
+  const owned = await prisma.address.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true },
+  });
+  if (!owned) return { error: "Address not found" };
+
   await prisma.$transaction([
     prisma.address.updateMany({ where: { userId: user.id, isDefault: true }, data: { isDefault: false } }),
-    prisma.address.update({ where: { id }, data: { isDefault: true } })
+    prisma.address.update({ where: { id: owned.id }, data: { isDefault: true } })
   ]);
   revalidatePath("/checkout");
   revalidatePath("/profile");
