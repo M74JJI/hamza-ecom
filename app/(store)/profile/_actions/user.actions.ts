@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { z } from 'zod';
-import { hashPassword, verifyPassword } from '@/lib/auth-utils';
+import { getCurrentSessionToken, hashPassword, verifyPassword } from '@/lib/auth-utils';
 import { sendVerifyEmail } from '@/lib/emails/verify';
 
 const profileSchema = z.object({
@@ -36,7 +36,20 @@ export async function changePassword(input: unknown){
   const ok = await verifyPassword(u.passwordHash, data.current);
   if(!ok) throw new Error('Current password is incorrect.');
   const nextHash = await hashPassword(data.next);
-  await prisma.user.update({ where: { id: user.id }, data: { passwordHash: nextHash } });
+  const currentToken = await getCurrentSessionToken();
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: nextHash },
+    }),
+    prisma.session.deleteMany({
+      where: {
+        userId: user.id,
+        ...(currentToken ? { token: { not: currentToken } } : {}),
+      },
+    }),
+  ]);
 }
 
 export async function resendVerificationEmail(){
