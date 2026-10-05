@@ -36,6 +36,6 @@ export async function POST(req: Request){
     return NextResponse.json({ error: "Please verify your email first." }, { status: 403 });
   }
   await createSession(user.id);
-   return NextResponse.redirect(new URL(callbackUrl, req.url));
+  return NextResponse.redirect(new URL(callbackUrl, req.url), 303);
 
 }
