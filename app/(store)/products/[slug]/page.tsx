@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import ProductViewClient from "./ProductViewClient";
-import { Decimal } from "@prisma/client/runtime/library";
+import { Prisma } from "@/generated/prisma/client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -47,7 +47,7 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
 
   const serialized = JSON.parse(
     JSON.stringify(product, (key, value) =>
-      value instanceof Decimal ? Number(value) : value
+      value instanceof Prisma.Decimal ? Number(value) : value
     )
   );
 
