@@ -8,7 +8,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { heroInclude, type HeroProduct } from '@/types/hero';
 
 export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
-    if (!products || products.length === 0) {
+  if (!products || products.length === 0) {
     return (
       <section className="min-h-[80vh] flex flex-col items-center justify-center bg-gradient-to-br from-stone-50 via-amber-50 to-orange-50/30">
         <div className="text-center space-y-4">
@@ -22,6 +22,11 @@ export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
       </section>
     );
   }
+
+  return <BrandFocusedHeroContent products={products} />;
+}
+
+function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   const [activeProduct, setActiveProduct] = useState(0);
   const [activeVariant, setActiveVariant] = useState(0);
   const [hoveredVariant, setHoveredVariant] = useState<number | null>(null);
