@@ -15,6 +15,30 @@ const addressSchema = z.object({
 export async function createAddress(input: unknown) {
   const { user } = await requireUser();
   const data = addressSchema.parse(input);
+
+  if (data.isDefault) {
+    await prisma.address.updateMany({
+      where: { userId: user.id, isDefault: true },
+      data: { isDefault: false },
+    });
+  }
+
+  return prisma.address.create({
+    data: {
+      userId: user.id,
+      fullName: data.fullName,
+      phone: data.phone,
+      city: data.city,
+      fullAddress: data.fullAddress,
+      isDefault: !!data.isDefault,
+    },
+  });
+}
+
+export async function updateAddress(id: string, input: unknown) {
+  const { user } = await requireUser();
+  const data = addressSchema.parse(input);
+
   const owned = await prisma.address.findFirst({
     where: { id, userId: user.id },
     select: { id: true },
@@ -30,31 +54,7 @@ export async function createAddress(input: unknown) {
     });
   }
 
-  const addr=await prisma.address.create({
-    data: {
-      userId: user.id,
-      fullName: data.fullName,
-      phone: data.phone,
-      city: data.city,
-      fullAddress: data.fullAddress,
-      isDefault: !!data.isDefault,
-    },
-  });
-  return addr
-}
-
-export async function updateAddress(id: string, input: unknown) {
-  const { user } = await requireUser();
-  const data = addressSchema.parse(input);
-
-  if (data.isDefault) {
-    await prisma.address.updateMany({
-      where: { userId: user.id, isDefault: true },
-      data: { isDefault: false },
-    });
-  }
-
-  const addr=await prisma.address.update({
+  return prisma.address.update({
     where: { id: owned.id },
     data: {
       fullName: data.fullName,
@@ -64,14 +64,15 @@ export async function updateAddress(id: string, input: unknown) {
       isDefault: !!data.isDefault,
     },
   });
-  return addr
 }
 
 export async function deleteAddress(id: string) {
   const { user } = await requireUser();
+
   const deleted = await prisma.address.deleteMany({
     where: { id, userId: user.id },
   });
+
   if (deleted.count !== 1) {
     throw new Error('Address not found');
   }
