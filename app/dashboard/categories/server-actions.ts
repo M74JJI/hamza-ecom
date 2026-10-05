@@ -1,10 +1,13 @@
 "use server";
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { prisma } from "@/lib/db";
 import { CategoryUpsertSchema } from "@/lib/z-admin";
 import { revalidatePath } from "next/cache";
 
 export async function upsertCategoryAction(input: unknown) {
+  await requireAdmin();
   const parsed = CategoryUpsertSchema.safeParse(input);
   if (!parsed.success) {
     return { error: "Invalid input" };
@@ -47,6 +50,7 @@ export async function upsertCategoryAction(input: unknown) {
 }
 
 export async function deleteCategoryAction(id: string) {
+  await requireAdmin();
   if (!id) return { error: "Missing category id." };
   try {
     await prisma.category.delete({ where: { id } });
