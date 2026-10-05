@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: refresh-lockfile-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   refresh:
     if: github.actor != 'github-actions[bot]'
