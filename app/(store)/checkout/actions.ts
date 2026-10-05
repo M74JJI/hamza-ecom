@@ -8,30 +8,39 @@ import { ApplyCouponSchema, CheckoutSchema } from '@/lib/zod-checkout';
 import { sendEmail } from '@/lib/send-email';
 import { renderEmail } from '@/lib/render-email';
 import OrderConfirmationEmail from '@/emails/order-confirmation';
+import { z } from 'zod';
 
-type CookieCartItem = {
-  productId: string;
-  productSlug: string;
-  variantId: string;
-  variantTitle: string;
-  variantName: string;
-  variantStyleImg?: string | null;
-  variantImage?: string | null;
-  variantSizeId: string;
-  sizeLabel: string;
-  sku: string;
-  unitPriceMAD: number;
-  discountPercent?: number | null;
-  finalUnitPriceMAD: number;
-  maxStock: number;
-  qty: number;
-};
+const CookieCartSchema = z.object({
+  items: z.array(z.object({
+    variantSizeId: z.string().min(1),
+    qty: z.number().int().min(1).max(10),
+  })).max(100),
+});
 
-async function readCookieCart(): Promise<{ items: CookieCartItem[]; }> {
-  const cookie=await cookies()
-  const c = cookie.get('hajzen_cart')?.value;
-  if (!c) return { items: [] };
-  try { const parsed = JSON.parse(c); return { items: parsed.items || [] }; } catch { return { items: [] }; }
+type CookieCartItem = z.infer<typeof CookieCartSchema>['items'][number];
+
+async function readCookieCart(): Promise<{ items: CookieCartItem[]; invalid: boolean }> {
+  const cookie = await cookies();
+  const raw = cookie.get('hajzen_cart')?.value;
+  if (!raw) return { items: [], invalid: false };
+
+  try {
+    const parsed = CookieCartSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return { items: [], invalid: true };
+
+    const deduped = new Map<string, number>();
+    for (const item of parsed.data.items) {
+      const current = deduped.get(item.variantSizeId) ?? 0;
+      deduped.set(item.variantSizeId, Math.min(10, current + item.qty));
+    }
+
+    return {
+      items: Array.from(deduped, ([variantSizeId, qty]) => ({ variantSizeId, qty })),
+      invalid: false,
+    };
+  } catch {
+    return { items: [], invalid: true };
+  }
 }
 
 function priceAfterDiscount(base: number, pct?: number | null) {
@@ -48,7 +57,14 @@ export async function ensureLoggedInOrRedirectCart() {
 // Sync cookie cart -> DB Cart/CartItem with stock/price revalidation
 export async function syncCartToDBAndValidate() {
   const user = await ensureLoggedInOrRedirectCart();
-  const { items } = await readCookieCart();
+  const { items, invalid } = await readCookieCart();
+  if (invalid) {
+    return {
+      ok: false,
+      problems: [{ type: 'invalid_cart', message: 'Your cart data is invalid. Please review your cart.' }],
+      items: [],
+    };
+  }
   if (items.length === 0) return { ok: true, problems: [], items: [] };
 
   const problems: any[] = [];
@@ -74,9 +90,7 @@ export async function syncCartToDBAndValidate() {
       problems.push({ type: 'qty_reduced', variantSizeId: it.variantSizeId, newQty: freshStock, message: `Quantity reduced to ${freshStock}.` });
     }
 
-    if (Number(it.finalUnitPriceMAD) !== freshFinal) {
-      problems.push({ type: 'price_changed', variantSizeId: it.variantSizeId, newPrice: freshFinal, message: 'Price has changed.' });
-    }
+    // Cookie prices and stock are never trusted. Fresh values above are authoritative.
   }
 
   if (problems.length) {
@@ -88,12 +102,16 @@ export async function syncCartToDBAndValidate() {
   const cartId = existing?.id ?? (await prisma.cart.create({ data: { userId: user.id } })).id;
   await prisma.cartItem.deleteMany({ where: { cartId } });
   await prisma.cartItem.createMany({
-    data: items.map(it => ({
-      cartId,
-      variantSizeId: it.variantSizeId,
-      quantity: it.qty,
-      unitPriceMAD: it.finalUnitPriceMAD,
-    }))
+    data: items.map((it) => {
+      const size = byId.get(it.variantSizeId);
+      if (!size) throw new Error('CART_SIZE_MISSING');
+      return {
+        cartId,
+        variantSizeId: it.variantSizeId,
+        quantity: it.qty,
+        unitPriceMAD: priceAfterDiscount(Number(size.priceMAD), size.discountPercent ?? null),
+      };
+    })
   });
   return { ok: true, problems: [], items };
 }
@@ -154,15 +172,22 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
       return { ok: false, error: 'Please enter a valid address and phone number' };
     }
 
-    const newAddr = await prisma.address.create({
-      data: {
-        userId: user.id,
-        fullName: payload.fullName.trim(),
-        phone: payload.phone.trim(),
-        city: payload.city.trim(),
-        fullAddress: payload.fullAddress.trim(),
-        isDefault: true,
-      },
+    const newAddr = await prisma.$transaction(async (tx) => {
+      await tx.address.updateMany({
+        where: { userId: user.id, isDefault: true },
+        data: { isDefault: false },
+      });
+
+      return tx.address.create({
+        data: {
+          userId: user.id,
+          fullName: payload.fullName.trim(),
+          phone: payload.phone.trim(),
+          city: payload.city.trim(),
+          fullAddress: payload.fullAddress.trim(),
+          isDefault: true,
+        },
+      });
     });
     addressId = newAddr.id;
   } else {
@@ -185,6 +210,9 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   for (const ci of cart.items) {
     const s = ci.variantSize;
     if (!s || !s.isActive) return { ok: false, error: 'Some items are no longer available.' };
+    if (!Number.isInteger(ci.quantity) || ci.quantity < 1 || ci.quantity > 10) {
+      return { ok: false, error: 'Invalid cart quantity. Please review your cart.' };
+    }
     if (ci.quantity > s.stockQty) return { ok: false, error: 'Quantity changed. Please review your cart.' };
     const final = priceAfterDiscount(Number(s.priceMAD), s.discountPercent ?? null);
     subtotal += final * ci.quantity;
@@ -222,17 +250,24 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   const discountMAD = couponPercent ? Number((subtotal * couponPercent / 100).toFixed(2)) : 0;
   const totalMAD = Number((subtotal - discountMAD + shippingFee).toFixed(2));
 
-  // --- Transaction: decrement stock + create order ---
-  const order = await prisma.$transaction(async (tx) => {
-    for (const ci of cart.items) {
-      const s = await tx.variantSize.update({
-        where: { id: ci.variantSizeId },
-        data: { stockQty: { decrement: ci.quantity } },
-      });
-      if (s.stockQty < 0) throw new Error('STOCK_RACE');
-    }
+  // --- Transaction: atomically reserve stock + create order ---
+  let order;
+  try {
+    order = await prisma.$transaction(async (tx) => {
+      for (const ci of cart.items) {
+        const reserved = await tx.variantSize.updateMany({
+          where: {
+            id: ci.variantSizeId,
+            isActive: true,
+            stockQty: { gte: ci.quantity },
+          },
+          data: { stockQty: { decrement: ci.quantity } },
+        });
 
-    const created = await tx.order.create({
+        if (reserved.count !== 1) throw new Error('STOCK_RACE');
+      }
+
+      const created = await tx.order.create({
       data: {
         userId: user.id,
         status: 'PENDING',
@@ -264,15 +299,22 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
       include: { items: true, shippingCompany: true, shippingAddress: true },
     });
 
-    await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
-    return created;
-  });
+      await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+      return created;
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'STOCK_RACE') {
+      return { ok: false, error: 'Stock changed while placing your order. Please review your cart and try again.' };
+    }
+    throw error;
+  }
 
   // --- Clear cookie snapshot ---
   const cookie=await cookies()
   cookie.set('hajzen_cart', JSON.stringify({ items: [], updatedAt: Date.now() }), {
     path: '/',
     sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
   });
 
   // --- Send confirmation email ---
