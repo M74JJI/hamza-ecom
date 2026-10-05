@@ -1,5 +1,7 @@
 'use server';
 
+import { requireAdmin } from "@/lib/require-admin";
+
 import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { VariantUpsertSchema, VariantStockAdjustSchema } from '@/lib/z-variants';
@@ -7,6 +9,7 @@ import { adjustStock, setStock } from '@/lib/inventory';
 
 // ✅ Create or update a variant
 export async function upsertVariantAction(input: any) {
+  await requireAdmin();
   const parsed = VariantUpsertSchema.safeParse(input);
 if (!parsed.success) return { error: "Invalid input" };
 const v = parsed.data;
@@ -48,7 +51,8 @@ await prisma.variant.create({
 }
 
 // ✅ Delete a variant
-export async function deleteVariantAction({ id }: { id: string }) {
+export async function deleteVariantAction({
+  await requireAdmin(); id }: { id: string }) {
   const variant = await prisma.variant.delete({
     where: { id },
   });
@@ -58,6 +62,7 @@ export async function deleteVariantAction({ id }: { id: string }) {
 
 // ✅ Adjust stock for a VariantSize (not Variant)
 export async function adjustVariantStockAction({
+  await requireAdmin();
   id,
   delta,
 }: {
