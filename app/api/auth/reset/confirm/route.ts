@@ -14,10 +14,19 @@ export async function POST(req: Request){
   const t = await prisma.passwordResetToken.findFirst({ where: { token, expires: { gt: new Date() } } });
   if(!t) return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
 
+  const user = await prisma.user.findUnique({
+    where: { email: t.identifier },
+    select: { id: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+  }
+
   const passwordHash = await hashPassword(password);
   await prisma.$transaction([
-    prisma.user.update({ where: { email: t.identifier }, data: { passwordHash } }),
-    prisma.passwordResetToken.delete({ where: { id: t.id } })
+    prisma.user.update({ where: { id: user.id }, data: { passwordHash } }),
+    prisma.passwordResetToken.deleteMany({ where: { identifier: t.identifier } }),
+    prisma.session.deleteMany({ where: { userId: user.id } }),
   ]);
 
   return NextResponse.json({ ok: true });
