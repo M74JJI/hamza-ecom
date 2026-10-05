@@ -2,14 +2,12 @@ import { ensureLoggedInOrRedirectCart, syncCartToDBAndValidate } from './actions
 import { prisma } from '@/lib/db';
 import { redirect } from 'next/navigation';
 import CheckoutClient from './ui/CheckoutClient';
-import { getCurrentUser } from '@/lib/auth';
 export const dynamic = "force-dynamic";
 
 
 
 export default async function CheckoutPage(){
-  const user = await getCurrentUser();
-  await ensureLoggedInOrRedirectCart();
+  const user = await ensureLoggedInOrRedirectCart();
   
   const sync = await syncCartToDBAndValidate();
   if(!sync.ok){
@@ -22,7 +20,8 @@ export default async function CheckoutPage(){
     orderBy: { name: 'asc' } 
   });
   
-  const cart = await prisma.cart.findFirst({
+  const cart = await prisma.cart.findUnique({
+    where: { userId: user.id },
     include: { 
       items: { 
         include: { 
