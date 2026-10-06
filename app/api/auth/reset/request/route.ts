@@ -4,6 +4,10 @@ import { z } from "zod";
 import { sendResetEmail } from "@/lib/emails/reset";
 import { getAppUrl } from "@/lib/app-url";
 import {
+  createOneTimeToken,
+  hashOneTimeToken,
+} from "@/lib/one-time-token";
+import {
   consumeRateLimit,
   getClientIp,
   maxRetryAfter,
@@ -49,14 +53,15 @@ export async function POST(req: Request){
   const user = await prisma.user.findUnique({ where: { email } });
   if(!user) return NextResponse.json({ ok: true }); // do not reveal
 
-  const token = crypto.randomUUID();
+  const token = createOneTimeToken();
+  const persistedToken = hashOneTimeToken(token);
   const expires = new Date(Date.now() + 1000*60*60);
   await prisma.$transaction([
     prisma.passwordResetToken.deleteMany({
       where: { identifier: email },
     }),
     prisma.passwordResetToken.create({
-      data: { identifier: email, token, expires },
+      data: { identifier: email, token: persistedToken, expires },
     }),
   ]);
 
