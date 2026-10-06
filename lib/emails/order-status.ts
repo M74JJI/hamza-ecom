@@ -1,4 +1,4 @@
-import { sendEmail } from "@/lib/auth-utils";
+import { sendEmail } from "@/lib/email";
 import { renderEmail } from "@/lib/render-email";
 
 export async function sendOrderStatusUpdate(to: string, orderId: string, status: string){

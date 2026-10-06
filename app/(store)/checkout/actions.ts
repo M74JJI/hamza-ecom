@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { CheckoutSchema } from '@/lib/zod-checkout';
-import { sendEmail } from '@/lib/send-email';
+import { sendEmail } from '@/lib/email';
 import { renderEmail } from '@/lib/render-email';
 import OrderConfirmationEmail from '@/emails/order-confirmation';
 import { z } from 'zod';

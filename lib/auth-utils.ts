@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { randomBytes } from "crypto";
 import * as argon2 from "argon2";
 import { prisma } from "./db";
-import nodemailer from "nodemailer";
 import {
   SESSION_COOKIE_NAME,
   getPersistedSessionTokenCandidates,
@@ -117,22 +116,4 @@ export async function getSessionUser() {
   }
 
   return session.user;
-}
-
-export function getTransport() {
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASS,
-    },
-  });
-}
-
-export async function sendEmail(to: string, subject: string, html: string) {
-  const from = process.env.AUTH_EMAIL_FROM || "no-reply@example.com";
-  const transporter = getTransport();
-  await transporter.sendMail({ to, from, subject, html });
 }
