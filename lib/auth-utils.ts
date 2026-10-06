@@ -3,6 +3,10 @@ import { randomBytes } from "crypto";
 import * as argon2 from "argon2";
 import { prisma } from "./db";
 import {
+  AUTH_PASSWORD_MAX_LENGTH,
+  isSupportedNewPasswordLength,
+} from "@/lib/auth/input-policy";
+import {
   SESSION_COOKIE_NAME,
   getPersistedSessionTokenCandidates,
   hashSessionToken,
