@@ -74,17 +74,31 @@ function CategoryTree({
 }
 
 /* ---------------------- 🧭 Filter Sidebar ---------------------- */
+function normalizeFacetFilters(source: Record<string, any>) {
+  const normalized: Record<string, any> = {
+    category: Array.isArray(source.category) ? source.category : [],
+    brand: Array.isArray(source.brand) ? source.brand : [],
+    color: Array.isArray(source.color) ? source.color : [],
+    size: Array.isArray(source.size) ? source.size : [],
+  };
+
+  if (typeof source.min === "number") normalized.min = source.min;
+  if (typeof source.max === "number") normalized.max = source.max;
+  if (typeof source.rating === "number") normalized.rating = source.rating;
+
+  return normalized;
+}
+
 export function FilterSidebar({
   onChange,
+  initialFilters = {},
 }: {
   onChange: (filters: Record<string, any>) => void;
+  initialFilters?: Record<string, any>;
 }) {
-  const [filters, setFilters] = useState<Record<string, any>>({
-    category: [],
-    brand: [],
-    color: [],
-    size: [],
-  });
+  const [filters, setFilters] = useState<Record<string, any>>(() =>
+    normalizeFacetFilters(initialFilters),
+  );
   const [data, setData] = useState<any>({
     categories: [],
     brands: [],
@@ -102,6 +116,10 @@ export function FilterSidebar({
     rating: true,
   });
   const [isSliding, setIsSliding] = useState(false);
+
+  useEffect(() => {
+    setFilters(normalizeFacetFilters(initialFilters));
+  }, [initialFilters]);
 
   /* 🧠 Fetch filters dynamically */
   const fetchFilters = async (cats?: string[]) => {
