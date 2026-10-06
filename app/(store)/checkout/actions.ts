@@ -424,6 +424,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
           shippingCompanyNameSnapshot: company.name,
           shippingFeeMAD: shippingFee,
           couponCode,
+          couponCodeSnapshot: couponCode,
           couponPercentApplied: couponPercent ?? undefined,
           subtotalMAD: normalizedSubtotal,
           discountMAD,

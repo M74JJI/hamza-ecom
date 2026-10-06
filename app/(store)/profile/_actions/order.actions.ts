@@ -55,7 +55,7 @@ export async function downloadInvoice(orderId: string) {
     discountMAD: Number(order.discountMAD ?? 0),
     shippingFeeMAD: Number(order.shippingFeeMAD ?? 0),
     totalMAD: Number(order.totalMAD ?? 0),
-    couponCode: order.couponCode ?? null,
+    couponCode: order.couponCodeSnapshot ?? order.couponCode ?? null,
     shippingCompany:
       order.shippingCompanyNameSnapshot ??
       order.shippingCompany?.name ??
