@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { hashPassword } from "@/lib/auth-utils";
+import { getPersistedOneTimeTokenCandidates } from "@/lib/one-time-token";
 import {
   consumeRateLimit,
   getClientIp,
@@ -46,7 +47,12 @@ export async function POST(req: Request){
     );
   }
 
-  const t = await prisma.passwordResetToken.findFirst({ where: { token, expires: { gt: new Date() } } });
+  const t = await prisma.passwordResetToken.findFirst({
+    where: {
+      token: { in: getPersistedOneTimeTokenCandidates(token) },
+      expires: { gt: new Date() },
+    },
+  });
   if(!t) return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
 
   const user = await prisma.user.findUnique({

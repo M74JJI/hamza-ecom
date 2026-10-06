@@ -8,6 +8,10 @@ import { getPersistedSessionTokenCandidates } from '@/lib/session-token';
 import { sendVerifyEmail } from '@/lib/emails/verify';
 import { getAppUrl } from '@/lib/app-url';
 import { consumeRateLimit } from '@/lib/security/rate-limit';
+import {
+  createOneTimeToken,
+  hashOneTimeToken,
+} from '@/lib/one-time-token';
 
 const profileSchema = z.object({
   name: z.string().min(0).max(120).optional(),
@@ -88,14 +92,15 @@ export async function resendVerificationEmail(){
   if (!decision.allowed) {
     throw new Error(`Too many verification emails. Try again in ${decision.retryAfterSeconds} seconds.`);
   }
-  const token = crypto.randomUUID();
+  const token = createOneTimeToken();
+  const persistedToken = hashOneTimeToken(token);
   const expires = new Date(Date.now() + 1000*60*60*24);
   await prisma.$transaction([
     prisma.verificationToken.deleteMany({
       where: { identifier: user.email! },
     }),
     prisma.verificationToken.create({
-      data: { identifier: user.email!, token, expires },
+      data: { identifier: user.email!, token: persistedToken, expires },
     }),
   ]);
   const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;

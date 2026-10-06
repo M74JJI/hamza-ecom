@@ -5,6 +5,10 @@ import { z } from "zod";
 import { sendVerifyEmail } from "@/lib/emails/verify";
 import { getAppUrl } from "@/lib/app-url";
 import {
+  createOneTimeToken,
+  hashOneTimeToken,
+} from "@/lib/one-time-token";
+import {
   consumeRateLimit,
   getClientIp,
   maxRetryAfter,
@@ -62,14 +66,15 @@ export async function POST(req: Request){
   const user = await prisma.user.create({ data: { email, name, passwordHash } });
 
   // create email verification token
-  const token = crypto.randomUUID();
+  const token = createOneTimeToken();
+  const persistedToken = hashOneTimeToken(token);
   const expires = new Date(Date.now() + 1000*60*60*24);
   await prisma.$transaction([
     prisma.verificationToken.deleteMany({
       where: { identifier: email },
     }),
     prisma.verificationToken.create({
-      data: { identifier: email, token, expires },
+      data: { identifier: email, token: persistedToken, expires },
     }),
   ]);
   const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;
