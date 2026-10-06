@@ -1,39 +1,28 @@
-'use server';
+"use server";
 
-import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/require-user";
+import { prisma } from "@/lib/db";
+import { OrderStatus } from "@/generated/prisma/enums";
+import { transitionOrderStatus } from "@/lib/orders/transition";
 
 export async function cancelOrderAction(orderId: string) {
   const { user } = await requireUser();
 
-  const order = await prisma.order.findFirst({
+  const ownedOrder = await prisma.order.findFirst({
     where: { id: orderId, userId: user.id },
-    include: { items: true },
+    select: { id: true },
   });
 
-  if (!order) throw new Error("Order not found");
-
-  if (order.status === "PENDING" || order.status === "CONFIRMED") {
-    await prisma.$transaction(async (db) => {
-      for (const item of order.items) {
-        await db.variantSize.update({
-          where: { id: item.variantSizeId },
-          data: {
-            stockQty: { increment: item.quantity },
-          },
-        });
-      }
-
-      await db.order.update({
-        where: { id: order.id },
-        data: { status: "CANCELLED" },
-      });
-    });
-
-    revalidatePath("/orders");
-    return { ok: true };
-  } else {
-    return { error: "Cannot cancel once shipped" };
+  if (!ownedOrder) {
+    return { error: "Order not found" };
   }
+
+  const result = await transitionOrderStatus(ownedOrder.id, OrderStatus.CANCELLED);
+  if (!result.ok) return result;
+
+  revalidatePath("/profile/orders");
+  revalidatePath(`/profile/orders/${ownedOrder.id}`);
+  revalidatePath("/dashboard/orders");
+  return result;
 }
