@@ -345,12 +345,14 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
                     </div>
                   </div>
 
-                  {order.couponCode && (
+                  {(order.couponCodeSnapshot ?? order.couponCode) && (
                     <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-xl border border-yellow-200 mt-3">
                       <Award className="w-4 h-4 text-yellow-600" />
                       <div className="text-sm">
                         <div className="font-semibold text-gray-800">Coupon Applied</div>
-                        <div className="text-gray-600">{order.couponCode}</div>
+                        <div className="text-gray-600">
+                          {order.couponCodeSnapshot ?? order.couponCode}
+                        </div>
                       </div>
                     </div>
                   )}
