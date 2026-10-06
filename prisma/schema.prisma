@@ -300,7 +300,7 @@ model Review {
   updatedAt       DateTime @updatedAt
 
   @@index([productId, rating, createdAt])
-  @@index([userId, productId])
+  @@unique([userId, productId])
 }
 
 model WishlistItem {
