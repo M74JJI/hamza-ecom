@@ -196,7 +196,9 @@ export async function GET(req: Request) {
     sort === "price-asc" ||
     sort === "price-desc";
 
-  let products: Awaited<ReturnType<typeof prisma.product.findMany>>;
+  type SearchProduct = Prisma.ProductGetPayload<{ include: typeof include }>;
+
+  let products: SearchProduct[];
   let total: number;
 
   if (priceSensitive) {
