@@ -43,6 +43,7 @@ jobs:
       GMAIL_APP_PASS: ci-placeholder
       AUTH_EMAIL_FROM: ci@example.com
       SMTP_SECURE: "true"
+      RATE_LIMIT_HASH_SECRET: ci-rate-limit-secret-at-least-32-characters
 
     steps:
       - name: Checkout
