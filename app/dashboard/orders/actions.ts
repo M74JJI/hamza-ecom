@@ -1,38 +1,38 @@
 "use server";
 
 import { requireAdmin } from "@/lib/require-admin";
-
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { OrderStatus } from "@/generated/prisma/enums";
+import { isOrderStatus, transitionOrderStatus } from "@/lib/orders/transition";
 
 export async function updateOrderStatusAction(orderId: string, status: string) {
   await requireAdmin();
-  const validStatuses: OrderStatus[] = [
-    OrderStatus.PENDING,
-    OrderStatus.CONFIRMED,
-    OrderStatus.SHIPPED,
-    OrderStatus.DELIVERED,
-    OrderStatus.CANCELLED,
-  ];
 
-  if (!validStatuses.includes(status as OrderStatus)) {
-    throw new Error("Invalid status");
+  if (!isOrderStatus(status)) {
+    return { error: "Invalid status" };
   }
 
-  await prisma.order.update({
-    where: { id: orderId },
-    data: { status: status as OrderStatus }, // ✅ cast to enum
-  });
+  const result = await transitionOrderStatus(orderId, status);
+  if (!result.ok) return result;
 
   revalidatePath("/dashboard/orders");
+  revalidatePath("/profile/orders");
+  return result;
 }
 
 export async function updateOrderNoteAction(orderId: string, note: string) {
   await requireAdmin();
+
+  const normalizedNote = note.trim();
+  if (normalizedNote.length > 2000) {
+    return { error: "Note is too long" };
+  }
+
   await prisma.order.update({
     where: { id: orderId },
-    data: { note },
+    data: { note: normalizedNote || null },
   });
+
   revalidatePath("/dashboard/orders");
+  return { ok: true };
 }
