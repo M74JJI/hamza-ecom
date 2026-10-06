@@ -13,7 +13,10 @@
     "prisma:generate": "prisma generate",
     "check": "bun run prisma:validate && bun run typecheck && bun run lint",
     "ci": "bun run prisma:generate && bun run check && bun run test:unit && bun run build",
-    "test:unit": "bun test tests"
+    "test:unit": "bun test tests",
+    "prisma:migrate:status": "prisma migrate status",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:baseline:resolve": "prisma migrate resolve --applied 0_init"
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.22",
