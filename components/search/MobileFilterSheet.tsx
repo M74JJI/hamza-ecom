@@ -63,8 +63,17 @@ export function MobileFilterSheet({
             {/* Filter Content */}
             <div className="flex-1 overflow-y-auto">
               <FilterSidebar
+                initialFilters={filters}
                 onChange={(update) =>
-                  setFilters((prev: any) => ({ ...prev, ...update }))
+                  setFilters((prev: any) => {
+                    const next = { ...prev };
+                    for (const key of ["category", "brand", "color", "size", "min", "max", "rating"]) {
+                      delete next[key];
+                    }
+                    Object.assign(next, update);
+                    next.page = 1;
+                    return next;
+                  })
                 }
               />
             </div>
