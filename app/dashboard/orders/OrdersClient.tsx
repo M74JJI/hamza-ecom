@@ -7,12 +7,6 @@ import {
   updateOrderStatusAction,
   updateOrderNoteAction,
 } from "./actions";
-function readAttributes(value: unknown) {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
 import {
   User,
   DollarSign,
@@ -23,6 +17,12 @@ import {
   X,
   Package,
 } from "lucide-react";
+
+function readAttributes(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
 
 export function OrdersClient({
   orders,
