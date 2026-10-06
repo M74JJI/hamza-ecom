@@ -140,7 +140,7 @@ model VariantSize {
   variantId       String
   size            String
   sku             String  @unique
-  priceMAD        Float
+  priceMAD        Decimal @db.Decimal(10, 2)
   discountPercent Int?
   stockQty        Int
   isActive        Boolean @default(true)
