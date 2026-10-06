@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { hashPassword } from "@/lib/auth-utils";
+import {
+  consumeRateLimit,
+  getClientIp,
+  maxRetryAfter,
+} from "@/lib/security/rate-limit";
 
 const schema = z.object({ token: z.string().min(10), password: z.string().min(8) });
 
@@ -11,6 +16,36 @@ export async function POST(req: Request){
   if(!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
 
   const { token, password } = parsed.data;
+  const ip = getClientIp(req);
+
+  const decisions = await Promise.all([
+    consumeRateLimit({
+      scope: "auth:reset-confirm:ip",
+      identifier: ip,
+      limit: 30,
+      windowMs: 15 * 60 * 1000,
+    }),
+    consumeRateLimit({
+      scope: "auth:reset-confirm:token",
+      identifier: token,
+      limit: 8,
+      windowMs: 15 * 60 * 1000,
+    }),
+  ]);
+
+  if (decisions.some((decision) => !decision.allowed)) {
+    return NextResponse.json(
+      { error: "Too many reset attempts. Try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(maxRetryAfter(decisions)),
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  }
+
   const t = await prisma.passwordResetToken.findFirst({ where: { token, expires: { gt: new Date() } } });
   if(!t) return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
 
