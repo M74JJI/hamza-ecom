@@ -561,7 +561,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
             >
               {products.map((product, index) => {
                 const productMinPrice = Math.min(...product.variants.flatMap(variant => 
-                  variant.sizes.map(size => calculateDiscountedPrice(size.priceMAD, size.discountPercent))
+                  variant.sizes.map(size => calculateDiscountedPrice(Number(size.priceMAD), size.discountPercent))
                 ));
                 
                 return (
