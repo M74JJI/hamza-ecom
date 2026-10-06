@@ -4,6 +4,7 @@ import { hashPassword } from "@/lib/auth-utils";
 import { z } from "zod";
 import { sendVerifyEmail } from "@/lib/emails/verify";
 import { getAppUrl } from "@/lib/app-url";
+import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
 import {
   createOneTimeToken,
   hashOneTimeToken,
@@ -15,18 +16,56 @@ import {
 } from "@/lib/security/rate-limit";
 
 const schema = z.object({
-  name: z.string().min(1).optional(),
-  email: z.string().email(),
-  password: z.string().min(8)
+  name: z.string().trim().min(1).max(120).optional(),
+  email: z.string().trim().email().transform(normalizeEmailIdentity),
+  password: z.string().min(8),
 });
 
-export async function POST(req: Request){
+function signupSuccess() {
+  return NextResponse.json(
+    { ok: true },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  );
+}
+
+async function issueVerificationEmail(email: string) {
+  const token = createOneTimeToken();
+  const persistedToken = hashOneTimeToken(token);
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  await prisma.$transaction([
+    prisma.verificationToken.deleteMany({
+      where: { identifier: email },
+    }),
+    prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token: persistedToken,
+        expires,
+      },
+    }),
+  ]);
+
+  const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;
+  await sendVerifyEmail(email, verifyUrl);
+}
+
+export async function POST(req: Request) {
   const form = await req.formData();
-  const data = Object.fromEntries(form) as any;
+  const data = Object.fromEntries(form) as Record<string, FormDataEntryValue>;
   const parsed = schema.safeParse(data);
-  if(!parsed.success){
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid input" },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    );
   }
+
   const { email, password, name } = parsed.data;
   const ip = getClientIp(req);
 
@@ -58,27 +97,52 @@ export async function POST(req: Request){
     );
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if(existing){
-    return NextResponse.json({ error: "Email already in use" }, { status: 400 });
-  }
+  // Perform the expensive password hash for both new and existing identities.
+  // This reduces the direct timing difference between the two response paths.
   const passwordHash = await hashPassword(password);
-  const user = await prisma.user.create({ data: { email, name, passwordHash } });
 
-  // create email verification token
-  const token = createOneTimeToken();
-  const persistedToken = hashOneTimeToken(token);
-  const expires = new Date(Date.now() + 1000*60*60*24);
-  await prisma.$transaction([
-    prisma.verificationToken.deleteMany({
-      where: { identifier: email },
-    }),
-    prisma.verificationToken.create({
-      data: { identifier: email, token: persistedToken, expires },
-    }),
-  ]);
-  const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;
-  await sendVerifyEmail(email, verifyUrl);
+  const existing = await prisma.user.findFirst({
+    where: {
+      email: { equals: email, mode: "insensitive" },
+    },
+    select: {
+      email: true,
+      emailVerified: true,
+    },
+  });
 
-  return NextResponse.json({ ok: true });
+  if (existing) {
+    if (!existing.emailVerified) {
+      await issueVerificationEmail(existing.email);
+    }
+
+    return signupSuccess();
+  }
+
+  let userEmail = email;
+
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        passwordHash,
+      },
+      select: {
+        email: true,
+      },
+    });
+
+    userEmail = user.email;
+  } catch (error: any) {
+    // A concurrent request may have created the same normalized identity after
+    // the case-insensitive existence check. Do not disclose that distinction.
+    if (error?.code === "P2002") {
+      return signupSuccess();
+    }
+    throw error;
+  }
+
+  await issueVerificationEmail(userEmail);
+  return signupSuccess();
 }
