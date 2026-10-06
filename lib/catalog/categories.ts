@@ -1,6 +1,4 @@
 import { prisma } from "@/lib/db";
-import { expandCategoryIds } from "@/lib/catalog/category-tree";
-
 export { expandCategoryIds } from "@/lib/catalog/category-tree";
 
 export type CatalogCategory = {
