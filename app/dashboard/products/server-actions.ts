@@ -41,8 +41,9 @@ export async function upsertProductAction(input: unknown) {
   }
   const data = parsed.data;
 
-  try {
-    const tx = await prisma.$transaction(async (db) => {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const tx = await prisma.$transaction(async (db) => {
       let product;
 
       // 🧩 Step 1: Determine base slug
@@ -332,15 +333,29 @@ export async function upsertProductAction(input: unknown) {
         }
       }
 
-      return product;
-    });
+        return product;
+      }, {
+        isolationLevel: 'Serializable',
+      });
 
-    revalidatePath('/dashboard/products');
-    revalidatePath('/products');
+      revalidatePath('/dashboard/products');
+      revalidatePath('/products');
 
-    return { ok: true, id: tx.id };
-  } catch (err: any) {
-    console.error('❌ upsertProductAction failed:', err);
+      return { ok: true, id: tx.id };
+    } catch (err: any) {
+      console.error('❌ upsertProductAction failed:', err);
+
+      const target = Array.isArray(err?.meta?.target)
+        ? err.meta.target.join(',')
+        : String(err?.meta?.target ?? '');
+
+      const retryableSlugRace =
+        err?.code === 'P2034' ||
+        (err?.code === 'P2002' && target.includes('slug'));
+
+      if (retryableSlugRace && attempt < 2) {
+        continue;
+      }
 
     if (err?.message === 'PRODUCT_NOT_FOUND') {
       return { error: 'Product not found.' };
@@ -355,19 +370,22 @@ export async function upsertProductAction(input: unknown) {
       return { error: 'A SKU cannot be moved between variants or products.' };
     }
 
-    if (err?.code === 'P2002') {
-      const target = Array.isArray(err.meta?.target)
-        ? err.meta.target.join(',')
-        : String(err.meta?.target ?? '');
+      if (err?.code === 'P2002') {
+        if (target.includes('sku')) {
+          return { error: 'Duplicate SKU detected. Please ensure each SKU is unique.' };
+        }
+        if (target.includes('slug')) {
+          return { error: 'Product slug already exists. Please retry with a different slug.' };
+        }
+      }
 
-      if (target.includes('sku')) {
-        return { error: 'Duplicate SKU detected. Please ensure each SKU is unique.' };
+      if (err?.code === 'P2034') {
+        return { error: 'Product was modified concurrently. Please retry.' };
       }
-      if (target.includes('slug')) {
-        return { error: 'Product slug already exists. Please retry with a different slug.' };
-      }
+
+      return { error: 'Unexpected error while saving product.' };
     }
-
-    return { error: 'Unexpected error while saving product.' };
   }
+
+  return { error: 'Unable to save product after multiple concurrent retries.' };
 }
