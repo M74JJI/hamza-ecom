@@ -16,22 +16,25 @@ export async function createAddress(input: unknown) {
   const { user } = await requireUser();
   const data = addressSchema.parse(input);
 
-  if (data.isDefault) {
-    await prisma.address.updateMany({
-      where: { userId: user.id, isDefault: true },
-      data: { isDefault: false },
-    });
-  }
+  return prisma.$transaction(async (tx) => {
+    if (data.isDefault) {
+      await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
+      await tx.address.updateMany({
+        where: { userId: user.id, isDefault: true },
+        data: { isDefault: false },
+      });
+    }
 
-  return prisma.address.create({
-    data: {
-      userId: user.id,
-      fullName: data.fullName,
-      phone: data.phone,
-      city: data.city,
-      fullAddress: data.fullAddress,
-      isDefault: !!data.isDefault,
-    },
+    return tx.address.create({
+      data: {
+        userId: user.id,
+        fullName: data.fullName,
+        phone: data.phone,
+        city: data.city,
+        fullAddress: data.fullAddress,
+        isDefault: !!data.isDefault,
+      },
+    });
   });
 }
 
@@ -39,30 +42,39 @@ export async function updateAddress(id: string, input: unknown) {
   const { user } = await requireUser();
   const data = addressSchema.parse(input);
 
-  const owned = await prisma.address.findFirst({
-    where: { id, userId: user.id },
-    select: { id: true },
-  });
-  if (!owned) {
-    throw new Error('Address not found');
-  }
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
 
-  if (data.isDefault) {
-    await prisma.address.updateMany({
-      where: { userId: user.id, isDefault: true },
-      data: { isDefault: false },
+    const owned = await tx.address.findFirst({
+      where: { id, userId: user.id },
+      select: { id: true },
     });
-  }
 
-  return prisma.address.update({
-    where: { id: owned.id },
-    data: {
-      fullName: data.fullName,
-      phone: data.phone,
-      city: data.city,
-      fullAddress: data.fullAddress,
-      isDefault: !!data.isDefault,
-    },
+    if (!owned) {
+      throw new Error('Address not found');
+    }
+
+    if (data.isDefault) {
+      await tx.address.updateMany({
+        where: {
+          userId: user.id,
+          isDefault: true,
+          id: { not: owned.id },
+        },
+        data: { isDefault: false },
+      });
+    }
+
+    return tx.address.update({
+      where: { id: owned.id },
+      data: {
+        fullName: data.fullName,
+        phone: data.phone,
+        city: data.city,
+        fullAddress: data.fullAddress,
+        isDefault: !!data.isDefault,
+      },
+    });
   });
 }
 
