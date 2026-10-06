@@ -31,6 +31,7 @@ export function OrdersClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [msg, setMsg] = useState<string>();
+  const [msgError, setMsgError] = useState(false);
   const [viewOrder, setViewOrder] = useState<any | null>(null);
   const [customNote, setCustomNote] = useState<string>("");
 
@@ -42,21 +43,44 @@ export function OrdersClient({
     router.push(`/dashboard/orders?${newParams.toString()}`);
   };
 
+  const allowedStatuses = (current: string) => {
+    const transitions: Record<string, string[]> = {
+      PENDING: ["PENDING", "CONFIRMED", "CANCELLED"],
+      CONFIRMED: ["CONFIRMED", "SHIPPED", "CANCELLED"],
+      SHIPPED: ["SHIPPED", "DELIVERED"],
+      DELIVERED: ["DELIVERED"],
+      CANCELLED: ["CANCELLED"],
+    };
+    return transitions[current] ?? [current];
+  };
+
   const handleUpdateStatus = (id: string, status: string) => {
     startTransition(async () => {
-      await updateOrderStatusAction(id, status);
-      setMsg("Order status updated!");
-      setTimeout(() => setMsg(undefined), 2000);
-      router.refresh();
+      const result = await updateOrderStatusAction(id, status);
+      if (result?.error) {
+        setMsgError(true);
+        setMsg(result.error);
+      } else {
+        setMsgError(false);
+        setMsg("Order status updated!");
+        router.refresh();
+      }
+      setTimeout(() => setMsg(undefined), 2500);
     });
   };
 
   const handleUpdateNote = (id: string, note: string) => {
     startTransition(async () => {
-      await updateOrderNoteAction(id, note);
-      setMsg("Note saved!");
-      setTimeout(() => setMsg(undefined), 2000);
-      router.refresh();
+      const result = await updateOrderNoteAction(id, note);
+      if (result?.error) {
+        setMsgError(true);
+        setMsg(result.error);
+      } else {
+        setMsgError(false);
+        setMsg("Note saved!");
+        router.refresh();
+      }
+      setTimeout(() => setMsg(undefined), 2500);
     });
   };
 
@@ -101,7 +125,7 @@ export function OrdersClient({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="px-4 py-3 bg-green-500/80 text-white rounded-xl"
+            className={`px-4 py-3 text-white rounded-xl ${msgError ? "bg-red-500/90" : "bg-green-500/80"}`}
           >
             {msg}
           </motion.div>
@@ -148,11 +172,11 @@ export function OrdersClient({
               : "bg-gray-300/30 text-gray-700 dark:text-gray-300"
           } focus:ring-2 focus:ring-blue-500/50 outline-none border border-transparent transition`}
         >
-          <option value="PENDING">Pending</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="SHIPPED">Shipped</option>
-          <option value="DELIVERED">Delivered</option>
-          <option value="CANCELLED">Cancelled</option>
+          {allowedStatuses(o.status).map((status) => (
+            <option key={status} value={status}>
+              {status.charAt(0) + status.slice(1).toLowerCase()}
+            </option>
+          ))}
         </select>
       </td>
 
