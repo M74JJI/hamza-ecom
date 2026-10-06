@@ -16,6 +16,8 @@ jobs:
   baseline:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://baseline:baseline@localhost:5432/baseline?schema=public
     timeout-minutes: 10
 
     steps:
