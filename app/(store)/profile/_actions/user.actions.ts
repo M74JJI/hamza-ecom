@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { z } from 'zod';
 import { getCurrentSessionToken, hashPassword, verifyPassword } from '@/lib/auth-utils';
+import { getPersistedSessionTokenCandidates } from '@/lib/session-token';
 import { sendVerifyEmail } from '@/lib/emails/verify';
 import { getAppUrl } from '@/lib/app-url';
 
@@ -47,7 +48,15 @@ export async function changePassword(input: unknown){
     prisma.session.deleteMany({
       where: {
         userId: user.id,
-        ...(currentToken ? { token: { not: currentToken } } : {}),
+        ...(currentToken
+          ? {
+              NOT: {
+                token: {
+                  in: getPersistedSessionTokenCandidates(currentToken),
+                },
+              },
+            }
+          : {}),
       },
     }),
   ]);
