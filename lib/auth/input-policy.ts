@@ -4,6 +4,13 @@ export const AUTH_PASSWORD_MAX_LENGTH = 1024;
 export const AUTH_ONE_TIME_TOKEN_MIN_LENGTH = 10;
 export const AUTH_ONE_TIME_TOKEN_MAX_LENGTH = 256;
 
+export function isSupportedNewPasswordLength(value: string) {
+  return (
+    value.length >= AUTH_PASSWORD_MIN_LENGTH &&
+    value.length <= AUTH_PASSWORD_MAX_LENGTH
+  );
+}
+
 export function isReasonableOneTimeToken(value: string | null | undefined) {
   if (!value) return false;
   return (
