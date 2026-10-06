@@ -3,8 +3,12 @@ import { randomBytes } from "crypto";
 import * as argon2 from "argon2";
 import { prisma } from "./db";
 import nodemailer from "nodemailer";
-
-const SESSION_COOKIE = "session";
+import {
+  SESSION_COOKIE_NAME,
+  getPersistedSessionTokenCandidates,
+  hashSessionToken,
+  isLegacyPlaintextSessionToken,
+} from "@/lib/session-token";
 
 function sessionCookieSecure() {
   return process.env.NODE_ENV === "production";
@@ -24,17 +28,23 @@ function tokenString(len = 48) {
 
 export async function getCurrentSessionToken() {
   const cookieStore = await cookies();
-  return cookieStore.get(SESSION_COOKIE)?.value ?? null;
+  return cookieStore.get(SESSION_COOKIE_NAME)?.value ?? null;
 }
 
 export async function createSession(userId: string, maxAgeDays = 30) {
   const cookieStore = await cookies();
-  const token = tokenString(24);
+  const rawToken = tokenString(24);
   const expires = new Date(Date.now() + maxAgeDays * 24 * 60 * 60 * 1000);
 
-  await prisma.session.create({ data: { userId, token, expires } });
+  await prisma.session.create({
+    data: {
+      userId,
+      token: hashSessionToken(rawToken),
+      expires,
+    },
+  });
 
-  cookieStore.set(SESSION_COOKIE, token, {
+  cookieStore.set(SESSION_COOKIE_NAME, rawToken, {
     httpOnly: true,
     secure: sessionCookieSecure(),
     sameSite: "lax",
@@ -45,13 +55,19 @@ export async function createSession(userId: string, maxAgeDays = 30) {
 
 export async function destroySession() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const rawToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-  if (token) {
-    await prisma.session.deleteMany({ where: { token } });
+  if (rawToken) {
+    await prisma.session.deleteMany({
+      where: {
+        token: {
+          in: getPersistedSessionTokenCandidates(rawToken),
+        },
+      },
+    });
   }
 
-  cookieStore.set(SESSION_COOKIE, "", {
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
     httpOnly: true,
     secure: sessionCookieSecure(),
     sameSite: "lax",
@@ -64,25 +80,47 @@ export async function revokeUserSessions(userId: string, exceptToken?: string | 
   await prisma.session.deleteMany({
     where: {
       userId,
-      ...(exceptToken ? { token: { not: exceptToken } } : {}),
+      ...(exceptToken
+        ? {
+            NOT: {
+              token: {
+                in: getPersistedSessionTokenCandidates(exceptToken),
+              },
+            },
+          }
+        : {}),
     },
   });
 }
 
 export async function getSessionUser() {
-  const token = await getCurrentSessionToken();
-  if (!token) return null;
+  const rawToken = await getCurrentSessionToken();
+  if (!rawToken) return null;
 
   const session = await prisma.session.findFirst({
-    where: { token, expires: { gt: new Date() } },
+    where: {
+      token: {
+        in: getPersistedSessionTokenCandidates(rawToken),
+      },
+      expires: { gt: new Date() },
+    },
     include: { user: true },
   });
 
-  return session?.user ?? null;
+  if (!session) return null;
+
+  if (isLegacyPlaintextSessionToken(session.token, rawToken)) {
+    await prisma.session.update({
+      where: { id: session.id },
+      data: { token: hashSessionToken(rawToken) },
+    });
+  }
+
+  return session.user;
 }
 
 export function getTransport() {
-  const transporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
@@ -91,7 +129,6 @@ export function getTransport() {
       pass: process.env.GMAIL_APP_PASS,
     },
   });
-  return transporter;
 }
 
 export async function sendEmail(to: string, subject: string, html: string) {
