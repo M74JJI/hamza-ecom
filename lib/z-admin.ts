@@ -15,7 +15,7 @@ export const VariantSizeSchema = z.object({
   size: z.string().min(1),
   sku: z.string().min(1),
   priceMAD: z.number().positive(),
-  discountPercent: z.number().int().optional(),
+  discountPercent: z.number().int().min(0).max(100).optional(),
   stockQty: z.number().int().nonnegative(),
   isActive: z.boolean().default(true),
 });
