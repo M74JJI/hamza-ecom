@@ -51,12 +51,12 @@ export function SignUpForm(){
         >
           <CheckCircle className="w-8 h-8 text-green-600" />
         </motion.div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">Welcome to the Club!</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">Check Your Email</h3>
         <p className="text-gray-600 mb-4">
-          We've sent a verification link to your email.
+          If this address can be registered, verification instructions will arrive shortly.
         </p>
         <p className="text-gray-500 text-sm mb-6">
-          Verify your email to start shopping and unlock member benefits.
+          If you already have an account, you can sign in or use password recovery instead.
         </p>
         
         <Link href="/products">
