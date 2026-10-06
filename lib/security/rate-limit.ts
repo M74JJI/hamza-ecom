@@ -1,38 +1,32 @@
-import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db";
+import {
+  makeRateLimitKey,
+  type RateLimitDecision,
+} from "@/lib/security/rate-limit-policy";
+
+export {
+  getClientIp,
+  makeRateLimitKey,
+  maxRetryAfter,
+  normalizeRateLimitIdentifier,
+  type RateLimitDecision,
+} from "@/lib/security/rate-limit-policy";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export type RateLimitDecision = {
-  allowed: boolean;
-  limit: number;
-  remaining: number;
-  retryAfterSeconds: number;
-};
-
-export function normalizeRateLimitIdentifier(value: string) {
-  return value.trim().toLowerCase().slice(0, 512);
-}
-
-export function getClientIp(request: Request) {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first.slice(0, 128);
+function getRateLimitSecret() {
+  const configured = process.env.RATE_LIMIT_HASH_SECRET?.trim();
+  if (configured && configured.length >= 32) {
+    return configured;
   }
 
-  const realIp = request.headers.get("x-real-ip")?.trim();
-  if (realIp) return realIp.slice(0, 128);
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "RATE_LIMIT_HASH_SECRET must be configured with at least 32 characters in production",
+    );
+  }
 
-  return "unknown";
-}
-
-export function makeRateLimitKey(scope: string, identifier: string) {
-  const digest = createHash("sha256")
-    .update(`${scope}\0${normalizeRateLimitIdentifier(identifier)}`)
-    .digest("hex");
-
-  return `${scope}:${digest}`;
+  return "development-only-rate-limit-secret-32-chars";
 }
 
 export async function consumeRateLimit({
@@ -53,7 +47,7 @@ export async function consumeRateLimit({
     throw new Error("Rate-limit window must be at least one second");
   }
 
-  const key = makeRateLimitKey(scope, identifier);
+  const key = makeRateLimitKey(scope, identifier, getRateLimitSecret());
   const now = Date.now();
   const nextExpiry = new Date(now + windowMs);
 
@@ -88,7 +82,6 @@ export async function consumeRateLimit({
   const count = Number(row.count);
   const expiresAt = new Date(row.expiresAt).getTime();
 
-  // Opportunistic indexed cleanup on a small deterministic fraction of keys.
   if (Number.parseInt(key.slice(-2), 16) < 8) {
     await prisma.rateLimitBucket.deleteMany({
       where: {
@@ -105,13 +98,4 @@ export async function consumeRateLimit({
     remaining: Math.max(0, limit - count),
     retryAfterSeconds: Math.max(1, Math.ceil((expiresAt - now) / 1000)),
   };
-}
-
-export function maxRetryAfter(decisions: RateLimitDecision[]) {
-  return Math.max(
-    1,
-    ...decisions
-      .filter((decision) => !decision.allowed)
-      .map((decision) => decision.retryAfterSeconds),
-  );
 }
