@@ -52,7 +52,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   // Calculate price range for product across all variants
   const getProductPriceRange = useMemo(() => {
     const allPrices = currentProduct.variants.flatMap(variant => 
-      variant.sizes.map(size => calculateDiscountedPrice(size.priceMAD, size.discountPercent))
+      variant.sizes.map(size => calculateDiscountedPrice(Number(size.priceMAD), size.discountPercent))
     );
     
     const minPrice = Math.min(...allPrices);
