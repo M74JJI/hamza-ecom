@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSafeCallbackPath } from "@/lib/auth/redirect";
 import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
 import {
+import { isSameOriginMutation } from "@/lib/security/request-origin";
   consumeRateLimit,
   getClientIp,
   maxRetryAfter,
@@ -16,6 +17,13 @@ const schema = z.object({
 });
 
 export async function POST(req: Request){
+  if (!isSameOriginMutation(req)) {
+    return NextResponse.json(
+      { error: "Cross-origin request rejected" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const form = await req.formData();
   const data = Object.fromEntries(form) as Record<string, FormDataEntryValue>;
   const callbackUrl = getSafeCallbackPath(data.callbackUrl);
