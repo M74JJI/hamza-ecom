@@ -53,10 +53,12 @@ export async function addToCartAction(input: unknown) {
     if (!size) return { error: "Variant size is unavailable" };
     if (size.stockQty <= 0) return { error: "Out of stock" };
 
-    const existing = await tx.cartItem.findFirst({
+    const existing = await tx.cartItem.findUnique({
       where: {
-        cartId: cart.id,
-        variantSizeId: size.id,
+        cartId_variantSizeId: {
+          cartId: cart.id,
+          variantSizeId: size.id,
+        },
       },
       select: {
         id: true,

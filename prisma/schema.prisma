@@ -258,6 +258,8 @@ model CartItem {
   unitPriceMAD  Decimal     @db.Decimal(10, 2)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+
+  @@unique([cartId, variantSizeId])
 }
 
 model DeliveryCompany {
@@ -300,7 +302,7 @@ model Review {
   updatedAt       DateTime @updatedAt
 
   @@index([productId, rating, createdAt])
-  @@index([userId, productId])
+  @@unique([userId, productId])
 }
 
 model WishlistItem {

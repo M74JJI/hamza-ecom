@@ -55,9 +55,8 @@ export async function POST(req: Request) {
       return { ok: false as const, status: 404, error: "Product not found" };
     }
 
-    // Serialize review writes for a product. This keeps the logical
-    // one-review-per-user rule and cached product rating consistent even
-    // before a database-level unique constraint is introduced.
+    // Serialize review writes for a product so the cached aggregate rating
+    // stays consistent with the database-level one-review-per-user constraint.
     await tx.$queryRaw`SELECT "id" FROM "Product" WHERE "id" = ${product.id} FOR UPDATE`;
 
     if (chosenVariantId) {
@@ -96,38 +95,30 @@ export async function POST(req: Request) {
       }
     }
 
-    const existing = await tx.review.findFirst({
+    await tx.review.upsert({
       where: {
+        userId_productId: {
+          userId: user.id,
+          productId: product.id,
+        },
+      },
+      update: {
+        rating,
+        comment,
+        chosenVariantId: chosenVariantId ?? null,
+        chosenSize: chosenSize ?? null,
+        quantity: quantity ?? null,
+      },
+      create: {
         productId: product.id,
         userId: user.id,
+        rating,
+        comment,
+        chosenVariantId: chosenVariantId ?? null,
+        chosenSize: chosenSize ?? null,
+        quantity: quantity ?? null,
       },
-      select: { id: true },
     });
-
-    if (existing) {
-      await tx.review.update({
-        where: { id: existing.id },
-        data: {
-          rating,
-          comment,
-          chosenVariantId: chosenVariantId ?? null,
-          chosenSize: chosenSize ?? null,
-          quantity: quantity ?? null,
-        },
-      });
-    } else {
-      await tx.review.create({
-        data: {
-          productId: product.id,
-          userId: user.id,
-          rating,
-          comment,
-          chosenVariantId: chosenVariantId ?? null,
-          chosenSize: chosenSize ?? null,
-          quantity: quantity ?? null,
-        },
-      });
-    }
 
     const aggregate = await tx.review.aggregate({
       where: { productId: product.id },
