@@ -1,21 +1,20 @@
-'use server';
+"use server";
 
 import { requireAdmin } from "@/lib/require-admin";
-
-import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { isOrderStatus, transitionOrderStatus } from "@/lib/orders/transition";
 
-export async function updateOrderStatusAction(orderId: string, status: "PENDING"|"CONFIRMED"|"SHIPPED"|"DELIVERED"|"CANCELLED"){
+export async function updateOrderStatusAction(orderId: string, status: string) {
   await requireAdmin();
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
-  if(!order) return { error: "Order not found" };
 
-  if(status === "CANCELLED" && order.status !== "CANCELLED"){
-    for(const item of order.items){
-      await prisma.variantSize.update({ where: { id: item.variantSizeId }, data: { stockQty: { increment: item.quantity } } });
-    }
+  if (!isOrderStatus(status)) {
+    return { error: "Invalid status" };
   }
-  await prisma.order.update({ where: { id: orderId }, data: { status } });
+
+  const result = await transitionOrderStatus(orderId, status);
+  if (!result.ok) return result;
+
   revalidatePath("/dashboard/orders");
-  return { ok: true };
+  revalidatePath("/profile/orders");
+  return result;
 }
