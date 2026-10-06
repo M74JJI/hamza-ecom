@@ -18,6 +18,12 @@ import {
   Package,
 } from "lucide-react";
 
+function readAttributes(value: unknown) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 export function OrdersClient({
   orders,
   currentPage,
@@ -342,7 +348,9 @@ export function OrdersClient({
                 </p>
                 <p>
                   <b>Shipping Company:</b>{" "}
-                  {viewOrder.shippingCompany?.name || "—"}
+                  {viewOrder.shippingCompanyNameSnapshot ||
+                    viewOrder.shippingCompany?.name ||
+                    "—"}
                 </p>
                 <hr className="my-3" />
 
@@ -353,9 +361,20 @@ export function OrdersClient({
                   {viewOrder.items.map((item: any) => {
                     const variant = item.variantSize.variant;
                     const product = variant.product;
+                    const attributes = readAttributes(item.attributesSnapshot);
+                    const brand =
+                      item.productBrandSnapshot ||
+                      product?.brand ||
+                      "Product";
+                    const title = item.titleSnapshot || variant.title;
+                    const size =
+                      typeof attributes.size === "string"
+                        ? attributes.size
+                        : item.variantSize.size;
                     const image =
+                      item.imageSnapshot ||
                       variant.images?.[0]?.url ||
-                      product.imageUrl ||
+                      variant.variantStyleImg ||
                       "/placeholder.png";
 
                     return (
@@ -365,15 +384,15 @@ export function OrdersClient({
                       >
                         <img
                           src={image}
-                          alt={variant.title}
+                          alt={title}
                           className="w-16 h-16 rounded-lg object-cover border border-gray-300/20"
                         />
                         <div className="flex-1">
                           <p className="font-medium">
-                            {product.brand} — {variant.title}
+                            {brand} — {title}
                           </p>
                           <p className="text-sm text-gray-500">
-                            Size: {item.variantSize.size}
+                            Size: {size}
                           </p>
                           <p className="text-sm text-gray-500">
                             Qty: {item.quantity}

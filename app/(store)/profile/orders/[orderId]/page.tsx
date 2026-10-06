@@ -10,6 +10,12 @@ import { SectionCard } from '../../_components/SectionCard';
 import { InvoiceButton } from '../../_components/InvoiceButton';
 import ProfileNav from '../../_components/ProfileNav';
 
+function readAttributes(value: unknown) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 export default async function Page({ params }: { params: Promise<{ orderId: string }> }) {
   const { orderId } = await params;
 
@@ -32,7 +38,6 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
       },
       shippingAddress: true,
       shippingCompany: true,
-      coupon: true,
       user:{
         select:{
           _count:{
@@ -58,6 +63,40 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
       </div>
     );
   }
+
+  const hasAddressSnapshot = Boolean(
+    order.shippingFullNameSnapshot ||
+      order.shippingPhoneSnapshot ||
+      order.shippingCitySnapshot ||
+      order.shippingAddressSnapshot,
+  );
+
+  const shippingAddress =
+    hasAddressSnapshot || order.shippingAddress
+      ? {
+          fullName:
+            order.shippingFullNameSnapshot ??
+            order.shippingAddress?.fullName ??
+            '',
+          phone:
+            order.shippingPhoneSnapshot ??
+            order.shippingAddress?.phone ??
+            '',
+          city:
+            order.shippingCitySnapshot ??
+            order.shippingAddress?.city ??
+            '',
+          fullAddress:
+            order.shippingAddressSnapshot ??
+            order.shippingAddress?.fullAddress ??
+            '',
+        }
+      : null;
+
+  const shippingCompanyName =
+    order.shippingCompanyNameSnapshot ??
+    order.shippingCompany?.name ??
+    null;
 
   // ---------------- Timeline steps ----------------
   const steps = [
@@ -174,10 +213,19 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
                 {order.items.map((it) => {
                   const v = it.variantSize.variant;
                   const product = v.product;
+                  const attributes = readAttributes(it.attributesSnapshot);
+                  const size =
+                    typeof attributes.size === 'string'
+                      ? attributes.size
+                      : it.variantSize.size;
+                  const brand = it.productBrandSnapshot ?? product?.brand ?? 'Product';
+                  const title = it.titleSnapshot || v.title;
+                  const sku = it.skuSnapshot || it.variantSize.sku;
                   const img =
-                    Array.isArray(v.images) && v.images.length > 0
-                      ? v.images[0]?.url
-                      : v.variantStyleImg || '';
+                    it.imageSnapshot ??
+                    v.images[0]?.url ??
+                    v.variantStyleImg ??
+                    '';
 
                   return (
                     <div key={it.id} className="flex items-center gap-4 p-4 bg-white/80 backdrop-blur-2xl rounded-2xl border-2 border-gray-300 hover:shadow-lg transition-all">
@@ -185,7 +233,7 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
                         {img ? (
                           <Image
                             src={img}
-                            alt={product?.brand ?? 'Item'}
+                            alt={brand}
                             fill
                             className="object-cover"
                           />
@@ -198,11 +246,11 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
 
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-800 text-lg mb-1">
-                          {product?.brand ?? 'Product'} — {v.title}
+                          {brand} — {title}
                         </h3>
                         <div className="text-sm text-gray-600 space-y-1">
-                          <div>Size: {it.variantSize.size} · Quantity: {it.quantity}</div>
-                          <div>SKU: {it.variantSize.sku}</div>
+                          <div>Size: {size} · Quantity: {it.quantity}</div>
+                          <div>SKU: {sku}</div>
                         </div>
                       </div>
 
@@ -231,24 +279,24 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
                   </div>
                 }
               >
-                {order.shippingAddress ? (
+                {shippingAddress ? (
                   <div className="space-y-3">
                     <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-xl p-4 border border-green-200">
                       <div className="font-semibold text-gray-800 text-lg mb-2">
-                        {order.shippingAddress.fullName}
+                        {shippingAddress.fullName}
                       </div>
                       <div className="text-gray-600 space-y-1">
-                        <div>{order.shippingAddress.fullAddress}</div>
-                        <div>{order.shippingAddress.city}</div>
-                        <div className="font-medium">Phone: {order.shippingAddress.phone}</div>
+                        <div>{shippingAddress.fullAddress}</div>
+                        <div>{shippingAddress.city}</div>
+                        <div className="font-medium">Phone: {shippingAddress.phone}</div>
                       </div>
                     </div>
                     
-                    {order.shippingCompany && (
+                    {shippingCompanyName && (
                       <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
                         <Truck className="w-5 h-5 text-blue-600" />
                         <div>
-                          <div className="font-semibold text-gray-800">{order.shippingCompany.name}</div>
+                          <div className="font-semibold text-gray-800">{shippingCompanyName}</div>
                           <div className="text-sm text-gray-600">
                             Shipping fee: {Number(order.shippingFeeMAD ?? 0).toFixed(2)} MAD
                           </div>
@@ -297,12 +345,12 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
                     </div>
                   </div>
 
-                  {order.coupon && (
+                  {order.couponCode && (
                     <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-xl border border-yellow-200 mt-3">
                       <Award className="w-4 h-4 text-yellow-600" />
                       <div className="text-sm">
                         <div className="font-semibold text-gray-800">Coupon Applied</div>
-                        <div className="text-gray-600">{order.coupon.code}</div>
+                        <div className="text-gray-600">{order.couponCode}</div>
                       </div>
                     </div>
                   )}

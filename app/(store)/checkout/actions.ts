@@ -206,7 +206,25 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   // --- Load DB cart ---
   const cart = await prisma.cart.findFirst({
     where: { userId: user.id },
-    include: { items: { include: { variantSize: { include: { variant: true } } } } },
+    include: {
+      items: {
+        include: {
+          variantSize: {
+            include: {
+              variant: {
+                include: {
+                  product: { select: { brand: true } },
+                  images: {
+                    orderBy: { sortOrder: 'asc' },
+                    take: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
   if (!cart || cart.items.length === 0) return { ok: false, error: 'Your cart is empty' };
 
@@ -257,6 +275,19 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   const discountMAD = couponPercent ? Number((subtotal * couponPercent / 100).toFixed(2)) : 0;
   const totalMAD = Number((subtotal - discountMAD + shippingFee).toFixed(2));
 
+  const shippingAddress = await prisma.address.findFirst({
+    where: { id: addressId, userId: user.id },
+    select: {
+      fullName: true,
+      phone: true,
+      city: true,
+      fullAddress: true,
+    },
+  });
+  if (!shippingAddress) {
+    return { ok: false, error: 'Invalid shipping address' };
+  }
+
   // --- Transaction: claim cart, atomically reserve stock, then create order ---
   const order = await prisma.$transaction(async (tx) => {
       const claimedCart = await tx.cartItem.deleteMany({
@@ -286,6 +317,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
         totalMAD,
         currency: 'MAD',
         shippingCompanyId: company.id,
+        shippingCompanyNameSnapshot: company.name,
         shippingFeeMAD: shippingFee,
         couponCode,
         couponPercentApplied: couponPercent ?? undefined,
@@ -293,6 +325,10 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
         discountMAD,
         placedAt: new Date(),
         shippingAddressId: addressId,
+        shippingFullNameSnapshot: shippingAddress.fullName,
+        shippingPhoneSnapshot: shippingAddress.phone,
+        shippingCitySnapshot: shippingAddress.city,
+        shippingAddressSnapshot: shippingAddress.fullAddress,
         items: {
           create: cart.items.map((ci) => {
             const s = ci.variantSize;
@@ -301,7 +337,15 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
               variantSizeId: s.id,
               titleSnapshot: s.variant.title,
               skuSnapshot: s.sku,
-              attributesSnapshot: { size: s.size, variantName: s.variant.name },
+              productBrandSnapshot: s.variant.product.brand,
+              imageSnapshot:
+                s.variant.images[0]?.url ??
+                s.variant.variantStyleImg ??
+                null,
+              attributesSnapshot: {
+                size: s.size,
+                variantName: s.variant.name,
+              },
               quantity: ci.quantity,
               unitPriceMAD: final,
             };

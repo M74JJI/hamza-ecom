@@ -4,6 +4,12 @@ import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { makePremiumInvoicePdf } from '@/lib/pdf/invoice';
 
+function readAttributes(value: unknown) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 export async function downloadInvoice(orderId: string) {
   const { user } = await requireUser();
 
@@ -12,7 +18,6 @@ export async function downloadInvoice(orderId: string) {
     include: {
       shippingAddress: true,
       shippingCompany: true,
-      coupon: true,
       items: {
         include: {
           variantSize: {
@@ -20,7 +25,10 @@ export async function downloadInvoice(orderId: string) {
               variant: {
                 include: {
                   product: true,
-                  images: true,
+                  images: {
+                    orderBy: { sortOrder: 'asc' },
+                    take: 1,
+                  },
                 },
               },
             },
@@ -32,6 +40,13 @@ export async function downloadInvoice(orderId: string) {
 
   if (!order) throw new Error('Order not found');
 
+  const hasAddressSnapshot = Boolean(
+    order.shippingFullNameSnapshot ||
+      order.shippingPhoneSnapshot ||
+      order.shippingCitySnapshot ||
+      order.shippingAddressSnapshot,
+  );
+
   const invoiceData = {
     id: order.id,
     createdAt: order.createdAt,
@@ -41,39 +56,61 @@ export async function downloadInvoice(orderId: string) {
     shippingFeeMAD: Number(order.shippingFeeMAD ?? 0),
     totalMAD: Number(order.totalMAD ?? 0),
     couponCode: order.couponCode ?? null,
-    shippingCompany: order.shippingCompany?.name ?? null,
-    address: order.shippingAddress
-      ? {
-          fullName: order.shippingAddress.fullName,
-          phone: order.shippingAddress.phone,
-          city: order.shippingAddress.city,
-          fullAddress: order.shippingAddress.fullAddress,
-        }
-      : null,
-    items: order.items.map((it) => {
-      const vs = it.variantSize;
-      const v = vs.variant;
-      const p = v.product;
+    shippingCompany:
+      order.shippingCompanyNameSnapshot ??
+      order.shippingCompany?.name ??
+      null,
+    address:
+      hasAddressSnapshot || order.shippingAddress
+        ? {
+            fullName:
+              order.shippingFullNameSnapshot ??
+              order.shippingAddress?.fullName ??
+              '',
+            phone:
+              order.shippingPhoneSnapshot ??
+              order.shippingAddress?.phone ??
+              '',
+            city:
+              order.shippingCitySnapshot ??
+              order.shippingAddress?.city ??
+              '',
+            fullAddress:
+              order.shippingAddressSnapshot ??
+              order.shippingAddress?.fullAddress ??
+              '',
+          }
+        : null,
+    items: order.items.map((item) => {
+      const attributes = readAttributes(item.attributesSnapshot);
+      const variantSize = item.variantSize;
+      const variant = variantSize.variant;
+      const product = variant.product;
+
+      const size =
+        typeof attributes.size === 'string'
+          ? attributes.size
+          : variantSize.size;
 
       return {
-        title: v.title,
-        productBrand: p.brand,
-        size: vs.size,
-        sku: vs.sku,
-        quantity: it.quantity,
-        unitPrice: Number(it.unitPriceMAD),
-        totalPrice: Number(it.unitPriceMAD) * it.quantity,
+        title: item.titleSnapshot || variant.title,
+        productBrand:
+          item.productBrandSnapshot ??
+          product.brand,
+        size,
+        sku: item.skuSnapshot || variantSize.sku,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPriceMAD),
+        totalPrice: Number(item.unitPriceMAD) * item.quantity,
         image:
-          Array.isArray(v.images) && v.images.length > 0
-            ? v.images[0].url
-            : v.variantStyleImg || null,
+          item.imageSnapshot ??
+          variant.images[0]?.url ??
+          variant.variantStyleImg ??
+          null,
       };
     }),
   };
 
-  // ✅ Await the async PDF generator
   const pdfBytes = await makePremiumInvoicePdf({ order: invoiceData });
-
-  // Return directly as ArrayBuffer to client
   return { bytes: pdfBytes.buffer };
 }
