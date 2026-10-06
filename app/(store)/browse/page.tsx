@@ -245,7 +245,7 @@ useEffect(() => {
             setShowFilters={setShowFilters}
             filters={filters}
             setFilters={setFilters}
-            dataLength={data.length}
+            dataLength={total}
           />
 
           {/* Product Section */}
