@@ -1,4 +1,4 @@
-import { boolean, z } from "zod";
+import { z } from "zod";
 
 export const VariantSizeSchema = z.object({
   id: z.string().optional(),
@@ -18,7 +18,7 @@ export const VariantSchema = z.object({
   variantStyleImg: z.string().url(),
   shortDescription: z.string().optional(),
   contentHtml: z.string().optional(),
-  sortOrder: z.number().int().optional(),
+  sortOrder: z.number().int().min(0).optional(),
   isActive: z.boolean().optional(),
   images: z.array(z.object({
     id: z.string().optional(),
