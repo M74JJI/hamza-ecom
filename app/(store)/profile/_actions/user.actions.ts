@@ -7,6 +7,7 @@ import { getCurrentSessionToken, hashPassword, verifyPassword } from '@/lib/auth
 import { getPersistedSessionTokenCandidates } from '@/lib/session-token';
 import { sendVerifyEmail } from '@/lib/emails/verify';
 import { getAppUrl } from '@/lib/app-url';
+import { consumeRateLimit } from '@/lib/security/rate-limit';
 
 const profileSchema = z.object({
   name: z.string().min(0).max(120).optional(),
@@ -33,6 +34,17 @@ const changePasswordSchema = z.object({
 export async function changePassword(input: unknown){
   const { user } = await requireUser();
   const data = changePasswordSchema.parse(input);
+
+  const decision = await consumeRateLimit({
+    scope: 'auth:password-change:user',
+    identifier: user.id,
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (!decision.allowed) {
+    throw new Error(`Too many password-change attempts. Try again in ${decision.retryAfterSeconds} seconds.`);
+  }
   const u = await prisma.user.findUnique({ where: { id: user.id } });
   if(!u?.passwordHash) throw new Error('Password auth not enabled.');
   const ok = await verifyPassword(u.passwordHash, data.current);
@@ -65,11 +77,27 @@ export async function changePassword(input: unknown){
 export async function resendVerificationEmail(){
   const { user } = await requireUser();
   if(user.emailVerified) return true;
+
+  const decision = await consumeRateLimit({
+    scope: 'auth:verification-resend:user',
+    identifier: user.id,
+    limit: 3,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!decision.allowed) {
+    throw new Error(`Too many verification emails. Try again in ${decision.retryAfterSeconds} seconds.`);
+  }
   const token = crypto.randomUUID();
   const expires = new Date(Date.now() + 1000*60*60*24);
-  await prisma.verificationToken.create({
-    data: { identifier: user.email!, token, expires }
-  });
+  await prisma.$transaction([
+    prisma.verificationToken.deleteMany({
+      where: { identifier: user.email! },
+    }),
+    prisma.verificationToken.create({
+      data: { identifier: user.email!, token, expires },
+    }),
+  ]);
   const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;
   await sendVerifyEmail(user.email!, verifyUrl);
   return true;
