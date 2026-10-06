@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { isSameOriginMutation } from "@/lib/security/request-origin";
+import { z } from "zod";
+
+const idPairSchema = z.object({
+  productId: z.string().min(1).max(100),
+  variantId: z.string().min(1).max(100),
+});
+
+const wishlistMutationSchema = idPairSchema.extend({
+  action: z.enum(["add", "remove"]).optional().default("add"),
+});
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -10,7 +21,7 @@ export async function GET() {
     where: { userId: user.id },
     include: {
       product: true,
-      variant: true, // ✅ include variant too
+      variant: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -19,20 +30,32 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (!isSameOriginMutation(req)) {
+    return NextResponse.json(
+      { ok: false, error: "CROSS_ORIGIN_REJECTED" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const user = await getCurrentUser();
-  if (!user)
+  if (!user) {
     return NextResponse.json(
       { ok: false, error: "UNAUTHENTICATED" },
-      { status: 401 }
+      { status: 401 },
     );
+  }
 
-  const { productId, variantId, action } = await req.json();
+  const body = await req.json().catch(() => null);
+  const parsed = wishlistMutationSchema.safeParse(body);
 
-  if (!productId || !variantId)
+  if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, error: "MISSING_IDS" },
-      { status: 400 }
+      { ok: false, error: "INVALID_INPUT" },
+      { status: 400 },
     );
+  }
+
+  const { productId, variantId, action } = parsed.data;
 
   if (action === "remove") {
     await prisma.wishlistItem.deleteMany({
@@ -41,15 +64,38 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, action: "removed" });
   }
 
+  const validVariant = await prisma.variant.findFirst({
+    where: {
+      id: variantId,
+      productId,
+      isActive: true,
+      product: {
+        status: "PUBLISHED",
+      },
+    },
+    select: { id: true },
+  });
+
+  if (!validVariant) {
+    return NextResponse.json(
+      { ok: false, error: "VARIANT_UNAVAILABLE" },
+      { status: 400 },
+    );
+  }
+
   await prisma.wishlistItem.upsert({
     where: {
       userId_productId_variantId: {
         userId: user.id,
         productId,
-        variantId,
+        variantId: validVariant.id,
       },
     },
-    create: { userId: user.id, productId, variantId },
+    create: {
+      userId: user.id,
+      productId,
+      variantId: validVariant.id,
+    },
     update: {},
   });
 
@@ -57,25 +103,40 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  if (!isSameOriginMutation(req)) {
+    return NextResponse.json(
+      { ok: false, error: "CROSS_ORIGIN_REJECTED" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const user = await getCurrentUser();
-  if (!user)
+  if (!user) {
     return NextResponse.json(
       { ok: false, error: "UNAUTHENTICATED" },
-      { status: 401 }
+      { status: 401 },
     );
+  }
 
   const url = new URL(req.url);
-  const productId = url.searchParams.get("productId") ?? undefined;
-  const variantId = url.searchParams.get("variantId") ?? undefined;
+  const parsed = idPairSchema.safeParse({
+    productId: url.searchParams.get("productId"),
+    variantId: url.searchParams.get("variantId"),
+  });
 
-  if (!productId || !variantId)
+  if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, error: "MISSING_IDS" },
-      { status: 400 }
+      { ok: false, error: "INVALID_INPUT" },
+      { status: 400 },
     );
+  }
 
   await prisma.wishlistItem.deleteMany({
-    where: { userId: user.id, productId, variantId },
+    where: {
+      userId: user.id,
+      productId: parsed.data.productId,
+      variantId: parsed.data.variantId,
+    },
   });
 
   return NextResponse.json({ ok: true, action: "removed" });
