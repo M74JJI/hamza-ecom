@@ -55,7 +55,7 @@ export default async function WishlistPage() {
   // Calculate wishlist stats
   const totalItems = items.length;
   const totalValue = items.reduce((sum, item) => {
-    const basePrice = item.variant?.sizes?.[0]?.priceMAD ?? 0;
+    const basePrice = Number(item.variant?.sizes?.[0]?.priceMAD ?? 0);
     const discount = item.variant?.sizes?.[0]?.discountPercent ?? 0;
     const price = discount ? (basePrice * (100 - discount)) / 100 : basePrice;
     return sum + price;
