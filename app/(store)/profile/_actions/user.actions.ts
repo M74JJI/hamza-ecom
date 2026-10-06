@@ -34,6 +34,17 @@ const changePasswordSchema = z.object({
 export async function changePassword(input: unknown){
   const { user } = await requireUser();
   const data = changePasswordSchema.parse(input);
+
+  const decision = await consumeRateLimit({
+    scope: 'auth:password-change:user',
+    identifier: user.id,
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (!decision.allowed) {
+    throw new Error(`Too many password-change attempts. Try again in ${decision.retryAfterSeconds} seconds.`);
+  }
   const u = await prisma.user.findUnique({ where: { id: user.id } });
   if(!u?.passwordHash) throw new Error('Password auth not enabled.');
   const ok = await verifyPassword(u.passwordHash, data.current);
