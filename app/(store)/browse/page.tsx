@@ -41,6 +41,8 @@ const pathname = usePathname();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<any>({});
   const [data, setData] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -70,6 +72,7 @@ useEffect(() => {
   const urlRating = searchParams.get('rating');
   const urlSort = searchParams.get('sort');
   const urlQ = searchParams.get('q');
+  const urlPage = searchParams.get('page');
 
   if (urlCategory.length) initialFilters.category = urlCategory;
   if (urlBrand.length) initialFilters.brand = urlBrand;
@@ -80,6 +83,9 @@ useEffect(() => {
   if (urlRating) initialFilters.rating = Number(urlRating);
   if (urlSort) initialFilters.sort = urlSort;
   if (urlQ) initialFilters.q = urlQ;
+  if (urlPage && Number.isInteger(Number(urlPage)) && Number(urlPage) > 1) {
+    initialFilters.page = Number(urlPage);
+  }
 
   setFilters(initialFilters);
     setIsHydrated(true); // ✅ mark ready
@@ -98,10 +104,23 @@ for (const [key, value] of Object.entries(filters)) {
 }
 
 
-    const res = await fetch(`/api/search?${params.toString()}`, { cache: 'no-store' });
-    const json = await res.json();
-    setData(json.data || []);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/search?${params.toString()}`, { cache: 'no-store' });
+      const json = await res.json();
+
+      if (!res.ok) {
+        setData([]);
+        setTotal(0);
+        setTotalPages(0);
+        return;
+      }
+
+      setData(json.data || []);
+      setTotal(Number(json.total) || 0);
+      setTotalPages(Number(json.totalPages) || 0);
+    } finally {
+      setLoading(false);
+    }
   };
 useEffect(() => {
    if (!isHydrated) return;
@@ -112,7 +131,8 @@ useEffect(() => {
     if (Array.isArray(val)) val.forEach((v) => params.append(key, v));
     else if (val !== undefined && val !== '') params.set(key, String(val));
   });
-  router.replace(`${pathname}?${params.toString()}`);
+  const query = params.toString();
+  router.replace(query ? `${pathname}?${query}` : pathname);
 }, [filters]);
 
 
@@ -128,10 +148,12 @@ useEffect(() => {
     if (qParam && qParam.trim() !== '') {
       if (prev.q === qParam) return prev; // no change
       updated.q = qParam;
+      updated.page = 1;
     } else {
       // if q is missing from URL but was previously set, remove it
       if (!prev.q) return prev;
       delete updated.q;
+      updated.page = 1;
     }
 
     return updated;
@@ -174,7 +196,7 @@ useEffect(() => {
                   animate={{ opacity: 1 }}
                   className="text-gray-600 text-lg"
                 >
-                  Discover {data.length} exquisite {data.length === 1 ? 'piece' : 'pieces'}
+                  Discover {total} exquisite {total === 1 ? 'piece' : 'pieces'}
                 </motion.p>
               )}
             </div>
@@ -188,7 +210,7 @@ useEffect(() => {
               setViewMode={setViewMode}
               filters={filters}
               setFilters={setFilters}
-              dataLength={data.length}
+              dataLength={total}
             />
           </div>
         </div>
@@ -200,7 +222,20 @@ useEffect(() => {
         {/* Desktop Sidebar */}
           <div className="hidden lg:block w-80 flex-shrink-0">
             <div className="sticky top-8">
-              <FilterSidebar onChange={(update) => setFilters(update)} />
+              <FilterSidebar
+                initialFilters={filters}
+                onChange={(update) =>
+                  setFilters((prev: any) => {
+                    const next = { ...prev };
+                    for (const key of ['category', 'brand', 'color', 'size', 'min', 'max', 'rating']) {
+                      delete next[key];
+                    }
+                    Object.assign(next, update);
+                    next.page = 1;
+                    return next;
+                  })
+                }
+              />
             </div>
           </div>
 
@@ -216,14 +251,14 @@ useEffect(() => {
           {/* Product Section */}
           <section className="flex-1">
             {/* Active Filters */}
-            {Object.keys(filters).length > 0 && (
+            {Object.keys(filters).some((key) => key !== 'sort' && key !== 'page') && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-wrap gap-2 mb-6"
               >
             {Object.entries(filters).map(([key, val]) => {
-  if (!val) return null;
+  if (key === 'sort' || key === 'page' || !val) return null;
   const vals = Array.isArray(val) ? val : [val];
   return vals.map((v) => (
     <motion.div
@@ -253,6 +288,7 @@ useEffect(() => {
             } else {
               delete updated[key];
             }
+            updated.page = 1;
             return updated;
           })
         }
@@ -367,6 +403,39 @@ useEffect(() => {
                   Reset Filters
                 </motion.button>
               </motion.div>
+            )}
+            {!loading && totalPages > 1 && (
+              <div className="mt-10 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  disabled={(Number(filters.page) || 1) <= 1}
+                  onClick={() =>
+                    setFilters((prev: any) => ({
+                      ...prev,
+                      page: Math.max(1, (Number(prev.page) || 1) - 1),
+                    }))
+                  }
+                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:border-gray-400 transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {Number(filters.page) || 1} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={(Number(filters.page) || 1) >= totalPages}
+                  onClick={() =>
+                    setFilters((prev: any) => ({
+                      ...prev,
+                      page: Math.min(totalPages, (Number(prev.page) || 1) + 1),
+                    }))
+                  }
+                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:border-gray-400 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
             )}
           </section>
         </div>
