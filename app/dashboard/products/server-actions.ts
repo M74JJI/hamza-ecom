@@ -3,13 +3,14 @@
 import { requireAdmin } from "@/lib/require-admin";
 
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@/generated/prisma/client';
 import { ProductUpsertSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
 import sanitizeHtml from 'sanitize-html';
 import slugify from 'slugify';
 
 // 🧠 Helper: generate a unique slug by checking DB and incrementing if needed
-async function generateUniqueSlug(db: typeof prisma, base: string, excludeId?: string) {
+async function generateUniqueSlug(db: Prisma.TransactionClient, base: string, excludeId?: string) {
   let slug = slugify(base, { lower: true, strict: true });
   let uniqueSlug = slug;
   let counter = 1;
@@ -52,12 +53,20 @@ export async function upsertProductAction(input: unknown) {
       }
 
       // 🧩 Step 2: Ensure slug uniqueness
-      const finalSlug = await generateUniqueSlug(prisma, baseSlug, data.id);
+      const finalSlug = await generateUniqueSlug(db, baseSlug, data.id);
 
       // ============ UPDATE MODE ============
       if (data.id) {
-        product = await db.product.update({
+        const existingProduct = await db.product.findUnique({
           where: { id: data.id },
+          select: { id: true },
+        });
+        if (!existingProduct) {
+          throw new Error('PRODUCT_NOT_FOUND');
+        }
+
+        product = await db.product.update({
+          where: { id: existingProduct.id },
           data: {
             slug: finalSlug,
             status: data.status,
@@ -118,12 +127,21 @@ export async function upsertProductAction(input: unknown) {
       // ============ VARIANTS ============
       for (const [idx, v] of data.variants.entries()) {
         let variant = v.id
-          ? await db.variant.findUnique({ where: { id: v.id } })
+          ? await db.variant.findFirst({
+              where: {
+                id: v.id,
+                productId: product.id,
+              },
+            })
           : null;
+
+        if (v.id && !variant) {
+          throw new Error('VARIANT_PRODUCT_MISMATCH');
+        }
 
         if (variant) {
           variant = await db.variant.update({
-            where: { id: v.id },
+            where: { id: variant.id },
             data: {
               title: v.title,
               name: v.name,
@@ -248,15 +266,48 @@ export async function upsertProductAction(input: unknown) {
         // ============ VARIANT SIZES ============
         if (v.sizes?.length) {
           for (const s of v.sizes) {
-            const existingSize = await db.variantSize.findUnique({
-              where: { sku: s.sku },
-            });
+            const normalizedSku = s.sku.trim();
+
+            const existingSize = s.id
+              ? await db.variantSize.findUnique({
+                  where: { id: s.id },
+                  include: {
+                    variant: {
+                      select: {
+                        id: true,
+                        productId: true,
+                      },
+                    },
+                  },
+                })
+              : await db.variantSize.findUnique({
+                  where: { sku: normalizedSku },
+                  include: {
+                    variant: {
+                      select: {
+                        id: true,
+                        productId: true,
+                      },
+                    },
+                  },
+                });
+
+            if (s.id && !existingSize) {
+              throw new Error('VARIANT_SIZE_NOT_FOUND');
+            }
 
             if (existingSize) {
+              if (
+                existingSize.variant.productId !== product.id ||
+                existingSize.variantId !== variant.id
+              ) {
+                throw new Error('SKU_VARIANT_MISMATCH');
+              }
+
               await db.variantSize.update({
-                where: { sku: s.sku },
+                where: { id: existingSize.id },
                 data: {
-                  variantId: variant.id,
+                  sku: normalizedSku,
                   size: s.size,
                   priceMAD: Number(s.priceMAD),
                   discountPercent: s.discountPercent ?? 0,
@@ -269,7 +320,7 @@ export async function upsertProductAction(input: unknown) {
                 data: {
                   variantId: variant.id,
                   size: s.size,
-                  sku: s.sku,
+                  sku: normalizedSku,
                   priceMAD: Number(s.priceMAD),
                   discountPercent: s.discountPercent ?? 0,
                   stockQty: s.stockQty,
@@ -290,9 +341,33 @@ export async function upsertProductAction(input: unknown) {
     return { ok: true, id: tx.id };
   } catch (err: any) {
     console.error('❌ upsertProductAction failed:', err);
-    if (err.code === 'P2002' && err.meta?.target?.includes('sku')) {
-      return { error: 'Duplicate SKU detected. Please ensure each SKU is unique.' };
+
+    if (err?.message === 'PRODUCT_NOT_FOUND') {
+      return { error: 'Product not found.' };
     }
+    if (err?.message === 'VARIANT_PRODUCT_MISMATCH') {
+      return { error: 'A submitted variant does not belong to this product.' };
+    }
+    if (err?.message === 'VARIANT_SIZE_NOT_FOUND') {
+      return { error: 'A submitted variant size no longer exists.' };
+    }
+    if (err?.message === 'SKU_VARIANT_MISMATCH') {
+      return { error: 'A SKU cannot be moved between variants or products.' };
+    }
+
+    if (err?.code === 'P2002') {
+      const target = Array.isArray(err.meta?.target)
+        ? err.meta.target.join(',')
+        : String(err.meta?.target ?? '');
+
+      if (target.includes('sku')) {
+        return { error: 'Duplicate SKU detected. Please ensure each SKU is unique.' };
+      }
+      if (target.includes('slug')) {
+        return { error: 'Product slug already exists. Please retry with a different slug.' };
+      }
+    }
+
     return { error: 'Unexpected error while saving product.' };
   }
 }
