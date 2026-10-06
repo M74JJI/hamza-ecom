@@ -213,6 +213,16 @@ model Session {
   createdAt DateTime @default(now())
 }
 
+model RateLimitBucket {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+  expiresAt   DateTime
+  updatedAt   DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
 model VerificationToken {
   id         String   @id @default(cuid())
   identifier String // email
