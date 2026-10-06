@@ -3,6 +3,11 @@ import { prisma } from "@/lib/db";
 import { verifyPassword, createSession } from "@/lib/auth-utils";
 import { z } from "zod";
 import { getSafeCallbackPath } from "@/lib/auth/redirect";
+import {
+  consumeRateLimit,
+  getClientIp,
+  maxRetryAfter,
+} from "@/lib/security/rate-limit";
 
 const schema = z.object({
   email: z.string().email(),
@@ -19,6 +24,42 @@ export async function POST(req: Request){
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
   const { email, password } = parsed.data;
+  const ip = getClientIp(req);
+
+  const decisions = await Promise.all([
+    consumeRateLimit({
+      scope: "auth:signin:ip",
+      identifier: ip,
+      limit: 30,
+      windowMs: 15 * 60 * 1000,
+    }),
+    consumeRateLimit({
+      scope: "auth:signin:pair",
+      identifier: `${ip}|${email}`,
+      limit: 10,
+      windowMs: 15 * 60 * 1000,
+    }),
+    consumeRateLimit({
+      scope: "auth:signin:email",
+      identifier: email,
+      limit: 50,
+      windowMs: 15 * 60 * 1000,
+    }),
+  ]);
+
+  if (decisions.some((decision) => !decision.allowed)) {
+    return NextResponse.json(
+      { error: "Too many sign-in attempts. Try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(maxRetryAfter(decisions)),
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  }
+
   const user = await prisma.user.findUnique({ where: { email } });
   if(!user || !user.passwordHash){
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
