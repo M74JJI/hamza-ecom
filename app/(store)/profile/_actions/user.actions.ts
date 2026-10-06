@@ -5,6 +5,7 @@ import { requireUser } from '@/lib/require-user';
 import { z } from 'zod';
 import { getCurrentSessionToken, hashPassword, verifyPassword } from '@/lib/auth-utils';
 import { sendVerifyEmail } from '@/lib/emails/verify';
+import { getAppUrl } from '@/lib/app-url';
 
 const profileSchema = z.object({
   name: z.string().min(0).max(120).optional(),
@@ -60,8 +61,7 @@ export async function resendVerificationEmail(){
   await prisma.verificationToken.create({
     data: { identifier: user.email!, token, expires }
   });
-  const base = process.env.APP_URL || "http://localhost:3000";
-  const verifyUrl = `${base}/api/auth/verify?token=${token}`;
+  const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;
   await sendVerifyEmail(user.email!, verifyUrl);
   return true;
 }
