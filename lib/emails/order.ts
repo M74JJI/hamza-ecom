@@ -1,6 +1,6 @@
 import OrderConfirmation from "@/emails/OrderConfirmation";
 import { renderEmail } from "@/lib/render-email";
-import { sendEmail } from "@/lib/auth-utils";
+import { sendEmail } from "@/lib/email";
 
 export async function sendOrderConfirmation(to: string, orderId: string){
   const html = renderEmail(OrderConfirmation({ orderId } as any));
