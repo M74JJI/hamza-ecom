@@ -82,5 +82,26 @@ jobs:
             exit 1
           fi
 
+      - name: Verify historical coupon snapshot invariant
+        run: |
+          PSQL_URL="postgresql://postgres:postgres@localhost:5432/hajzen"
+
+          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"Coupon\" (\"id\", \"code\", \"percent\", \"active\", \"createdAt\", \"updatedAt\") VALUES ('ci-coupon-snapshot', 'SAVE10', 10, TRUE, NOW(), NOW());"
+
+          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"Order\" (\"id\", \"status\", \"totalMAD\", \"currency\", \"couponCode\", \"couponCodeSnapshot\", \"createdAt\") VALUES ('ci-order-coupon-snapshot', 'PENDING', 100.00, 'MAD', 'SAVE10', 'SAVE10', NOW());"
+
+          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c \
+            "UPDATE \"Coupon\" SET \"code\" = 'SAVE20', \"updatedAt\" = NOW() WHERE \"id\" = 'ci-coupon-snapshot';"
+
+          SNAPSHOT_ROW="$(psql "$PSQL_URL" -tA -F '|' -c \
+            "SELECT COALESCE(\"couponCode\", ''), COALESCE(\"couponCodeSnapshot\", '') FROM \"Order\" WHERE \"id\" = 'ci-order-coupon-snapshot';")"
+
+          if [ "$SNAPSHOT_ROW" != "SAVE20|SAVE10" ]; then
+            echo "Historical coupon snapshot changed unexpectedly: $SNAPSHOT_ROW"
+            exit 1
+          fi
+
       - name: Run quality gate
         run: bun run ci
