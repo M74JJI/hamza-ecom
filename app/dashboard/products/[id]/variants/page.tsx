@@ -56,7 +56,7 @@ export default async function ProductVariantsPage({
                 <td className="p-3">
                   {v.sizes.map((s) => (
                     <div key={s.id}>
-                      {s.size} — {s.priceMAD} MAD — Stock: {s.stockQty}
+                      {s.size} — {Number(s.priceMAD).toFixed(2)} MAD — Stock: {s.stockQty}
                     </div>
                   ))}
                 </td>

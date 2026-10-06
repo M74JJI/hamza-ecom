@@ -227,7 +227,9 @@ export async function GET(req: Request) {
     const candidateMetrics = priceCandidates
       .map((product) => {
         const prices = product.variants.flatMap((variant) =>
-          variant.sizes.map((size) => finalPrice(size.priceMAD, size.discountPercent)),
+          variant.sizes.map((size) =>
+            finalPrice(Number(size.priceMAD), size.discountPercent),
+          ),
         );
 
         if (prices.length === 0) return null;
@@ -327,7 +329,13 @@ export async function GET(req: Request) {
 
     return {
       ...productData,
-      variants: sortedVariants,
+      variants: sortedVariants.map((variant) => ({
+        ...variant,
+        sizes: variant.sizes.map((size) => ({
+          ...size,
+          priceMAD: Number(size.priceMAD),
+        })),
+      })),
       avgRating: product.rating,
       reviewCount: _count.reviews,
     };

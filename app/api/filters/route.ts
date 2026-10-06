@@ -113,7 +113,7 @@ export async function GET(req: Request) {
   }
 
   const prices = variantSizes.map((size) =>
-    finalPrice(size.priceMAD, size.discountPercent),
+    finalPrice(Number(size.priceMAD), size.discountPercent),
   );
 
   const minPrice = prices.length > 0 ? Math.min(...prices) : 0;

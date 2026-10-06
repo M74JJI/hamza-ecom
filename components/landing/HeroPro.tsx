@@ -43,8 +43,8 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   // Get cheapest size for a variant considering discounts
   const getCheapestSize = (variant: typeof currentVariant) => {
     return variant.sizes.reduce((cheapest, size) => {
-      const currentPrice = calculateDiscountedPrice(size.priceMAD, size.discountPercent);
-      const cheapestPrice = calculateDiscountedPrice(cheapest.priceMAD, cheapest.discountPercent);
+      const currentPrice = calculateDiscountedPrice(Number(size.priceMAD), size.discountPercent);
+      const cheapestPrice = calculateDiscountedPrice(Number(cheapest.priceMAD), cheapest.discountPercent);
       return currentPrice < cheapestPrice ? size : cheapest;
     });
   };
@@ -52,7 +52,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   // Calculate price range for product across all variants
   const getProductPriceRange = useMemo(() => {
     const allPrices = currentProduct.variants.flatMap(variant => 
-      variant.sizes.map(size => calculateDiscountedPrice(size.priceMAD, size.discountPercent))
+      variant.sizes.map(size => calculateDiscountedPrice(Number(size.priceMAD), size.discountPercent))
     );
     
     const minPrice = Math.min(...allPrices);
@@ -71,8 +71,8 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   // Get current variant's best price
   const currentVariantPrice = useMemo(() => {
     const cheapestSize = getCheapestSize(currentVariant);
-    const discountedPrice = calculateDiscountedPrice(cheapestSize.priceMAD, cheapestSize.discountPercent);
-    const originalPrice = cheapestSize.priceMAD;
+    const discountedPrice = calculateDiscountedPrice(Number(cheapestSize.priceMAD), cheapestSize.discountPercent);
+    const originalPrice = Number(cheapestSize.priceMAD);
     
     return {
       discounted: Math.round(discountedPrice),
@@ -527,7 +527,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
                                     {variant.name}
                                   </div>
                                   <div className="text-xs text-amber-600 text-center font-medium">
-                                    {getCheapestSize(variant).size} • {calculateDiscountedPrice(getCheapestSize(variant).priceMAD, getCheapestSize(variant).discountPercent).toFixed(0)} MAD
+                                    {getCheapestSize(variant).size} • {calculateDiscountedPrice(Number(getCheapestSize(variant).priceMAD), getCheapestSize(variant).discountPercent).toFixed(0)} MAD
                                   </div>
                                 </div>
                                 {/* Tooltip arrow */}
@@ -561,7 +561,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
             >
               {products.map((product, index) => {
                 const productMinPrice = Math.min(...product.variants.flatMap(variant => 
-                  variant.sizes.map(size => calculateDiscountedPrice(size.priceMAD, size.discountPercent))
+                  variant.sizes.map(size => calculateDiscountedPrice(Number(size.priceMAD), size.discountPercent))
                 ));
                 
                 return (
