@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/require-user";
 import { z } from "zod";
+import { isSameOriginMutation } from "@/lib/security/request-origin";
 
 const reviewSchema = z
   .object({
@@ -22,6 +23,13 @@ const reviewSchema = z
   });
 
 export async function POST(req: Request) {
+  if (!isSameOriginMutation(req)) {
+    return Response.json(
+      { error: "Cross-origin request rejected" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const { user } = await requireUser();
   const body = await req.json().catch(() => null);
   const parsed = reviewSchema.safeParse(body);
