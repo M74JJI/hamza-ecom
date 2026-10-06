@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyPassword, createSession } from "@/lib/auth-utils";
 import { z } from "zod";
+import { getSafeCallbackPath } from "@/lib/auth/redirect";
 
 const schema = z.object({
   email: z.string().email(),
@@ -11,13 +12,7 @@ const schema = z.object({
 export async function POST(req: Request){
   const form = await req.formData();
   const data = Object.fromEntries(form) as Record<string, FormDataEntryValue>;
-  const requestedCallback = typeof data.callbackUrl === "string" ? data.callbackUrl : "/";
-  const callbackUrl =
-    requestedCallback.startsWith("/") &&
-    !requestedCallback.startsWith("//") &&
-    !requestedCallback.includes("\\")
-      ? requestedCallback
-      : "/";
+  const callbackUrl = getSafeCallbackPath(data.callbackUrl);
 
   const parsed = schema.safeParse(data);
   if(!parsed.success){

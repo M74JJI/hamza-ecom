@@ -1,8 +1,13 @@
-export function getAppUrl() {
-  const configured = process.env.APP_URL?.trim();
+type AppUrlEnvironment = {
+  APP_URL?: string;
+  NODE_ENV?: string;
+};
+
+export function getAppUrl(env: AppUrlEnvironment = process.env) {
+  const configured = env.APP_URL?.trim();
 
   if (!configured) {
-    if (process.env.NODE_ENV === "production") {
+    if (env.NODE_ENV === "production") {
       throw new Error("APP_URL is required in production");
     }
     return "http://localhost:3000";
@@ -15,7 +20,7 @@ export function getAppUrl() {
     throw new Error("APP_URL must be a valid absolute URL");
   }
 
-  if (process.env.NODE_ENV === "production" && url.protocol !== "https:") {
+  if (env.NODE_ENV === "production" && url.protocol !== "https:") {
     throw new Error("APP_URL must use HTTPS in production");
   }
 

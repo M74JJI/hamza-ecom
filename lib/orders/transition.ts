@@ -1,21 +1,8 @@
 import { prisma } from "@/lib/db";
 import { OrderStatus } from "@/generated/prisma/enums";
+import { getAllowedOrderTransitions } from "@/lib/orders/status";
 
-const ALLOWED_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
-  [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
-  [OrderStatus.CONFIRMED]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
-  [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
-  [OrderStatus.DELIVERED]: [],
-  [OrderStatus.CANCELLED]: [],
-};
-
-export function isOrderStatus(value: string): value is OrderStatus {
-  return Object.values(OrderStatus).includes(value as OrderStatus);
-}
-
-export function getAllowedOrderTransitions(status: OrderStatus) {
-  return ALLOWED_TRANSITIONS[status];
-}
+export { getAllowedOrderTransitions, isOrderStatus } from "@/lib/orders/status";
 
 export async function transitionOrderStatus(orderId: string, nextStatus: OrderStatus) {
   return prisma.$transaction(async (tx) => {
