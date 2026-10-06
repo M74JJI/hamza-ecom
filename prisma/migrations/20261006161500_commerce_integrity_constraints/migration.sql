@@ -75,6 +75,11 @@ WHERE ci."cartId" = d."cartId"
   AND ci."variantSizeId" = d."variantSizeId"
   AND ci."id" <> d.keeper_id;
 
+UPDATE "Review"
+SET "quantity" = LEAST(100, GREATEST(1, "quantity"))
+WHERE "quantity" IS NOT NULL
+  AND ("quantity" < 1 OR "quantity" > 100);
+
 -- Normalize mutable catalog/cart data before adding CHECK constraints.
 UPDATE "CartItem"
 SET
@@ -121,9 +126,15 @@ CREATE UNIQUE INDEX "CartItem_cartId_variantSizeId_key"
   ON "CartItem"("cartId", "variantSizeId");
 
 -- Enforce mutable commerce invariants at the database boundary.
+ALTER TABLE "Product"
+  ADD CONSTRAINT "Product_rating_check"
+  CHECK ("rating" BETWEEN 0 AND 5);
+
 ALTER TABLE "Review"
   ADD CONSTRAINT "Review_rating_check"
-  CHECK ("rating" BETWEEN 1 AND 5);
+  CHECK ("rating" BETWEEN 1 AND 5),
+  ADD CONSTRAINT "Review_quantity_check"
+  CHECK ("quantity" IS NULL OR "quantity" BETWEEN 1 AND 100);
 
 ALTER TABLE "CartItem"
   ADD CONSTRAINT "CartItem_quantity_check"
