@@ -14,10 +14,7 @@ function sessionCookieSecure() {
 }
 
 export async function hashPassword(password: string) {
-  if (
-    password.length < AUTH_PASSWORD_MIN_LENGTH ||
-    password.length > AUTH_PASSWORD_MAX_LENGTH
-  ) {
+  if (!isSupportedNewPasswordLength(password)) {
     throw new Error("Password length is outside the supported range");
   }
 
