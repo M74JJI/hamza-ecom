@@ -1,24 +1,22 @@
-import { cookies } from "next/headers";
-import { prisma } from "@/lib/db";
+import { getSessionUser } from "@/lib/auth-utils";
 
 export async function getCurrentUser() {
   try {
-    // ✅ cookies() can return a Promise in Next 15+
-    const c = await cookies();
-    const sessionToken = c.get("session")?.value;
-    if (!sessionToken) return null;
+    const user = await getSessionUser();
+    if (!user) return null;
 
-    const session = await prisma.session.findFirst({
-      where: { token: sessionToken, expires: { gt: new Date() } },
-      include: { user: true },
-    });
-
-    if (!session?.user) return null;
-
-    const { passwordHash, ...safeUser } = session.user as any;
-    return safeUser;
-  } catch (err) {
-    console.error("getCurrentUser() failed:", err);
+    return {
+      id: user.id,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      name: user.name,
+      image: user.image,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  } catch (error) {
+    console.error("getCurrentUser() failed:", error);
     return null;
   }
 }
