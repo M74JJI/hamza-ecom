@@ -6,7 +6,8 @@ import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { cookies } from 'next/headers';
-import { Shield, Monitor, Smartphone, Globe, Cpu } from 'lucide-react';
+import { getPersistedSessionTokenCandidates } from '@/lib/session-token';
+import { Shield, Monitor, Globe, Cpu } from 'lucide-react';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -18,19 +19,32 @@ export default async function SessionsPage(){
   const { user } = await requireUser();
   const c = await cookies();
   const token = c.get('session')?.value || null;
-  const [sessions, current] = await Promise.all([
-    prisma.session.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' },include:{
-      user:{
-        select:{
-          _count:{
-            select:{
-              orders:true
-            }
-          }
-        }
-      }
-    } }),
-    token ? prisma.session.findFirst({ where: { userId: user.id, token } }) : Promise.resolve(null)
+  const [sessions, current, ordersCount] = await Promise.all([
+    prisma.session.findMany({
+      where: {
+        userId: user.id,
+        expires: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        createdAt: true,
+        expires: true,
+      },
+    }),
+    token
+      ? prisma.session.findFirst({
+          where: {
+            userId: user.id,
+            expires: { gt: new Date() },
+            token: {
+              in: getPersistedSessionTokenCandidates(token),
+            },
+          },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    prisma.order.count({ where: { userId: user.id } }),
   ]);
 
   // Calculate session stats
@@ -50,12 +64,12 @@ export default async function SessionsPage(){
           </div>
           <div>
             <h1 className="text-3xl sm:text-4xl font-black text-gray-800">Active Sessions</h1>
-            <p className="text-gray-600 font-medium">Manage your logged-in devices and browsers</p>
+            <p className="text-gray-600 font-medium">Manage your active sign-in sessions</p>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-8">
-        <ProfileNav ordersCount={sessions[0].user._count.orders} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
+        <ProfileNav ordersCount={ordersCount} userSince={Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24))}/>
        
           
           <div className="space-y-6 lg:space-y-8">
@@ -82,7 +96,7 @@ export default async function SessionsPage(){
                     <div className="text-2xl font-black text-gray-800">
                       {currentSession ? '1' : '0'}
                     </div>
-                    <div className="text-sm text-gray-600 font-medium">This Device</div>
+                    <div className="text-sm text-gray-600 font-medium">Current Session</div>
                   </div>
                 </div>
               </div>
@@ -94,7 +108,7 @@ export default async function SessionsPage(){
                   </div>
                   <div>
                     <div className="text-2xl font-black text-gray-800">{otherSessions}</div>
-                    <div className="text-sm text-gray-600 font-medium">Other Devices</div>
+                    <div className="text-sm text-gray-600 font-medium">Other Sessions</div>
                   </div>
                 </div>
               </div>
@@ -103,7 +117,7 @@ export default async function SessionsPage(){
             {/* Active Sessions */}
             <SectionCard 
               title="Active Sessions" 
-              subtitle={`Manage your logged-in devices (${activeSessions} active)`}
+              subtitle={`Manage your active sign-ins (${activeSessions} active)`}
               right={
                 <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
                   <Shield className="w-5 h-5 text-white" />
@@ -138,16 +152,15 @@ export default async function SessionsPage(){
                 <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                      <Smartphone className="w-6 h-6 text-white" />
+                      <Monitor className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-800 text-lg">Device Recognition</h3>
-                      <p className="text-gray-600 text-sm">Automatic device tracking</p>
+                      <h3 className="font-bold text-gray-800 text-lg">Session Records</h3>
+                      <p className="text-gray-600 text-sm">Only the data needed for session control</p>
                     </div>
                   </div>
                   <p className="text-sm text-gray-600">
-                    We automatically track devices and browsers where you're logged in. 
-                    You can revoke access to any suspicious or unused sessions at any time.
+                    Session records contain creation and expiration times. Device and browser metadata are not currently collected.
                   </p>
                 </div>
               </div>
