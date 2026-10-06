@@ -5,8 +5,16 @@ export async function getCurrentUser() {
     const user = await getSessionUser();
     if (!user) return null;
 
-    const { passwordHash: _passwordHash, ...safeUser } = user;
-    return safeUser;
+    return {
+      id: user.id,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      name: user.name,
+      image: user.image,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   } catch (error) {
     console.error("getCurrentUser() failed:", error);
     return null;
