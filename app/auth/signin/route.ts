@@ -6,14 +6,19 @@ import { getSafeCallbackPath } from "@/lib/auth/redirect";
 import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
 import { isSameOriginMutation } from "@/lib/security/request-origin";
 import {
+  AUTH_EMAIL_MAX_LENGTH,
+  AUTH_PASSWORD_MAX_LENGTH,
+  AUTH_PASSWORD_MIN_LENGTH,
+} from "@/lib/auth/input-policy";
+import {
   consumeRateLimit,
   getClientIp,
   maxRetryAfter,
 } from "@/lib/security/rate-limit";
 
 const schema = z.object({
-  email: z.string().trim().email().transform(normalizeEmailIdentity),
-  password: z.string().min(8)
+  email: z.string().trim().max(AUTH_EMAIL_MAX_LENGTH).email().transform(normalizeEmailIdentity),
+  password: z.string().min(AUTH_PASSWORD_MIN_LENGTH).max(AUTH_PASSWORD_MAX_LENGTH)
 });
 
 export async function POST(req: Request){
