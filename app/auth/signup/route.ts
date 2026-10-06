@@ -7,6 +7,11 @@ import { getAppUrl } from "@/lib/app-url";
 import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
 import { isSameOriginMutation } from "@/lib/security/request-origin";
 import {
+  AUTH_EMAIL_MAX_LENGTH,
+  AUTH_PASSWORD_MAX_LENGTH,
+  AUTH_PASSWORD_MIN_LENGTH,
+} from "@/lib/auth/input-policy";
+import {
   createOneTimeToken,
   hashOneTimeToken,
 } from "@/lib/one-time-token";
@@ -18,8 +23,8 @@ import {
 
 const schema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
-  email: z.string().trim().email().transform(normalizeEmailIdentity),
-  password: z.string().min(8),
+  email: z.string().trim().max(AUTH_EMAIL_MAX_LENGTH).email().transform(normalizeEmailIdentity),
+  password: z.string().min(AUTH_PASSWORD_MIN_LENGTH).max(AUTH_PASSWORD_MAX_LENGTH),
 });
 
 function signupSuccess() {

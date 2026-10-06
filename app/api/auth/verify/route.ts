@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAppUrl } from "@/lib/app-url";
 import { getPersistedOneTimeTokenCandidates } from "@/lib/one-time-token";
+import { isReasonableOneTimeToken } from "@/lib/auth/input-policy";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
 
-  if (!token) {
-    return NextResponse.json({ error: "Missing token" }, { status: 400 });
+  if (!isReasonableOneTimeToken(token)) {
+    return NextResponse.json({ error: "Invalid token" }, { status: 400 });
   }
 
   const verification = await prisma.verificationToken.findFirst({

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { sendResetEmail } from "@/lib/emails/reset";
 import { getAppUrl } from "@/lib/app-url";
 import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
+import { AUTH_EMAIL_MAX_LENGTH } from "@/lib/auth/input-policy";
 import { isSameOriginMutation } from "@/lib/security/request-origin";
 import {
   createOneTimeToken,
@@ -16,7 +17,7 @@ import {
 } from "@/lib/security/rate-limit";
 
 const schema = z.object({
-  email: z.string().trim().email().transform(normalizeEmailIdentity),
+  email: z.string().trim().max(AUTH_EMAIL_MAX_LENGTH).email().transform(normalizeEmailIdentity),
 });
 
 export async function POST(req: Request){

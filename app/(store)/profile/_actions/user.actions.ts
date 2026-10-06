@@ -9,6 +9,10 @@ import { sendVerifyEmail } from '@/lib/emails/verify';
 import { getAppUrl } from '@/lib/app-url';
 import { consumeRateLimit } from '@/lib/security/rate-limit';
 import {
+  AUTH_PASSWORD_MAX_LENGTH,
+  AUTH_PASSWORD_MIN_LENGTH,
+} from '@/lib/auth/input-policy';
+import {
   createOneTimeToken,
   hashOneTimeToken,
 } from '@/lib/one-time-token';
@@ -31,8 +35,8 @@ export async function updateProfile(input: unknown){
 }
 
 const changePasswordSchema = z.object({
-  current: z.string().min(1),
-  next: z.string().min(8),
+  current: z.string().min(1).max(AUTH_PASSWORD_MAX_LENGTH),
+  next: z.string().min(AUTH_PASSWORD_MIN_LENGTH).max(AUTH_PASSWORD_MAX_LENGTH),
 });
 
 export async function changePassword(input: unknown){

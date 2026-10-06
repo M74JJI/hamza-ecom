@@ -3,6 +3,10 @@ import { randomBytes } from "crypto";
 import * as argon2 from "argon2";
 import { prisma } from "./db";
 import {
+  AUTH_PASSWORD_MAX_LENGTH,
+  isSupportedNewPasswordLength,
+} from "@/lib/auth/input-policy";
+import {
   SESSION_COOKIE_NAME,
   getPersistedSessionTokenCandidates,
   hashSessionToken,
@@ -14,10 +18,15 @@ function sessionCookieSecure() {
 }
 
 export async function hashPassword(password: string) {
+  if (!isSupportedNewPasswordLength(password)) {
+    throw new Error("Password length is outside the supported range");
+  }
+
   return argon2.hash(password, { type: argon2.argon2id });
 }
 
 export async function verifyPassword(hash: string, password: string) {
+  if (password.length > AUTH_PASSWORD_MAX_LENGTH) return false;
   return argon2.verify(hash, password);
 }
 

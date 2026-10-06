@@ -5,12 +5,21 @@ import { hashPassword } from "@/lib/auth-utils";
 import { getPersistedOneTimeTokenCandidates } from "@/lib/one-time-token";
 import { isSameOriginMutation } from "@/lib/security/request-origin";
 import {
+  AUTH_ONE_TIME_TOKEN_MAX_LENGTH,
+  AUTH_ONE_TIME_TOKEN_MIN_LENGTH,
+  AUTH_PASSWORD_MAX_LENGTH,
+  AUTH_PASSWORD_MIN_LENGTH,
+} from "@/lib/auth/input-policy";
+import {
   consumeRateLimit,
   getClientIp,
   maxRetryAfter,
 } from "@/lib/security/rate-limit";
 
-const schema = z.object({ token: z.string().min(10), password: z.string().min(8) });
+const schema = z.object({
+  token: z.string().min(AUTH_ONE_TIME_TOKEN_MIN_LENGTH).max(AUTH_ONE_TIME_TOKEN_MAX_LENGTH),
+  password: z.string().min(AUTH_PASSWORD_MIN_LENGTH).max(AUTH_PASSWORD_MAX_LENGTH),
+});
 
 export async function POST(req: Request){
   if (!isSameOriginMutation(req)) {
