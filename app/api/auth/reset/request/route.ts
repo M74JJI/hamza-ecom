@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { sendResetEmail } from "@/lib/emails/reset";
 import { getAppUrl } from "@/lib/app-url";
+import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
 import {
   createOneTimeToken,
   hashOneTimeToken,
@@ -13,7 +14,9 @@ import {
   maxRetryAfter,
 } from "@/lib/security/rate-limit";
 
-const schema = z.object({ email: z.string().email() });
+const schema = z.object({
+  email: z.string().trim().email().transform(normalizeEmailIdentity),
+});
 
 export async function POST(req: Request){
   const body = await req.json().catch(()=>null);
@@ -50,7 +53,14 @@ export async function POST(req: Request){
     );
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findFirst({
+    where: {
+      email: { equals: email, mode: "insensitive" },
+    },
+    select: {
+      email: true,
+    },
+  });
   if(!user) return NextResponse.json({ ok: true }); // do not reveal
 
   const token = createOneTimeToken();
@@ -58,15 +68,15 @@ export async function POST(req: Request){
   const expires = new Date(Date.now() + 1000*60*60);
   await prisma.$transaction([
     prisma.passwordResetToken.deleteMany({
-      where: { identifier: email },
+      where: { identifier: user.email },
     }),
     prisma.passwordResetToken.create({
-      data: { identifier: email, token: persistedToken, expires },
+      data: { identifier: user.email, token: persistedToken, expires },
     }),
   ]);
 
   const url = `${getAppUrl()}/reset?token=${token}`;
-  await sendResetEmail(email, url);
+  await sendResetEmail(user.email, url);
   return NextResponse.json({ ok: true });
 }
 
