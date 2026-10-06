@@ -69,8 +69,23 @@ export async function syncCartToDBAndValidate() {
 
   const problems: any[] = [];
   const sizes = await prisma.variantSize.findMany({
-    where: { id: { in: items.map(i => i.variantSizeId) } },
-    include: { variant: { select: { title: true, name: true, freeDelivery: true } } }
+    where: {
+      id: { in: items.map(i => i.variantSizeId) },
+      isActive: true,
+      variant: {
+        isActive: true,
+        product: { status: 'PUBLISHED' },
+      },
+    },
+    include: {
+      variant: {
+        select: {
+          title: true,
+          name: true,
+          freeDelivery: true,
+        },
+      },
+    },
   });
   const byId = new Map(sizes.map(s => [s.id, s]));
 
@@ -213,7 +228,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
             include: {
               variant: {
                 include: {
-                  product: { select: { brand: true } },
+                  product: { select: { brand: true, status: true } },
                   images: {
                     orderBy: { sortOrder: 'asc' },
                     take: 1,
@@ -234,7 +249,14 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
 
   for (const ci of cart.items) {
     const s = ci.variantSize;
-    if (!s || !s.isActive) return { ok: false, error: 'Some items are no longer available.' };
+    if (
+      !s ||
+      !s.isActive ||
+      !s.variant.isActive ||
+      s.variant.product.status !== 'PUBLISHED'
+    ) {
+      return { ok: false, error: 'Some items are no longer available.' };
+    }
     if (!Number.isInteger(ci.quantity) || ci.quantity < 1 || ci.quantity > 10) {
       return { ok: false, error: 'Invalid cart quantity. Please review your cart.' };
     }
@@ -303,6 +325,10 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
             id: ci.variantSizeId,
             isActive: true,
             stockQty: { gte: ci.quantity },
+            variant: {
+              isActive: true,
+              product: { status: 'PUBLISHED' },
+            },
           },
           data: { stockQty: { decrement: ci.quantity } },
         });
