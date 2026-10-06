@@ -11,7 +11,9 @@ export function isSupportedNewPasswordLength(value: string) {
   );
 }
 
-export function isReasonableOneTimeToken(value: string | null | undefined) {
+export function isReasonableOneTimeToken(
+  value: string | null | undefined,
+): value is string {
   if (!value) return false;
   return (
     value.length >= AUTH_ONE_TIME_TOKEN_MIN_LENGTH &&
