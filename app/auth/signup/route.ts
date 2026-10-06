@@ -5,6 +5,7 @@ import { z } from "zod";
 import { sendVerifyEmail } from "@/lib/emails/verify";
 import { getAppUrl } from "@/lib/app-url";
 import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
+import { isSameOriginMutation } from "@/lib/security/request-origin";
 import {
   createOneTimeToken,
   hashOneTimeToken,
@@ -55,6 +56,13 @@ async function issueVerificationEmail(email: string) {
 }
 
 export async function POST(req: Request) {
+  if (!isSameOriginMutation(req)) {
+    return NextResponse.json(
+      { error: "Cross-origin request rejected" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const form = await req.formData();
   const data = Object.fromEntries(form) as Record<string, FormDataEntryValue>;
   const parsed = schema.safeParse(data);

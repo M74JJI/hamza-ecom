@@ -4,6 +4,7 @@ import { z } from "zod";
 import { sendResetEmail } from "@/lib/emails/reset";
 import { getAppUrl } from "@/lib/app-url";
 import { normalizeEmailIdentity } from "@/lib/auth/email-identity";
+import { isSameOriginMutation } from "@/lib/security/request-origin";
 import {
   createOneTimeToken,
   hashOneTimeToken,
@@ -19,6 +20,13 @@ const schema = z.object({
 });
 
 export async function POST(req: Request){
+  if (!isSameOriginMutation(req)) {
+    return NextResponse.json(
+      { error: "Cross-origin request rejected" },
+      { status: 403, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   const body = await req.json().catch(()=>null);
   const parsed = schema.safeParse(body || {});
   if(!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 });
