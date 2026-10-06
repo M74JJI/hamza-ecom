@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { hashPassword, sendEmail } from "@/lib/auth-utils";
+import { hashPassword } from "@/lib/auth-utils";
 import { z } from "zod";
 import { sendVerifyEmail } from "@/lib/emails/verify";
+import { getAppUrl } from "@/lib/app-url";
 
 const schema = z.object({
   name: z.string().min(1).optional(),
@@ -31,8 +32,7 @@ export async function POST(req: Request){
   await prisma.verificationToken.create({
     data: { identifier: email, token, expires }
   });
-  const base = process.env.APP_URL || "http://localhost:3000";
-  const verifyUrl = `${base}/api/auth/verify?token=${token}`;
+  const verifyUrl = `${getAppUrl()}/api/auth/verify?token=${token}`;
   await sendVerifyEmail(email, verifyUrl);
 
   return NextResponse.json({ ok: true });
