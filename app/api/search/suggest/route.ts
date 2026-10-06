@@ -57,11 +57,12 @@ export async function GET(req: Request) {
       originalPrice: number;
       discountPercent: number;
     } | null>((best, size) => {
-      const price = finalPrice(size.priceMAD, size.discountPercent);
+      const originalPrice = Number(size.priceMAD);
+      const price = finalPrice(originalPrice, size.discountPercent);
       if (!best || price < best.price) {
         return {
           price,
-          originalPrice: size.priceMAD,
+          originalPrice,
           discountPercent: size.discountPercent ?? 0,
         };
       }
