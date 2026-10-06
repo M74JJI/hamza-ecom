@@ -131,16 +131,17 @@ export async function syncCartToDBAndValidate() {
     };
   });
 
-  await prisma.$transaction([
-    prisma.cartItem.deleteMany({ where: { cartId: cart.id } }),
-    prisma.cartItem.createMany({ data: itemData }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "Cart" WHERE "id" = ${cart.id} FOR UPDATE`;
+    await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+    await tx.cartItem.createMany({ data: itemData });
+  });
   return { ok: true, problems: [], items };
 }
 
 // coupon
 export async function applyCouponAction(prevState: any, formData: FormData) {
- const rawCode = String(formData.get('code') || '').trim();
+ const rawCode = String(formData.get('code') || '').trim().toUpperCase();
   if (!rawCode) return { ok: false, error: 'Invalid code' };
 
   const now = new Date();
@@ -168,7 +169,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   const payload = {
     addressId: String(formData.get('addressId') || ''),
     shippingCompanyId: String(formData.get('shippingCompanyId') || ''),
-    couponCode: (formData.get('couponCode') || '') as string,
+    couponCode: String(formData.get('couponCode') || ''),
     fullName: String(formData.get('fullName') || ''),
     phone: String(formData.get('phone') || ''),
     city: String(formData.get('city') || ''),
@@ -179,12 +180,10 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   if (!parsed.success) return { ok: false, error: 'Invalid checkout data' };
   if (!parsed.data.shippingCompanyId) return { ok: false, error: 'Select delivery company' };
 
-  // --- Ensure Address ---
   let addressId = parsed.data.addressId;
   const moroccoPhoneRegex = /^(?:\+212|0)(6|7)\d{8}$/;
 
   if (addressId === 'new' || !addressId) {
-    // Validate fields
     if (
       !payload.fullName.trim() ||
       !payload.fullAddress.trim() ||
@@ -211,200 +210,294 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
         },
       });
     });
+
     addressId = newAddr.id;
-  } else {
-    // Verify ownership of selected address
-    const addr = await prisma.address.findFirst({ where: { id: addressId, userId: user.id } });
-    if (!addr) return { ok: false, error: 'Invalid address' };
   }
 
-  // --- Load DB cart ---
-  const cart = await prisma.cart.findFirst({
+  const cart = await prisma.cart.findUnique({
     where: { userId: user.id },
-    include: {
-      items: {
+    select: { id: true },
+  });
+
+  if (!cart) {
+    return { ok: false, error: 'Your cart is empty' };
+  }
+
+  const requestedCouponCode = payload.couponCode.trim().toUpperCase();
+
+  let order;
+  try {
+    order = await prisma.$transaction(async (tx) => {
+      // Serialize checkout against cart add/update/remove and cookie->DB sync.
+      await tx.$queryRaw`SELECT "id" FROM "Cart" WHERE "id" = ${cart.id} FOR UPDATE`;
+
+      const currentCart = await tx.cart.findFirst({
+        where: {
+          id: cart.id,
+          userId: user.id,
+        },
         include: {
-          variantSize: {
+          items: {
+            select: {
+              id: true,
+              variantSizeId: true,
+              quantity: true,
+            },
+          },
+        },
+      });
+
+      if (!currentCart || currentCart.items.length === 0) {
+        throw new Error('CART_CHANGED');
+      }
+
+      const sizeIds = Array.from(
+        new Set(currentCart.items.map((item) => item.variantSizeId)),
+      ).sort();
+
+      // Freeze catalog price/stock rows for the remainder of this order snapshot.
+      for (const variantSizeId of sizeIds) {
+        await tx.$queryRaw`SELECT "id" FROM "VariantSize" WHERE "id" = ${variantSizeId} FOR UPDATE`;
+      }
+
+      const sizes = await tx.variantSize.findMany({
+        where: {
+          id: { in: sizeIds },
+        },
+        include: {
+          variant: {
             include: {
-              variant: {
-                include: {
-                  product: { select: { brand: true, status: true } },
-                  images: {
-                    orderBy: { sortOrder: 'asc' },
-                    take: 1,
-                  },
+              product: {
+                select: {
+                  brand: true,
+                  status: true,
                 },
+              },
+              images: {
+                orderBy: { sortOrder: 'asc' },
+                take: 1,
               },
             },
           },
         },
-      },
-    },
-  });
-  if (!cart || cart.items.length === 0) return { ok: false, error: 'Your cart is empty' };
-
-  // --- Validate stock/prices ---
-  let subtotal = 0;
-  let allFreeDelivery = true;
-
-  for (const ci of cart.items) {
-    const s = ci.variantSize;
-    if (
-      !s ||
-      !s.isActive ||
-      !s.variant.isActive ||
-      s.variant.product.status !== 'PUBLISHED'
-    ) {
-      return { ok: false, error: 'Some items are no longer available.' };
-    }
-    if (!Number.isInteger(ci.quantity) || ci.quantity < 1 || ci.quantity > 10) {
-      return { ok: false, error: 'Invalid cart quantity. Please review your cart.' };
-    }
-    if (ci.quantity > s.stockQty) return { ok: false, error: 'Quantity changed. Please review your cart.' };
-    const final = priceAfterDiscount(Number(s.priceMAD), s.discountPercent ?? null);
-    subtotal += final * ci.quantity;
-    if (!s.variant.freeDelivery) allFreeDelivery = false;
-  }
-
-  // --- Coupon ---
-  let couponPercent: number | null = null;
-  let couponCode: string | null = null;
-
-  const now = new Date();
-  if (payload.couponCode) {
-    const c = await prisma.coupon.findFirst({
-      where: {
-        code: payload.couponCode.toUpperCase(),
-        active: true,
-          AND: [
-      { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-      { OR: [{ endsAt: null }, { endsAt: { gte: now } }] }
-    ]
-      },
-    });
-    if (!c) return { ok: false, error: 'Coupon invalid or expired' };
-    couponPercent = c.percent;
-    couponCode = c.code;
-  }
-
-  // --- Delivery company ---
-  const company = await prisma.deliveryCompany.findFirst({
-    where: { id: parsed.data.shippingCompanyId, active: true },
-  });
-  if (!company) return { ok: false, error: 'Invalid delivery company' };
-
-  const shippingFee = allFreeDelivery ? 0 : Number(company.priceMAD);
-  const discountMAD = couponPercent ? Number((subtotal * couponPercent / 100).toFixed(2)) : 0;
-  const totalMAD = Number((subtotal - discountMAD + shippingFee).toFixed(2));
-
-  const shippingAddress = await prisma.address.findFirst({
-    where: { id: addressId, userId: user.id },
-    select: {
-      fullName: true,
-      phone: true,
-      city: true,
-      fullAddress: true,
-    },
-  });
-  if (!shippingAddress) {
-    return { ok: false, error: 'Invalid shipping address' };
-  }
-
-  // --- Transaction: claim cart, atomically reserve stock, then create order ---
-  const order = await prisma.$transaction(async (tx) => {
-      const claimedCart = await tx.cartItem.deleteMany({
-        where: { cartId: cart.id },
       });
-      if (claimedCart.count !== cart.items.length) {
-        throw new Error('CART_ALREADY_CHECKED_OUT');
+
+      const sizeById = new Map(sizes.map((size) => [size.id, size]));
+      let subtotal = 0;
+      let allFreeDelivery = true;
+
+      const pricedItems = currentCart.items.map((item) => {
+        const size = sizeById.get(item.variantSizeId);
+
+        if (
+          !size ||
+          !size.isActive ||
+          !size.variant.isActive ||
+          size.variant.product.status !== 'PUBLISHED'
+        ) {
+          throw new Error('CART_CHANGED');
+        }
+
+        if (
+          !Number.isInteger(item.quantity) ||
+          item.quantity < 1 ||
+          item.quantity > 10 ||
+          item.quantity > size.stockQty
+        ) {
+          throw new Error('CART_CHANGED');
+        }
+
+        const unitPriceMAD = priceAfterDiscount(
+          Number(size.priceMAD),
+          size.discountPercent ?? null,
+        );
+
+        subtotal += unitPriceMAD * item.quantity;
+        if (!size.variant.freeDelivery) allFreeDelivery = false;
+
+        return {
+          item,
+          size,
+          unitPriceMAD,
+        };
+      });
+
+      let couponPercent: number | null = null;
+      let couponCode: string | null = null;
+
+      if (requestedCouponCode) {
+        await tx.$queryRaw`SELECT "code" FROM "Coupon" WHERE "code" = ${requestedCouponCode} FOR UPDATE`;
+
+        const now = new Date();
+        const coupon = await tx.coupon.findFirst({
+          where: {
+            code: requestedCouponCode,
+            active: true,
+            AND: [
+              { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+              { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+            ],
+          },
+        });
+
+        if (!coupon) {
+          throw new Error('COUPON_INVALID');
+        }
+
+        couponPercent = coupon.percent;
+        couponCode = coupon.code;
       }
 
-      for (const ci of cart.items) {
+      await tx.$queryRaw`SELECT "id" FROM "DeliveryCompany" WHERE "id" = ${parsed.data.shippingCompanyId} FOR UPDATE`;
+
+      const company = await tx.deliveryCompany.findFirst({
+        where: {
+          id: parsed.data.shippingCompanyId,
+          active: true,
+        },
+      });
+
+      if (!company) {
+        throw new Error('SHIPPING_INVALID');
+      }
+
+      await tx.$queryRaw`SELECT "id" FROM "Address" WHERE "id" = ${addressId} FOR UPDATE`;
+
+      const shippingAddress = await tx.address.findFirst({
+        where: {
+          id: addressId,
+          userId: user.id,
+        },
+        select: {
+          fullName: true,
+          phone: true,
+          city: true,
+          fullAddress: true,
+        },
+      });
+
+      if (!shippingAddress) {
+        throw new Error('ADDRESS_INVALID');
+      }
+
+      // Stock reservation is still conditional so product/variant deactivation
+      // committed during this transaction causes a rollback instead of a stale sale.
+      for (const { item } of pricedItems) {
         const reserved = await tx.variantSize.updateMany({
           where: {
-            id: ci.variantSizeId,
+            id: item.variantSizeId,
             isActive: true,
-            stockQty: { gte: ci.quantity },
+            stockQty: { gte: item.quantity },
             variant: {
               isActive: true,
               product: { status: 'PUBLISHED' },
             },
           },
-          data: { stockQty: { decrement: ci.quantity } },
+          data: {
+            stockQty: { decrement: item.quantity },
+          },
         });
 
-        if (reserved.count !== 1) throw new Error('STOCK_RACE');
+        if (reserved.count !== 1) {
+          throw new Error('STOCK_RACE');
+        }
       }
+
+      const shippingFee = allFreeDelivery ? 0 : Number(company.priceMAD);
+      const normalizedSubtotal = Number(subtotal.toFixed(2));
+      const discountMAD = couponPercent
+        ? Number((normalizedSubtotal * couponPercent / 100).toFixed(2))
+        : 0;
+      const totalMAD = Number(
+        (normalizedSubtotal - discountMAD + shippingFee).toFixed(2),
+      );
 
       const created = await tx.order.create({
-      data: {
-        userId: user.id,
-        status: 'PENDING',
-        totalMAD,
-        currency: 'MAD',
-        shippingCompanyId: company.id,
-        shippingCompanyNameSnapshot: company.name,
-        shippingFeeMAD: shippingFee,
-        couponCode,
-        couponPercentApplied: couponPercent ?? undefined,
-        subtotalMAD: Number(subtotal.toFixed(2)),
-        discountMAD,
-        placedAt: new Date(),
-        shippingAddressId: addressId,
-        shippingFullNameSnapshot: shippingAddress.fullName,
-        shippingPhoneSnapshot: shippingAddress.phone,
-        shippingCitySnapshot: shippingAddress.city,
-        shippingAddressSnapshot: shippingAddress.fullAddress,
-        items: {
-          create: cart.items.map((ci) => {
-            const s = ci.variantSize;
-            const final = priceAfterDiscount(Number(s.priceMAD), s.discountPercent ?? null);
-            return {
-              variantSizeId: s.id,
-              titleSnapshot: s.variant.title,
-              skuSnapshot: s.sku,
-              productBrandSnapshot: s.variant.product.brand,
+        data: {
+          userId: user.id,
+          status: 'PENDING',
+          totalMAD,
+          currency: 'MAD',
+          shippingCompanyId: company.id,
+          shippingCompanyNameSnapshot: company.name,
+          shippingFeeMAD: shippingFee,
+          couponCode,
+          couponPercentApplied: couponPercent ?? undefined,
+          subtotalMAD: normalizedSubtotal,
+          discountMAD,
+          placedAt: new Date(),
+          shippingAddressId: addressId,
+          shippingFullNameSnapshot: shippingAddress.fullName,
+          shippingPhoneSnapshot: shippingAddress.phone,
+          shippingCitySnapshot: shippingAddress.city,
+          shippingAddressSnapshot: shippingAddress.fullAddress,
+          items: {
+            create: pricedItems.map(({ item, size, unitPriceMAD }) => ({
+              variantSizeId: size.id,
+              titleSnapshot: size.variant.title,
+              skuSnapshot: size.sku,
+              productBrandSnapshot: size.variant.product.brand,
               imageSnapshot:
-                s.variant.images[0]?.url ??
-                s.variant.variantStyleImg ??
+                size.variant.images[0]?.url ??
+                size.variant.variantStyleImg ??
                 null,
               attributesSnapshot: {
-                size: s.size,
-                variantName: s.variant.name,
+                size: size.size,
+                variantName: size.variant.name,
               },
-              quantity: ci.quantity,
-              unitPriceMAD: final,
-            };
-          }),
+              quantity: item.quantity,
+              unitPriceMAD,
+            })),
+          },
         },
-      },
-      include: { items: true, shippingCompany: true, shippingAddress: true },
-    });
+        include: {
+          items: true,
+          shippingCompany: true,
+          shippingAddress: true,
+        },
+      });
+
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
 
       return created;
-    }).catch((error: unknown) => {
-      if (
-        error instanceof Error &&
-        (error.message === 'STOCK_RACE' || error.message === 'CART_ALREADY_CHECKED_OUT')
-      ) {
-        return null;
-      }
-      throw error;
     });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === 'CART_CHANGED' ||
+        error.message === 'STOCK_RACE'
+      ) {
+        return {
+          ok: false,
+          error: 'Your cart changed while placing the order. Please review it and try again.',
+        };
+      }
 
-  if (!order) {
-    return { ok: false, error: 'Your cart changed while placing the order. Please review it and try again.' };
+      if (error.message === 'COUPON_INVALID') {
+        return { ok: false, error: 'Coupon invalid or expired' };
+      }
+
+      if (error.message === 'SHIPPING_INVALID') {
+        return { ok: false, error: 'Invalid delivery company' };
+      }
+
+      if (error.message === 'ADDRESS_INVALID') {
+        return { ok: false, error: 'Invalid shipping address' };
+      }
+    }
+
+    throw error;
   }
 
-  // --- Clear cookie snapshot ---
-  const cookie=await cookies()
+  const cookie = await cookies();
   cookie.set('hajzen_cart', JSON.stringify({ items: [], updatedAt: Date.now() }), {
     path: '/',
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
 
-  // --- Send confirmation email ---
   try {
     const html = renderEmail(OrderConfirmationEmail({ order } as any));
     const u = await prisma.user.findUnique({ where: { id: order.userId! } });
