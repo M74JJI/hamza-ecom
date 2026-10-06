@@ -14,11 +14,48 @@ export async function POST(req: Request){
   const t = await prisma.passwordResetToken.findFirst({ where: { token, expires: { gt: new Date() } } });
   if(!t) return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
 
+  const user = await prisma.user.findUnique({
+    where: { email: t.identifier },
+    select: { id: true },
+  });
+  if (!user) {
+    return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+  }
+
   const passwordHash = await hashPassword(password);
-  await prisma.$transaction([
-    prisma.user.update({ where: { email: t.identifier }, data: { passwordHash } }),
-    prisma.passwordResetToken.delete({ where: { id: t.id } })
-  ]);
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const consumed = await tx.passwordResetToken.deleteMany({
+        where: {
+          id: t.id,
+          expires: { gt: new Date() },
+        },
+      });
+
+      if (consumed.count !== 1) {
+        throw new Error("RESET_TOKEN_CONSUMED");
+      }
+
+      await tx.user.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      });
+
+      await tx.passwordResetToken.deleteMany({
+        where: { identifier: t.identifier },
+      });
+
+      await tx.session.deleteMany({
+        where: { userId: user.id },
+      });
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "RESET_TOKEN_CONSUMED") {
+      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+    }
+    throw error;
+  }
 
   return NextResponse.json({ ok: true });
 }
