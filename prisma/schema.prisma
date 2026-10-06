@@ -157,11 +157,16 @@ model Order {
   status               OrderStatus      @default(PENDING)
   totalMAD             Decimal          @db.Decimal(12, 2)
   currency             String           @default("MAD")
-  shippingAddressId    String?
-  shippingAddress      Address?         @relation(fields: [shippingAddressId], references: [id])
-  shippingCompanyId    String?
-  shippingCompany      DeliveryCompany? @relation(fields: [shippingCompanyId], references: [id])
-  shippingFeeMAD       Decimal?         @db.Decimal(10, 2)
+  shippingAddressId           String?
+  shippingAddress             Address?         @relation(fields: [shippingAddressId], references: [id])
+  shippingFullNameSnapshot    String?
+  shippingPhoneSnapshot       String?
+  shippingCitySnapshot        String?
+  shippingAddressSnapshot     String?
+  shippingCompanyId           String?
+  shippingCompany             DeliveryCompany? @relation(fields: [shippingCompanyId], references: [id])
+  shippingCompanyNameSnapshot String?
+  shippingFeeMAD              Decimal?         @db.Decimal(10, 2)
   couponCode           String?
   couponPercentApplied Int?
   subtotalMAD          Decimal?         @db.Decimal(12, 2)
@@ -181,10 +186,12 @@ model OrderItem {
   orderId            String
   variantSize        VariantSize @relation(fields: [variantSizeId], references: [id])
   variantSizeId      String
-  titleSnapshot      String
-  skuSnapshot        String
-  attributesSnapshot Json
-  quantity           Int
+  titleSnapshot        String
+  skuSnapshot          String
+  productBrandSnapshot String?
+  imageSnapshot        String?
+  attributesSnapshot   Json
+  quantity             Int
   unitPriceMAD       Decimal     @db.Decimal(10, 2)
 }
 
