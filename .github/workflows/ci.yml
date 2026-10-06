@@ -67,7 +67,7 @@ jobs:
 
       - name: Verify single-default-address invariant
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          psql "postgresql://postgres:postgres@localhost:5432/hajzen" -v ON_ERROR_STOP=1 <<'SQL'
           DO $
           BEGIN
             INSERT INTO "User" (
