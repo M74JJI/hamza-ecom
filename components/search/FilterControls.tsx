@@ -35,7 +35,7 @@ export function FilterControls({
 }: FilterControlsProps) {
   
   const activeFilterCount = Object.keys(filters).reduce((count, key) => {
-    if (key === 'q') return count;
+    if (key === 'q' || key === 'sort' || key === 'page') return count;
     const val = filters[key];
     return count + (Array.isArray(val) ? val.length : 1);
   }, 0);
@@ -131,6 +131,7 @@ export function FilterControls({
                       setFilters((prev: any) => ({
                         ...prev,
                         sort: option.value,
+                        page: 1,
                       }));
                       setSortOpen(false);
                     }}
