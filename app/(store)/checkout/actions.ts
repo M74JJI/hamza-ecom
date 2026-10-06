@@ -194,6 +194,8 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
     }
 
     const newAddr = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
+
       await tx.address.updateMany({
         where: { userId: user.id, isDefault: true },
         data: { isDefault: false },
