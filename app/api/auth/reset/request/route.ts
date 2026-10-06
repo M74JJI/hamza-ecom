@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { sendResetEmail } from "@/lib/emails/reset";
+import { getAppUrl } from "@/lib/app-url";
 
 const schema = z.object({ email: z.string().email() });
 
@@ -17,8 +18,7 @@ export async function POST(req: Request){
   const expires = new Date(Date.now() + 1000*60*60);
   await prisma.passwordResetToken.create({ data: { identifier: email, token, expires } });
 
-  const base = process.env.APP_URL || "http://localhost:3000";
-  const url = `${base}/reset?token=${token}`;
+  const url = `${getAppUrl()}/reset?token=${token}`;
   await sendResetEmail(email, url);
   return NextResponse.json({ ok: true });
 }
