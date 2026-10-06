@@ -11,6 +11,7 @@ export async function addAddressAction(input: unknown){
   if(!parsed.success){
     return { error: "Invalid address" };
   }
+
   const a = parsed.data;
   const created = await prisma.address.create({
     data: {
@@ -21,6 +22,7 @@ export async function addAddressAction(input: unknown){
       fullAddress: a.streetAddress
     }
   });
+
   revalidatePath("/checkout");
   revalidatePath("/profile");
   return { ok: true, id: created.id };
@@ -28,17 +30,37 @@ export async function addAddressAction(input: unknown){
 
 export async function setDefaultAddressAction(id: string){
   const { user } = await requireUser();
-  const owned = await prisma.address.findFirst({
-    where: { id, userId: user.id },
-    select: { id: true },
-  });
-  if (!owned) return { error: "Address not found" };
 
-  await prisma.$transaction([
-    prisma.address.updateMany({ where: { userId: user.id, isDefault: true }, data: { isDefault: false } }),
-    prisma.address.update({ where: { id: owned.id }, data: { isDefault: true } })
-  ]);
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
+
+    const owned = await tx.address.findFirst({
+      where: { id, userId: user.id },
+      select: { id: true },
+    });
+
+    if (!owned) return { error: "Address not found" as const };
+
+    await tx.address.updateMany({
+      where: {
+        userId: user.id,
+        isDefault: true,
+        id: { not: owned.id },
+      },
+      data: { isDefault: false },
+    });
+
+    await tx.address.update({
+      where: { id: owned.id },
+      data: { isDefault: true },
+    });
+
+    return { ok: true as const };
+  });
+
+  if (!result.ok) return result;
+
   revalidatePath("/checkout");
   revalidatePath("/profile");
-  return { ok: true };
+  return result;
 }

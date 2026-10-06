@@ -65,5 +65,22 @@ jobs:
       - name: Validate migration history
         run: bun run prisma:migrate:deploy
 
+      - name: Verify single-default-address invariant
+        run: |
+          PSQL_URL="postgresql://postgres:postgres@localhost:5432/hajzen"
+
+          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"User\" (\"id\", \"email\", \"role\", \"createdAt\", \"updatedAt\") VALUES ('ci-default-address-user', 'ci-default-address@example.com', 'USER', NOW(), NOW());"
+
+          psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"Address\" (\"id\", \"userId\", \"fullName\", \"phone\", \"city\", \"fullAddress\", \"isDefault\", \"createdAt\", \"updatedAt\") VALUES ('ci-default-address-1', 'ci-default-address-user', 'CI User', '0600000000', 'Casablanca', 'CI Address 1', TRUE, NOW(), NOW());"
+
+          if psql "$PSQL_URL" -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"Address\" (\"id\", \"userId\", \"fullName\", \"phone\", \"city\", \"fullAddress\", \"isDefault\", \"createdAt\", \"updatedAt\") VALUES ('ci-default-address-2', 'ci-default-address-user', 'CI User', '0600000000', 'Casablanca', 'CI Address 2', TRUE, NOW(), NOW());"
+          then
+            echo "single-default-address invariant was not enforced"
+            exit 1
+          fi
+
       - name: Run quality gate
         run: bun run ci
