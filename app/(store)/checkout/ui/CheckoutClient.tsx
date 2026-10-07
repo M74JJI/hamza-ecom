@@ -507,80 +507,10 @@ function validAddress() {
                 </div>
               </div>
 
-              {/* Trust Features */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="grid grid-cols-2 gap-4"
-              >
-                {[
-                  { icon: Shield, label: "Secure", desc: "Payment", color: "text-blue-600" },
-                  { icon: Truck, label: "Fast", desc: "Delivery", color: "text-green-600" },
-                  { icon: Clock, label: "24/7", desc: "Support", color: "text-purple-600" },
-                  { icon: Award, label: "2-Year", desc: "Warranty", color: "text-yellow-600" },
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature.label}
-                    whileHover={{ y: -2, scale: 1.02 }}
-                    className="bg-white rounded-xl p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <feature.icon className={`w-6 h-6 ${feature.color} mx-auto mb-2`} />
-                    <div className="font-semibold text-gray-800 text-sm">{feature.label}</div>
-                    <div className="text-gray-600 text-xs">{feature.desc}</div>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Need Help */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7 }}
-                className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl p-6 border border-blue-200"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <Sparkles className="w-6 h-6 text-blue-600" />
-                  <h3 className="font-semibold text-gray-800">Need Help?</h3>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  Our support team is here to help with your order
-                </p>
-                <div className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-2">
-                  Contact Support
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
 
-        {/* Trust Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 pt-8 border-t border-gray-300"
-        >
-          {[
-            { icon: Shield, value: "Secure", label: "PAYMENT", color: "text-blue-600" },
-            { icon: Truck, value: "Fast", label: "DELIVERY", color: "text-green-600" },
-            { icon: Clock, value: "24/7", label: "SUPPORT", color: "text-purple-600" },
-            { icon: Award, value: "2-Year", label: "WARRANTY", color: "text-yellow-600" },
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1 + index * 0.1 }}
-              className="text-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-2 border-gray-300 shadow-lg"
-            >
-              <stat.icon className={`w-6 h-6 ${stat.color} mx-auto mb-2`} />
-              <div className="text-xl font-black text-gray-900 mb-1">{stat.value}</div>
-              <div className="text-xs font-medium text-gray-700">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </div>
   );

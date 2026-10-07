@@ -431,21 +431,9 @@ export default function CartPageClient() {
               </motion.button>
             </Link>
             
-            <div className="grid grid-cols-3 gap-4 max-w-xs mx-auto">
-              {['New Arrivals', 'Bestsellers', 'Sale'].map((category, index) => (
-                <Link key={category} href={`/products?category=${category.toLowerCase()}`} className="block">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="bg-white/80 backdrop-blur-sm p-3 rounded-lg border border-gray-200 shadow-sm text-center hover:shadow-md transition-all cursor-pointer"
-                  >
-                    <div className="text-sm font-medium text-gray-700 truncate">{category}</div>
-                  </motion.div>
-                </Link>
-              ))}
-            </div>
+            <p className="text-sm text-gray-500">
+              The catalog shows only products currently published by the store.
+            </p>
           </motion.div>
         </motion.div>
       </div>
@@ -897,137 +885,18 @@ export default function CartPageClient() {
                   {/* Security & Trust */}
                   <div className="flex items-center justify-center gap-2 sm:gap-4 mt-3 sm:mt-4 text-gray-500 text-xs sm:text-sm flex-wrap">
                     <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>Secure SSL Encryption</span>
+                    <span>Cart checked at checkout</span>
                     <span className="hidden sm:inline">·</span>
                     <CreditCard className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>Protected Payment</span>
+                    <span>Shipping calculated from live options</span>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Enhanced Trust Features */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="grid grid-cols-2 gap-3 sm:gap-4"
-              >
-                {[
-                  { icon: Truck, label: "Free Shipping", desc: "Over 500 MAD", color: "text-blue-600" },
-                  { icon: Package, label: "Easy Returns", desc: "30 Days", color: "text-green-600" },
-                  { icon: Award, label: "2-Year Warranty", desc: "Guaranteed", color: "text-yellow-600" },
-                  { icon: CreditCard, label: "Secure Payment", desc: "Protected", color: "text-purple-600" },
-                ].map((feature, index) => (
-                  <motion.div
-                    key={feature.label}
-                    whileHover={{ y: -2, scale: 1.02 }}
-                    className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <feature.icon className={`w-6 h-6 sm:w-8 sm:h-8 ${feature.color} mx-auto mb-2`} />
-                    <div className="font-semibold text-gray-800 text-xs sm:text-sm">{feature.label}</div>
-                    <div className="text-gray-600 text-xs">{feature.desc}</div>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Enhanced Recommendations */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7 }}
-                className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl lg:rounded-3xl p-4 sm:p-6 border border-blue-200"
-              >
-                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
-                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Complete your look</h3>
-                </div>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-                  Customers who bought these items also loved
-                </p>
-                <Link href="/products" className="text-blue-600 hover:text-blue-700 font-medium text-xs sm:text-sm flex items-center gap-2">
-                  Discover Recommendations
-                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Link>
-              </motion.div>
-
-              {/* Gift Message */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.9 }}
-                className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-2xl lg:rounded-3xl p-4 sm:p-6 border border-green-200"
-              >
-                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                  <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                  <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Add a gift message?</h3>
-                </div>
-                <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">
-                  Make it special with a personalized note
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-2 sm:py-3 border-2 border-green-600 text-green-600 rounded-xl font-semibold hover:bg-green-600 hover:text-white transition-colors text-sm"
-                >
-                  Add Gift Options
-                </motion.button>
-              </motion.div>
             </div>
           </div>
         </motion.div>
 
-        {/* Enhanced Progress Bar for Free Shipping */}
-        {sub < 500 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl mx-auto mt-8 sm:mt-12 bg-white rounded-2xl lg:rounded-3xl p-6 sm:p-8 shadow-lg border border-gray-100"
-          >
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                <span className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
-                  You're almost there!
-                </span>
-              </div>
-              <span className="text-gray-600 font-medium text-xs sm:text-sm">
-                {(500 - sub).toFixed(2)} MAD to go
-              </span>
-            </div>
-            
-            <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-2 sm:mb-3 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((sub / 500) * 100, 100)}%` }}
-                transition={{ duration: 1, delay: 0.5 }}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 sm:h-3 rounded-full relative"
-              >
-                <motion.div
-                  animate={{ x: ['0%', '100%', '0%'] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                />
-              </motion.div>
-            </div>
-            
-            <p className="text-center text-gray-600 text-xs sm:text-sm">
-              Add <span className="font-semibold text-green-600">{(500 - sub).toFixed(2)} MAD</span> more to get{' '}
-              <span className="font-semibold">FREE shipping!</span>
-            </p>
-            
-            <div className="flex justify-center mt-3 sm:mt-4">
-              <Link href="/products">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors text-sm sm:text-base"
-                >
-                  Continue Shopping
-                </motion.button>
-              </Link>
-            </div>
-          </motion.div>
-        )}
       </div>
     </div>
   );

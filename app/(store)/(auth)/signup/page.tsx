@@ -39,92 +39,10 @@ export default function SignUp(){
 
               <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
                 Join thousands of savvy shoppers who get exclusive deals, faster checkout, 
-                and personalized recommendations.
+                plus saved addresses, order history, wishlists, and reviews.
               </p>
             </motion.div>
 
-            {/* E-commerce Benefits Grid */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-              {[
-                {
-                  icon: Tag,
-                  title: "Exclusive Deals",
-                  description: "Members-only discounts and early access to sales",
-                  color: "text-green-600 bg-green-100"
-                },
-                {
-                  icon: Truck,
-                  title: "Free Shipping",
-                  description: "Free delivery on orders over 500 MAD",
-                  color: "text-blue-600 bg-blue-100"
-                },
-                {
-                  icon: Clock,
-                  title: "Faster Checkout",
-                  description: "Save your details for quick, easy purchases",
-                  color: "text-purple-600 bg-purple-100"
-                },
-                {
-                  icon: Star,
-                  title: "Earn Rewards",
-                  description: "Collect points with every purchase",
-                  color: "text-yellow-600 bg-yellow-100"
-                },
-              ].map((benefit, index) => (
-                <motion.div
-                  key={benefit.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 + index * 0.1 }}
-                  whileHover={{ y: -2 }}
-                  className="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all"
-                >
-                  <div className={`w-12 h-12 ${benefit.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <benefit.icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-1">{benefit.title}</h3>
-                    <p className="text-gray-600 text-sm">{benefit.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Social Proof */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full border-2 border-white" />
-                  ))}
-                </div>
-                <div className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">5,000+</span> shoppers joined this week
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className="w-4 h-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <span className="font-semibold text-gray-900">4.8/5</span>
-                </div>
-                <div className="text-gray-600">Based on 2,500+ reviews</div>
-              </div>
-            </motion.div>
           </motion.div>
 
           {/* Right Side - Sign Up Form */}

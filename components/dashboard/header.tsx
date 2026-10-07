@@ -14,7 +14,8 @@ export async function AdminHeader() {
     totalRevenuePending,
     totalOrders,
     totalProducts,
-    recentRevenue
+    recentRevenue,
+    previousRevenue,
   ] = await Promise.all([
     // Confirmed / Shipped / Delivered = Realized revenue
     prisma.order.aggregate({
@@ -43,6 +44,18 @@ export async function AdminHeader() {
         createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
       },
     }),
+
+    // Previous 24-hour window for a real comparison
+    prisma.order.aggregate({
+      _sum: { totalMAD: true },
+      where: {
+        status: { in: ["CONFIRMED", "SHIPPED", "DELIVERED"] },
+        createdAt: {
+          gte: new Date(Date.now() - 48 * 60 * 60 * 1000),
+          lt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
+      },
+    }),
   ]);
 
   const confirmedRevenue = totalRevenueConfirmed._sum.totalMAD ?? 0;
@@ -51,7 +64,13 @@ export async function AdminHeader() {
   const pending = pendingRevenue.toFixed(0);
   const orders = totalOrders;
   const products = totalProducts;
-  const growth = "+12%"; // placeholder — can later be computed from weekly trend
+  const recentRevenueValue = Number(recentRevenue._sum.totalMAD ?? 0);
+  const previousRevenueValue = Number(previousRevenue._sum.totalMAD ?? 0);
+  const growth = previousRevenueValue > 0
+    ? `${Math.round(((recentRevenueValue - previousRevenueValue) / previousRevenueValue) * 100)}%`
+    : recentRevenueValue > 0
+      ? "New"
+      : "0%";
 
   return (
     <AdminHeaderClient

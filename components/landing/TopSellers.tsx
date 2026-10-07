@@ -220,11 +220,11 @@ export function TopSellers({ products }: TopSellersProps) {
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg border-2 border-white shadow-lg mb-4"
           >
             <TrendingUp className="w-4 h-4" />
-            <span className="font-black text-sm">TOP SELLERS</span>
+            <span className="font-black text-sm">LATEST PRODUCTS</span>
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
-            <span className="text-gray-900">BEST SELLING</span>
+            <span className="text-gray-900">RECENTLY ADDED</span>
             <br />
             <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
               PRODUCTS
@@ -232,7 +232,7 @@ export function TopSellers({ products }: TopSellersProps) {
           </h2>
           
           <p className="text-lg text-gray-700 max-w-2xl mx-auto font-medium">
-            Discover our most loved products that customers can't stop talking about
+            Browse the newest products currently published in our catalog
           </p>
         </motion.div>
 

@@ -184,12 +184,6 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
 });
 
 
-  const luxuryFeatures = [
-    { icon: Crown, text: "Luxury Collection", description: "Exclusive designer pieces", color: "from-amber-500 to-yellow-500" },
-    { icon: Gem, text: "Premium Materials", description: "Finest quality craftsmanship", color: "from-blue-500 to-cyan-500" },
-    { icon: Shield, text: "Authenticity Guarantee", description: "Official luxury retailer", color: "from-emerald-500 to-green-500" },
-  ];
-
   function getCategoryPath(category: any): any[] {
     const path: any[] = [];
     let current = category;
@@ -489,7 +483,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
           transition={{ delay: 0.1 }}
           className="space-y-6 sm:space-y-8"
         >
-          {/* Luxury Collection Badge */}
+          {/* Database-backed category badge */}
           {product.categories?.[0] && (
             <motion.span
               initial={{ opacity: 0, scale: 0.8 }}
@@ -809,29 +803,6 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
           )}
         </motion.div>
 
-        {/* Luxury Features Grid - Stack on mobile */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-8 sm:py-10 border-t border-gray-200"
-        >
-          {luxuryFeatures.map((feature, index) => (
-            <motion.div
-              key={feature.text}
-              whileHover={{ y: -4, scale: 1.03 }}
-              className="flex items-start gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-gray-50 to-white border border-gray-200 hover:border-gray-300 transition-all duration-500 shadow-lg sm:shadow-2xl hover:shadow-xl sm:hover:shadow-3xl group"
-            >
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${feature.color} rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg sm:shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0`}>
-                <feature.icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-bold text-gray-900 text-xs sm:text-sm mb-1 sm:mb-2 truncate">{feature.text}</div>
-                <div className="text-xs text-gray-600 leading-relaxed line-clamp-2">{feature.description}</div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </div>
   </div>

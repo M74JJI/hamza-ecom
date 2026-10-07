@@ -115,22 +115,7 @@ export default async function AddressesPage(){
               title="Delivery Information" 
               subtitle="Important notes about shipping"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl p-6 border border-blue-200">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                      <Truck className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-lg">Free Shipping</h3>
-                      <p className="text-gray-600 text-sm">On orders over 500 MAD</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    Enjoy free delivery when your order total exceeds 500 MAD. Standard delivery times apply.
-                  </p>
-                </div>
-                
+              <div className="grid grid-cols-1 gap-6">
                 <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">

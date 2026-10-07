@@ -312,30 +312,6 @@ useEffect(() => {
               </motion.div>
             )}
 
-            {/* Trust Features */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
-            >
-              {[
-                { icon: Truck, label: "Free Shipping", desc: "Over 500 MAD", color: "text-blue-600" },
-                { icon: Award, label: "2-Year Warranty", desc: "Quality Guaranteed", color: "text-yellow-600" },
-                { icon: Shield, label: "Secure Payment", desc: "SSL Protected", color: "text-green-600" },
-                { icon: Tag, label: "Best Price", desc: "Price Match", color: "text-purple-600" },
-              ].map((feature) => (
-                <motion.div
-                  key={feature.label}
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  className="bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm hover:shadow-md transition-all"
-                >
-                  <feature.icon className={`w-6 h-6 ${feature.color} mx-auto mb-2`} />
-                  <div className="font-semibold text-gray-800 text-sm">{feature.label}</div>
-                  <div className="text-gray-600 text-xs">{feature.desc}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-
             {/* Products */}
             {loading ? (
               <motion.div

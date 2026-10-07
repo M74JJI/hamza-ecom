@@ -1,8 +1,6 @@
 // Home Page - Premium Enhanced
 import HeroPro from "@/components/landing/HeroPro";
-import FeaturedProducts from "@/components/landing/FeaturedProducts";
 import FeaturedCategories from "@/components/landing/FeaturedCategories";
-import Trust from "@/components/landing/Trust";
 import { TopSellers } from "@/components/landing/TopSellers";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";

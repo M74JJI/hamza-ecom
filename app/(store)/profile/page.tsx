@@ -198,24 +198,6 @@ export default async function ProfileOverview(){
               </div>
             </SectionCard>
 
-            {/* Trust Features */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { icon: Shield, value: "Secure", label: "ACCOUNT", color: "text-blue-600" },
-                { icon: Award, value: "Premium", label: "QUALITY", color: "text-yellow-600" },
-                { icon: Clock, value: "24/7", label: "SUPPORT", color: "text-purple-600" },
-                { icon: Truck, value: "Fast", label: "DELIVERY", color: "text-green-600" },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="text-center p-4 bg-white/80 backdrop-blur-sm rounded-xl border-2 border-gray-300 shadow-lg"
-                >
-                  <stat.icon className={`w-6 h-6 ${stat.color} mx-auto mb-2`} />
-                  <div className="text-xl font-black text-gray-900 mb-1">{stat.value}</div>
-                  <div className="text-xs font-medium text-gray-700">{stat.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>

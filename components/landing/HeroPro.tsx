@@ -82,13 +82,6 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
     };
   }, [currentVariant, getCheapestSize]);
 
-  const brandHighlights = [
-    { icon: Crown, text: "Luxury Craftsmanship", description: "Artisanal quality" },
-    { icon: Shield, text: "2-Year Warranty", description: "Quality guaranteed" },
-    { icon: Gem, text: "Premium Materials", description: "Finest selection" },
-    { icon: Truck, text: "White Glove Delivery", description: "Free over 500 MAD" }
-  ];
-
   const nextProduct = useCallback(() => {
     setActiveProduct((prev) => (prev + 1) % products.length);
     setActiveVariant(0);
@@ -211,7 +204,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
                 transition={{ delay: 0.6 }}
                 className="text-xl text-stone-700 leading-relaxed max-w-lg font-light tracking-wide"
               >
-                Discover meticulously crafted pieces where exceptional quality meets timeless design. 
+                Browse products selected from the store's currently published catalog.
               </motion.p>
             </motion.div>
 
@@ -224,7 +217,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
             >
               <div className="flex items-center gap-4">
                 <Gem className="w-6 h-6 text-amber-600" />
-                <span className="font-black text-stone-900 text-lg tracking-widest uppercase">Craftsmanship</span>
+                <span className="font-black text-stone-900 text-lg tracking-widest uppercase">Product details</span>
               </div>
               
               <div className="grid grid-cols-3 gap-4">
@@ -244,33 +237,6 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
                       <div className="text-sm text-stone-600 font-light">{feature.value}</div>
                     </div>
                     <Check className="w-4 h-4 text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Luxury Trust Features */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="space-y-6"
-            >
-              <div className="font-black text-stone-900 text-lg tracking-widest uppercase">The Luxury Promise</div>
-              <div className="w-fit grid sm:grid-cols-2 gap-4">
-                {brandHighlights.map((item, index) => (
-                  <motion.div
-                    key={item.text}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1 + index * 0.1 }}
-                    className="flex items-center gap-3 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-stone-300/50 hover:border-amber-300/50 transition-all duration-300 group"
-                  >
-                    <item.icon className="w-5 h-5 text-amber-600 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                    <div className="min-w-0">
-                      <div className="text-sm font-bold text-stone-900 truncate">{item.text}</div>
-                      <div className="text-xs text-stone-600 font-light truncate">{item.description}</div>
-                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -384,15 +350,6 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-orange-500/5 mix-blend-overlay z-15" />
   <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-stone-900/95 via-stone-900/50 to-transparent z-15" />
   
-  {/* Limited Edition Badge */}
-  <motion.div
-    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    className="absolute top-6 left-6 bg-gradient-to-r from-amber-500 to-amber-700 px-4 py-2 rounded-full border border-amber-300/30 shadow-lg z-20"
-  >
-    <span className="text-white font-black text-xs tracking-wider">LIMITED EDITION</span>
-  </motion.div>
-
   {/* Premium Product Info Overlay */}
   <div className="absolute bottom-6 left-6 right-6 z-20">
     <div className="flex items-end justify-between">
@@ -410,7 +367,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
           transition={{ delay: 0.2 }}
           className="text-amber-300 font-medium text-base tracking-wide"
         >
-          {currentProduct.categories?.[0]?.category?.name || "Luxury Collection"}
+          {currentProduct.categories?.[0]?.category?.name || "Catalog"}
         </motion.p>
       </div>
       <motion.div
@@ -589,7 +546,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
                     <div className="space-y-2">
                       <h4 className="font-bold text-sm text-stone-900 truncate tracking-wide">{product.variants[0].name}</h4>
                       <div className="text-xs text-stone-600 font-light truncate">
-                        {product.categories?.[0]?.category?.name || "Luxury"}
+                        {product.categories?.[0]?.category?.name || "Catalog"}
                       </div>
                       <div className="font-black text-stone-900 text-base">
                         From {Math.round(productMinPrice)} MAD

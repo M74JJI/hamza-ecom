@@ -47,7 +47,7 @@ export default async function SecurityPage(){
           
           <div className="space-y-6 lg:space-y-8">
             {/* Security Status */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white/80 backdrop-blur-2xl rounded-2xl p-4 border-2 border-gray-300 shadow-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
@@ -74,17 +74,6 @@ export default async function SecurityPage(){
                 </div>
               </div>
               
-              <div className="bg-white/80 backdrop-blur-2xl rounded-2xl p-4 border-2 border-gray-300 shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
-                    <Award className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-black text-gray-800">Member</div>
-                    <div className="text-sm text-gray-600 font-medium">Tier Level</div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Email Verification Banner */}

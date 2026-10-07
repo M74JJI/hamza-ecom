@@ -38,8 +38,7 @@ export default function SignIn(){
               </h1>
 
               <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                Continue your shopping journey with personalized recommendations, 
-                saved preferences, and exclusive member benefits.
+                Access your saved addresses, orders, wishlist, reviews, and account security settings.
               </p>
             </motion.div>
 
@@ -53,26 +52,26 @@ export default function SignIn(){
               {[
                 {
                   icon: ShoppingBag,
-                  title: "Quick Checkout",
-                  description: "Your saved details for faster purchases",
+                  title: "Saved Addresses",
+                  description: "Reuse your saved delivery details",
                   color: "text-blue-600 bg-blue-100"
                 },
                 {
                   icon: Tag,
-                  title: "Active Offers",
-                  description: "Personalized deals waiting for you",
+                  title: "Wishlist",
+                  description: "Return to products you saved",
                   color: "text-green-600 bg-green-100"
                 },
                 {
                   icon: Clock,
                   title: "Order History",
-                  description: "Track and reorder your favorites",
+                  description: "Review your previous purchases",
                   color: "text-purple-600 bg-purple-100"
                 },
                 {
                   icon: Star,
-                  title: "Saved Preferences",
-                  description: "Your size, style, and brand preferences",
+                  title: "Product Reviews",
+                  description: "Manage feedback you submitted",
                   color: "text-yellow-600 bg-yellow-100"
                 },
               ].map((benefit, index) => (
@@ -174,25 +173,6 @@ export default function SignIn(){
                 </div>
               </motion.div>
 
-              {/* Member Stats */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="mt-6 grid grid-cols-3 gap-4 text-center"
-              >
-                {[
-                  { icon: Star, label: "50K+", value: "Members" },
-                  { icon: Zap, label: "4.8★", value: "Rating" },
-                  { icon: Truck, label: "Free", value: "Shipping" },
-                ].map((item, index) => (
-                  <div key={item.label} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-                    <item.icon className="w-5 h-5 text-green-600 mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-gray-900">{item.label}</div>
-                    <div className="text-xs text-gray-600">{item.value}</div>
-                  </div>
-                ))}
-              </motion.div>
             </div>
           </motion.div>
         </div>

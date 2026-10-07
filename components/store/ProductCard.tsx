@@ -72,7 +72,7 @@ export default function ProductCard({ product, viewMode = 'grid' }: ProductCardP
     : originalPrice;
 
   const currentImages = variant?.images?.length > 0 ? variant.images : [{ url: variant.variantStyleImg }];
-  const currentImage = currentImages[imageIndex]?.url || "https://images.unsplash.com/photo-1558769132-cb25c5d1c7c1?w=800";
+  const currentImage = currentImages[imageIndex]?.url || "/placeholder.svg";
 
   // Enhanced auto-scroll with pause on interaction
   useEffect(() => {
@@ -321,20 +321,6 @@ export default function ProductCard({ product, viewMode = 'grid' }: ProductCardP
                     <Check className="w-3 h-3" />
                     In Stock
                   </motion.div>
-                  <motion.div 
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="flex items-center gap-2 text-xs text-blue-600 font-semibold bg-blue-50 px-3 py-1.5 rounded-2xl"
-                  >
-                    <Truck className="w-3 h-3" />
-                    Free Shipping
-                  </motion.div>
-                  <motion.div 
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="flex items-center gap-2 text-xs text-purple-600 font-semibold bg-purple-50 px-3 py-1.5 rounded-2xl"
-                  >
-                    <Clock className="w-3 h-3" />
-                    Fast Delivery
-                  </motion.div>
                 </motion.div>
               </div>
 
@@ -463,32 +449,6 @@ export default function ProductCard({ product, viewMode = 'grid' }: ProductCardP
           </div>
         </div>
 
-        {/* Enhanced Trust Bar */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex items-center justify-center gap-8 mt-6 pt-6 border-t border-white/50"
-        >
-          {[
-            { icon: Shield, text: "2-Year Warranty", color: "text-blue-500" },
-            { icon: RotateCcw, text: "30-Day Returns", color: "text-green-500" },
-            { icon: Clock, text: "24/7 Support", color: "text-purple-500" },
-            { icon: Truck, text: "Free Shipping", color: "text-orange-500" }
-          ].map((item, index) => (
-            <motion.div
-              key={item.text}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 + index * 0.1 }}
-              whileHover={{ scale: 1.1, y: -2 }}
-              className="flex items-center gap-2 text-xs font-semibold text-gray-600"
-            >
-              <item.icon className={`w-4 h-4 ${item.color}`} />
-              {item.text}
-            </motion.div>
-          ))}
-        </motion.div>
       </motion.div>
     );
   }

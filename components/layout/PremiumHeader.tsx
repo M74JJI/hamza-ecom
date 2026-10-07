@@ -14,7 +14,6 @@ import {
   X,
   ChevronDown,
   Heart,
-  Phone,
   Clock,
   Star,
   Truck,
@@ -34,9 +33,6 @@ import {
 } from 'lucide-react';
 import { signOutAction } from '@/app/(store)/(auth)/actions';
 import { useCart } from '@/hooks/useCart';
-import { usePresence } from '@/hooks/usePresence';
-
-import navigationData from '@/data/nav.json';
 import Image from 'next/image';
 
 //-------------------------------
@@ -121,24 +117,6 @@ const slideIn = {
 const stagger = {
   animate: { transition: { staggerChildren: 0.1 } },
 };
-
-const FloatingParticles = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {[...Array(15)].map((_, i) => (
-      <motion.div
-        key={i}
-        className="absolute w-1 h-1 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full pointer-events-none"
-        initial={{
-          x: `${(i * 37 + 11) % 100}vw`,
-          y: (i * 29 + 7) % 100,
-          scale: 0.5 + ((i * 17) % 50) / 100,
-        }}
-        animate={{ y: [null, -20, 0], opacity: [0, 1, 0] }}
-        transition={{ duration: 2 + (i % 4) * 0.7, repeat: Infinity, delay: (i % 5) * 0.35 }}
-      />
-    ))}
-  </div>
-);
 
 const ShimmerLoader = ({ className }: { className: string }) => (
   <div className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 ${className}`} />
@@ -309,7 +287,6 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [activeSearchCategory, setActiveSearchCategory] = useState('all');
-  const [notificationCount] = useState(3);
   const [loadingStates, setLoadingStates] = useState({ search: false, cart: false });
 
   const pathname = usePathname();
@@ -324,10 +301,8 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
   const headerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const live = usePresence('global'); 
-
   // ---------- CATEGORIES (SWR once, no polling) ----------
-  const { data: catData } = useSWR<{ items: Array<{ id: string; name: string; slug: string; imageUrl?: string }> }>(
+  const { data: catData } = useSWR<{ items: Array<{ id: string; name: string; slug: string; imageUrl?: string; productCount: number }> }>(
     '/api/categories/header',
     fetcher,
     { refreshInterval: 0, revalidateOnFocus: false, revalidateOnReconnect: false }
@@ -345,26 +320,32 @@ export default function UltimateEcommerceHeader({ user }: { user?: any }) {
     }, 0);
   }, [cartItems]);
 
-  // AI-powered search suggestions
-  const searchSuggestions = useMemo(() => ({
-    popular: ["Running Shoes", "Summer Dresses", "Smart Watch", "Backpack", "Designer Jeans", "Sports Bra"],
-    trending: ["Wireless Earbuds", "Yoga Mat", "Sunglasses", "Water Bottle", "Fitness Tracker"],
-    recentlyViewed: ["Casual Sneakers", "Leather Jacket", "Formal Shirt"]
-  }), []);
-
-  // ---------- Navigation (unchanged UI data) ----------
+  // Navigation and search filters come only from the live catalog.
   const navigation: NavigationItem[] = useMemo(
-    () => navigationData.navigation as NavigationItem[],
-    []
+    () => [
+      { name: 'Shop All', href: '/browse' },
+      ...(catData?.items ?? []).map((category) => ({
+        name: category.name,
+        href: `/browse?category=${encodeURIComponent(category.id)}`,
+      })),
+    ],
+    [catData]
   );
 
   // ---------- Search config ----------
-  const searchCategories = [
-    { id: 'all', name: 'All Categories', count: '10K+' },
-    { id: 'cmhci78b6000bvdy4utekixma', name: "Men's Fashion", count: '2.3K' },
-    { id: 'cmhdofcvl003fvddgwvmo3f0f', name: "Women's Fashion", count: '3.1K' },
-    { id: 'cmhggk3qo000nvd5gjkt5s6tj', name: 'Kids Clothing', count: '1.2K' },
-  ];
+  const searchCategories = useMemo(() => [
+    { id: 'all', name: 'All Categories', count: null },
+    ...(catData?.items ?? []).map((category) => ({
+      id: category.id,
+      name: category.name,
+      count: category.productCount,
+    })),
+  ], [catData]);
+
+  const searchSuggestions = useMemo(() => ({
+    popular: (catData?.items ?? []).map((category) => category.name),
+    trending: [] as string[],
+  }), [catData]);
 
   // ---------- effects ----------
   useEffect(() => {
@@ -431,61 +412,13 @@ useEffect(() => {
   // ---------- UI ----------
   return (
     <LazyMotion features={domMax}>
-      {/* Announcement */}
-      <div className="relative bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 text-white text-sm overflow-hidden border-b border-white/10">
-        <FloatingParticles />
-        <div className="relative max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-2.5">
-            <div className="flex items-center space-x-8">
-              <motion.div className="flex items-center space-x-2" whileHover={{ scale: 1.02 }} transition={{ type: 'spring', stiffness: 400 }}>
-                <div className="relative">
-                  <Zap className="w-4 h-4 text-yellow-400" />
-                  <motion.div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full pointer-events-none" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-                </div>
-                <span className="font-semibold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">FLASH SALE: 60% OFF</span>
-              </motion.div>
-
-              <motion.div className="hidden lg:flex items-center space-x-3 bg-black/30 px-3 py-1.5 rounded-full border border-white/10" whileHover={{ scale: 1.05 }}>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse pointer-events-none" />
-                  <span className="text-xs font-medium">LIVE</span>
-                </div>
-                {typeof live === 'number' ? (
-                  <span className="text-xs font-bold font-mono">{live.toLocaleString()}</span>
-                ) : (
-                  <span className="text-xs font-mono opacity-60">—</span>
-                )}
-                <span className="text-xs text-white/70">shopping now</span>
-              </motion.div>
-            </div>
-
-            <motion.div className="hidden xl:flex items-center space-x-3 bg-gradient-to-r from-red-600 to-pink-600 px-4 py-1.5 rounded-full shadow-lg" initial={{ scale: 0.9, y: -5 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300 }}>
-              <Clock className="w-3.5 h-3.5" />
-              <span className="font-mono text-sm font-bold">23:59:45</span>
-              <span className="text-xs font-medium">LEFT</span>
-            </motion.div>
-
-            <div className="flex items-center space-x-6">
-              <div className="hidden lg:flex items-center space-x-4">
-                <div className="flex items-center space-x-1.5 text-xs text-white/80">
-                  <Shield className="w-3.5 h-3.5 text-green-400" />
-                  <span>Secure</span>
-                </div>
-                <div className="flex items-center space-x-1.5 text-xs text-white/80">
-                  <Truck className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Free Shipping</span>
-                </div>
-              </div>
-
-              <motion.div className="hidden xl:flex items-center space-x-2 text-xs hover:text-white/90 transition-colors cursor-pointer group" whileHover={{ x: 2 }}>
-                <Phone className="w-3.5 h-3.5" />
-                <span>+212 600-000000</span>
-                <motion.div className="w-1 h-1 bg-green-400 rounded-full pointer-events-none" animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-              </motion.div>
-            </div>
-          </div>
+      <div className="bg-gray-900 text-white text-sm border-b border-white/10">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
+          <span>Browse products currently published in our catalog.</span>
+          <Link href="/browse" className="font-semibold text-amber-300 hover:text-amber-200">
+            Shop catalog
+          </Link>
         </div>
-        <motion.div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 pointer-events-none" initial={{ width: '100%' }} animate={{ width: '25%' }} transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} />
       </div>
 
       {/* Header */}
@@ -908,13 +841,15 @@ useEffect(() => {
                   }`}
                 >
                   <span>{category.name}</span>
-                  <span className={`px-2 py-1 rounded-lg text-xs ${
-                    activeSearchCategory === category.id
-                      ? 'bg-white/20 text-white/90'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {category.count}
-                  </span>
+                  {category.count !== null && (
+                    <span className={`px-2 py-1 rounded-lg text-xs ${
+                      activeSearchCategory === category.id
+                        ? 'bg-white/20 text-white/90'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {category.count}
+                    </span>
+                  )}
                 </motion.button>
               ))}
             </div>
@@ -983,10 +918,10 @@ useEffect(() => {
               </div>
             )}
 
-            {/* Popular Searches */}
-            {!loadingStates.search && (
+            {/* Catalog categories */}
+            {!loadingStates.search && searchSuggestions.popular.length > 0 && (
               <div className="p-6 border-b border-gray-200/50">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Popular Now</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Categories</div>
                 <div className="flex flex-wrap gap-2">
                   {searchSuggestions.popular.map((term, index) => (
                     <motion.button
@@ -1009,8 +944,7 @@ useEffect(() => {
               </div>
             )}
 
-            {/* Trending Searches */}
-            {!loadingStates.search && (
+            {!loadingStates.search && searchSuggestions.trending.length > 0 && (
               <div className="p-6">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Trending</div>
                 <div className="space-y-2">
@@ -1109,13 +1043,15 @@ useEffect(() => {
         }`}
       >
         <span>{category.name}</span>
-        <span className={`px-2 py-1 rounded-lg text-xs ${
-          activeSearchCategory === category.id
-            ? 'bg-white/20 text-white/90'
-            : 'bg-gray-100 text-gray-600'
-        }`}>
-          {category.count}
-        </span>
+        {category.count !== null && (
+          <span className={`px-2 py-1 rounded-lg text-xs ${
+            activeSearchCategory === category.id
+              ? 'bg-white/20 text-white/90'
+              : 'bg-gray-100 text-gray-600'
+          }`}>
+            {category.count}
+          </span>
+        )}
       </motion.button>
     ))}
   </div>
@@ -1177,10 +1113,10 @@ useEffect(() => {
               </div>
             )}
 
-            {/* Popular Searches */}
-            {!loadingStates.search && (
+            {/* Catalog categories */}
+            {!loadingStates.search && searchSuggestions.popular.length > 0 && (
               <div className="p-4 sm:p-6 border-b border-gray-200/50">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Popular Now</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Categories</div>
                 <div className="flex flex-wrap gap-2">
                   {searchSuggestions.popular.map((term, index) => (
                     <motion.button
@@ -1201,8 +1137,7 @@ useEffect(() => {
               </div>
             )}
 
-            {/* Trending Searches */}
-            {!loadingStates.search && (
+            {!loadingStates.search && searchSuggestions.trending.length > 0 && (
               <div className="p-4 sm:p-6">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Trending</div>
                 <div className="space-y-2">
@@ -1302,7 +1237,6 @@ useEffect(() => {
                               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                                 {user.name?.charAt(0)?.toUpperCase() || 'U'}
                               </div>
-                              {/* Enhanced Tier Badge */}
                               <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg pointer-events-none">
                                 <Crown className="w-4 h-4 text-white" />
                               </div>
@@ -1310,46 +1244,6 @@ useEffect(() => {
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-gray-900 text-lg truncate">{user.name}</p>
                               <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                              <div className="flex items-center space-x-2 mt-2">
-                                <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">
-                                  {user.tier} Tier
-                                </span>
-                                <span className="text-xs text-gray-500">{user.points} points</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Enhanced Progress Bar */}
-                          <div className="mt-6">
-                            <div className="flex justify-between text-sm text-gray-600 mb-2">
-                              <span>Progress to {user.nextTier}</span>
-                              <span className="font-semibold">{user.pointsNeeded} pts needed</span>
-                            </div>
-                            <div className="w-full bg-gray-200/60 rounded-full h-2.5 backdrop-blur-sm">
-                              <motion.div
-                                className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2.5 rounded-full shadow-lg pointer-events-none"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(user.points / (user.points + user.pointsNeeded)) * 100}%` }}
-                                transition={{ duration: 1.5, ease: "easeOut" }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Quick Stats */}
-                        <div className="p-6 border-b border-gray-200/50">
-                          <div className="grid grid-cols-3 gap-4 text-center">
-                            <div>
-                              <div className="font-bold text-gray-900 text-lg">{user.orders}</div>
-                              <div className="text-xs text-gray-500">Orders</div>
-                            </div>
-                            <div>
-                              <div className="font-bold text-gray-900 text-lg">12</div>
-                              <div className="text-xs text-gray-500">Wishlist</div>
-                            </div>
-                            <div>
-                              <div className="font-bold text-gray-900 text-lg">4.8</div>
-                              <div className="text-xs text-gray-500">Rating</div>
                             </div>
                           </div>
                         </div>
@@ -1373,9 +1267,6 @@ useEffect(() => {
                           >
                             <Package className="w-4 h-4" />
                             <span>My Orders</span>
-                            <span className="ml-auto px-1.5 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
-                              {user.orders}
-                            </span>
                           </Link>
                           
                           <Link
@@ -1385,9 +1276,6 @@ useEffect(() => {
                           >
                             <Heart className="w-4 h-4" />
                             <span>Wishlist</span>
-                            <span className="ml-auto px-1.5 py-0.5 bg-pink-100 text-pink-600 text-xs rounded-full">
-                              12
-                            </span>
                           </Link>
 
                           {user.role === "ADMIN" && (
@@ -1661,9 +1549,6 @@ useEffect(() => {
               {/* Mobile menu button */}
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setMobileMenuOpen(true)} className="xl:hidden p-3 rounded-2xl text-gray-600 hover:bg-white/80 transition-all duration-400 border border-gray-200/60 hover:border-gray-300/60 hover:shadow-lg relative backdrop-blur-sm">
                 <Menu className="w-5 h-5" />
-                {notificationCount > 0 && (
-                  <motion.div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white shadow-lg pointer-events-none" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-                )}
               </motion.button>
             </div>
           </div>
@@ -1738,12 +1623,6 @@ useEffect(() => {
                         <div className="flex-1">
                           <p className="font-bold text-gray-900 text-lg">{user.name}</p>
                           <p className="text-sm text-gray-500">{user.email}</p>
-                          <div className="flex items-center space-x-3 mt-2">
-                            <span className="text-xs font-semibold text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full">
-                              {user.tier} Member
-                            </span>
-                            <span className="text-xs text-gray-500">{user.points} points</span>
-                          </div>
                         </div>
                       </div>
                     ) : (
