@@ -38,6 +38,29 @@ function signupSuccess() {
   );
 }
 
+function emailDeliveryUnavailable(error: unknown) {
+  const details =
+    error instanceof Error
+      ? { name: error.name, message: error.message }
+      : { message: String(error) };
+
+  console.error("Signup verification email delivery failed", details);
+
+  return NextResponse.json(
+    {
+      error:
+        "We could not send the verification email. Please try signing up again shortly.",
+    },
+    {
+      status: 503,
+      headers: {
+        "Cache-Control": "no-store",
+        "Retry-After": "60",
+      },
+    },
+  );
+}
+
 async function issueVerificationEmail(email: string) {
   const token = createOneTimeToken();
   const persistedToken = hashOneTimeToken(token);
@@ -126,7 +149,11 @@ export async function POST(req: Request) {
 
   if (existing) {
     if (!existing.emailVerified) {
-      await issueVerificationEmail(existing.email);
+      try {
+        await issueVerificationEmail(existing.email);
+      } catch (error) {
+        return emailDeliveryUnavailable(error);
+      }
     }
 
     return signupSuccess();
@@ -156,6 +183,11 @@ export async function POST(req: Request) {
     throw error;
   }
 
-  await issueVerificationEmail(userEmail);
+  try {
+    await issueVerificationEmail(userEmail);
+  } catch (error) {
+    return emailDeliveryUnavailable(error);
+  }
+
   return signupSuccess();
 }

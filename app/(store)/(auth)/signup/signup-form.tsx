@@ -20,20 +20,25 @@ export function SignUpForm(){
     e.preventDefault();
     setLoading(true); 
     setError(undefined);
-    
-    const data = new FormData(e.currentTarget);
-    const res = await fetch('/auth/signup', { 
-      method: 'POST', 
-      body: data 
-    });
-    
-    const j = await res.json().catch(() => null);
-    if(!res.ok){ 
-      setError(j?.error || 'Failed to create account. Please try again.'); 
-    } else { 
-      setOk(true); 
+
+    try {
+      const data = new FormData(e.currentTarget);
+      const res = await fetch('/auth/signup', {
+        method: 'POST',
+        body: data
+      });
+
+      const j = await res.json().catch(() => null);
+      if(!res.ok){
+        setError(j?.error || 'Failed to create account. Please try again.');
+      } else {
+        setOk(true);
+      }
+    } catch {
+      setError('Could not reach the server. Disable any blocker for this site and try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   if (ok) {
