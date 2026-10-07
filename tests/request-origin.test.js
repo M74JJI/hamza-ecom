@@ -33,6 +33,38 @@ describe("isSameOriginMutation", () => {
     expect(isSameOriginMutation(req)).toBe(true);
   });
 
+  test("uses canonical APP_URL instead of spoofable forwarded headers in production", () => {
+    const req = new Request("http://127.0.0.1:3000/auth/signin", {
+      method: "POST",
+      headers: {
+        origin: "https://evil.example",
+        "x-forwarded-host": "evil.example",
+        "x-forwarded-proto": "https",
+      },
+    });
+
+    expect(
+      isSameOriginMutation(req, {
+        NODE_ENV: "production",
+        APP_URL: "https://shop.example.com",
+      }),
+    ).toBe(false);
+  });
+
+  test("accepts canonical production origin behind a proxy", () => {
+    const req = new Request("http://127.0.0.1:3000/auth/signin", {
+      method: "POST",
+      headers: { origin: "https://shop.example.com" },
+    });
+
+    expect(
+      isSameOriginMutation(req, {
+        NODE_ENV: "production",
+        APP_URL: "https://shop.example.com",
+      }),
+    ).toBe(true);
+  });
+
   test("accepts same-origin Fetch Metadata when Origin is absent", () => {
     const req = new Request("https://shop.example.com/api/auth/signout", {
       method: "POST",

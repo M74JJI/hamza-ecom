@@ -6,12 +6,20 @@ import { CheckCircle, Clock, Package, Truck } from 'lucide-react';
 type Step = { label: string; active: boolean; done: boolean };
 
 export function OrderTimeline({ steps }: { steps: Step[] }){
+  const currentIndex = Math.max(
+    steps.findIndex((step) => step.active),
+    ...steps.map((step, index) => (step.done ? index : -1)),
+  );
+  const progress = steps.length > 1 && currentIndex >= 0
+    ? (currentIndex / (steps.length - 1)) * 100
+    : 0;
+
   const getStepIcon = (index: number, step: Step) => {
-    if (step.done) return <CheckCircle className="w-4 h-4" />;
     if (step.active) {
       const icons = [<Clock key="clock" className="w-4 h-4" />, <Package key="package" className="w-4 h-4" />, <Truck key="truck" className="w-4 h-4" />, <CheckCircle key="check" className="w-4 h-4" />];
       return icons[index] || <CheckCircle className="w-4 h-4" />;
     }
+    if (step.done) return <CheckCircle className="w-4 h-4" />;
     return <div className="w-2 h-2 bg-gray-300 rounded-full" />;
   };
 
@@ -21,7 +29,7 @@ export function OrderTimeline({ steps }: { steps: Step[] }){
       <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 -z-10">
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: `${(steps.filter(s => s.done).length / (steps.length - 1)) * 100}%` }}
+          animate={{ width: `${progress}%` }}
           transition={{ duration: 1, delay: 0.5 }}
           className="h-1 bg-green-500 rounded-full"
         />
@@ -39,10 +47,10 @@ export function OrderTimeline({ steps }: { steps: Step[] }){
             <motion.div
               whileHover={{ scale: 1.1 }}
               className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                step.done 
+                step.active
+                  ? 'bg-blue-500 border-blue-500 text-white shadow-lg'
+                  : step.done
                   ? 'bg-green-500 border-green-500 text-white shadow-lg' 
-                  : step.active 
-                  ? 'bg-blue-500 border-blue-500 text-white shadow-lg' 
                   : 'bg-white border-gray-300 text-gray-400'
               }`}
             >
@@ -57,9 +65,9 @@ export function OrderTimeline({ steps }: { steps: Step[] }){
               </div>
               {(step.done || step.active) && (
                 <div className={`text-xs ${
-                  step.done ? 'text-green-600' : 'text-blue-600'
+                  step.active ? 'text-blue-600' : 'text-green-600'
                 }`}>
-                  {step.done ? 'Completed' : 'In Progress'}
+                  {step.active ? 'In Progress' : 'Completed'}
                 </div>
               )}
             </div>

@@ -51,7 +51,7 @@ export function ProfileInfoForm({ user }:{ user:any }){
             <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 border-2 border-gray-300">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src={form.image || '/avatar-placeholder.png'} 
+                src={form.image || '/placeholder.svg'}
                 alt="avatar" 
                 className="w-full h-full object-cover"
               />

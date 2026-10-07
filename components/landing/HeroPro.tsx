@@ -4,8 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { ShoppingBag, Star, Heart, Eye, ChevronRight, Zap, Sparkles, ArrowRight, ArrowLeft, Shield, Truck, Clock, Award, Crown, Gem, Check } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { HeroProduct } from '@/types/hero';
+
+function calculateDiscountedPrice(price: number, discountPercent: number | null) {
+  if (!discountPercent) return price;
+  return price * (1 - discountPercent / 100);
+}
 
 export default function BrandFocusedHero({products}:{products:HeroProduct[]}) {
   if (!products || products.length === 0) {
@@ -34,20 +39,14 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
   const currentProduct = products[activeProduct];
   const currentVariant = currentProduct.variants[activeVariant];
 
-  // Premium price calculation utilities
-  const calculateDiscountedPrice = (price: number, discountPercent: number | null) => {
-    if (!discountPercent) return price;
-    return price * (1 - discountPercent / 100);
-  };
-
   // Get cheapest size for a variant considering discounts
-  const getCheapestSize = (variant: typeof currentVariant) => {
+  const getCheapestSize = useCallback((variant: typeof currentVariant) => {
     return variant.sizes.reduce((cheapest, size) => {
       const currentPrice = calculateDiscountedPrice(Number(size.priceMAD), size.discountPercent);
       const cheapestPrice = calculateDiscountedPrice(Number(cheapest.priceMAD), cheapest.discountPercent);
       return currentPrice < cheapestPrice ? size : cheapest;
     });
-  };
+  }, []);
 
   // Calculate price range for product across all variants
   const getProductPriceRange = useMemo(() => {
@@ -81,7 +80,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
       discountPercent: cheapestSize.discountPercent,
       size: cheapestSize.size
     };
-  }, [currentVariant]);
+  }, [currentVariant, getCheapestSize]);
 
   const brandHighlights = [
     { icon: Crown, text: "Luxury Craftsmanship", description: "Artisanal quality" },
@@ -90,10 +89,10 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
     { icon: Truck, text: "White Glove Delivery", description: "Free over 500 MAD" }
   ];
 
-  const nextProduct = () => {
+  const nextProduct = useCallback(() => {
     setActiveProduct((prev) => (prev + 1) % products.length);
     setActiveVariant(0);
-  };
+  }, [products.length]);
 
   const prevProduct = () => {
     setActiveProduct((prev) => (prev - 1 + products.length) % products.length);
@@ -106,7 +105,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
       nextProduct();
     }, 10000);
     return () => clearInterval(interval);
-  }, [activeProduct]);
+  }, [nextProduct]);
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-50 via-amber-50 to-orange-50/30 relative overflow-hidden py-10">

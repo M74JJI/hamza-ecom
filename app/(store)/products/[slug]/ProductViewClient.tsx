@@ -134,11 +134,15 @@ export default function ProductViewClient({ product }: { product: any }) {
   }
 
   const imageContainerRef = useRef<HTMLDivElement>(null);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
-
-  const variants = product.variants || [];
-  const variant = variants[variantIdx] || {};
-  const gallery = (variant.images || []).sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  const variants = useMemo(() => product.variants || [], [product.variants]);
+  const variant = useMemo(
+    () => variants[variantIdx] || {},
+    [variantIdx, variants],
+  );
+  const gallery = useMemo(
+    () => (variant.images || []).slice().sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
+    [variant.images],
+  );
 
   const prices = useMemo(() => {
     const arr = (variant.sizes || []).map((s: any) => applyDiscount(Number(s.priceMAD), s.discountPercent));
@@ -185,11 +189,6 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
     { icon: Gem, text: "Premium Materials", description: "Finest quality craftsmanship", color: "from-blue-500 to-cyan-500" },
     { icon: Shield, text: "Authenticity Guarantee", description: "Official luxury retailer", color: "from-emerald-500 to-green-500" },
   ];
-
-  useEffect(() => {
-    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
-    return () => { if (autoPlayRef.current) clearInterval(autoPlayRef.current); };
-  }, []);
 
   function getCategoryPath(category: any): any[] {
     const path: any[] = [];
@@ -238,7 +237,6 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
 
   useEffect(() => {
     async function checkWishlist() {
-      const variant = product.variants?.[variantIdx];
       if (!variant?.id) return;
 
       try {
@@ -251,7 +249,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
     
 
     checkWishlist();
-  }, [variantIdx, product.id]);
+  }, [product.id, variant.id]);
 
   // Mock rating data
   const productRating = product.rating;

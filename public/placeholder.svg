@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-labelledby="title description">
+  <title id="title">Image unavailable</title>
+  <desc id="description">Neutral HAMZA Store image placeholder</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5f5f4"/>
+      <stop offset="1" stop-color="#e7e5e4"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#background)"/>
+  <rect x="270" y="270" width="260" height="260" rx="52" fill="#1c1917"/>
+  <text x="400" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="160" font-weight="800" fill="#fff">H</text>
+  <text x="400" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="700" letter-spacing="8" fill="#57534e">HAMZA</text>
+</svg>

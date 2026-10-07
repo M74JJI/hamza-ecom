@@ -36,6 +36,15 @@ export function Input({ label, ...props }: InputProps) {
   );
 }
 
+function findCategoryById(tree: any[], id: string): any | null {
+  for (const cat of tree) {
+    if (cat.id === id) return cat;
+    const found = findCategoryById(cat.children || [], id);
+    if (found) return found;
+  }
+  return null;
+}
+
 export function ProductForm({ categories, product }: { categories: any[], product?: any }) {
   const [slug, setSlug] = useState(product?.slug || '');
   const [status, setStatus] = useState(product?.status || 'DRAFT');
@@ -102,15 +111,6 @@ useEffect(() => {
   }
 }, [categoryIds, categories]);
 
-
-function findCategoryById(tree: any[], id: string): any | null {
-  for (const cat of tree) {
-    if (cat.id === id) return cat;
-    const found = findCategoryById(cat.children || [], id);
-    if (found) return found;
-  }
-  return null;
-}
 
   function toggleCategory(id: string) { setCategoryIds(v => v.includes(id) ? v.filter(x => x !== id) : [...v, id]); }
   function addDetail() { setDetailList(v => [...v, { label: '', value: '' }]); }
@@ -483,7 +483,7 @@ function findCategoryById(tree: any[], id: string): any | null {
                     >
                       {v.variantStyleImg ? (
                         <>
-                          <img src={v.variantStyleImg} className="w-full h-full object-cover" />
+                          <img src={v.variantStyleImg} alt={`${v.name || v.title || 'Variant'} preview`} className="w-full h-full object-cover" />
                           <motion.button
                             type="button"
                             whileHover={{ scale: 1.1 }}
@@ -564,7 +564,7 @@ function findCategoryById(tree: any[], id: string): any | null {
                         animate={{ opacity: 1, scale: 1 }}
                         className="relative group"
                       >
-                        <img src={img.url || img.secure_url} className="w-20 h-20 rounded-xl border border-white/20 object-cover" />
+                        <img src={img.url || img.secure_url} alt={`${v.name || v.title || 'Variant'} gallery image`} className="w-20 h-20 rounded-xl border border-white/20 object-cover" />
                         <motion.button
                           type="button"
                           whileHover={{ scale: 1.1 }}

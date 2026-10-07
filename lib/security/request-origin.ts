@@ -1,8 +1,26 @@
+import { getAppUrl } from "@/lib/app-url";
+
+type OriginEnvironment = {
+  APP_URL?: string;
+  NODE_ENV?: string;
+};
+
 function firstHeaderValue(value: string | null) {
   return value?.split(",")[0]?.trim() || null;
 }
 
-function getExpectedOrigin(req: Request) {
+function getExpectedOrigin(req: Request, env: OriginEnvironment) {
+  // In production, compare against the canonical configured origin. Forwarded
+  // headers are client-controlled unless the deployment proxy explicitly strips
+  // them, so they must not define the CSRF trust boundary.
+  if (env.NODE_ENV === "production") {
+    try {
+      return getAppUrl(env);
+    } catch {
+      return null;
+    }
+  }
+
   const url = new URL(req.url);
   const forwardedProto = firstHeaderValue(req.headers.get("x-forwarded-proto"));
   const forwardedHost = firstHeaderValue(req.headers.get("x-forwarded-host"));
@@ -20,8 +38,11 @@ function getExpectedOrigin(req: Request) {
   }
 }
 
-export function isSameOriginMutation(req: Request) {
-  const expectedOrigin = getExpectedOrigin(req);
+export function isSameOriginMutation(
+  req: Request,
+  env: OriginEnvironment = process.env,
+) {
+  const expectedOrigin = getExpectedOrigin(req, env);
   if (!expectedOrigin) return false;
 
   const origin = req.headers.get("origin");

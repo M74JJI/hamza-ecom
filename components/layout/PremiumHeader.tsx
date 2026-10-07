@@ -129,12 +129,12 @@ const FloatingParticles = () => (
         key={i}
         className="absolute w-1 h-1 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full pointer-events-none"
         initial={{
-          x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-          y: Math.random() * 100,
-          scale: Math.random() * 0.5 + 0.5,
+          x: `${(i * 37 + 11) % 100}vw`,
+          y: (i * 29 + 7) % 100,
+          scale: 0.5 + ((i * 17) % 50) / 100,
         }}
         animate={{ y: [null, -20, 0], opacity: [0, 1, 0] }}
-        transition={{ duration: Math.random() * 3 + 2, repeat: Infinity, delay: Math.random() * 2 }}
+        transition={{ duration: 2 + (i % 4) * 0.7, repeat: Infinity, delay: (i % 5) * 0.35 }}
       />
     ))}
   </div>

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Send, Image, Smile, Plus, Minus, ChevronDown } from 'lucide-react';
+import { Star, Send, Image as ImageIcon, Smile, Plus, Minus, ChevronDown } from 'lucide-react';
 
 export default function ReviewForm({ productId, variants }: { productId: string; variants: any[] }) {
   const [rating, setRating] = useState(5);
@@ -210,7 +210,7 @@ export default function ReviewForm({ productId, variants }: { productId: string;
                     type="button" 
                     className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded hover:bg-gray-100"
                   >
-                    <Image className="w-4 h-4" />
+                    <ImageIcon className="w-4 h-4" />
                   </button>
                 </div>
               </div>

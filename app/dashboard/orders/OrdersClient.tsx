@@ -375,7 +375,7 @@ export function OrdersClient({
                       item.imageSnapshot ||
                       variant.images?.[0]?.url ||
                       variant.variantStyleImg ||
-                      "/placeholder.png";
+                      "/placeholder.svg";
 
                     return (
                       <div

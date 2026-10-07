@@ -1,6 +1,6 @@
 'use client';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ProductCard from '@/components/store/ProductCard';
 import { FilterSidebar } from '@/components/search/FilterSidebar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,6 +39,7 @@ export default function SearchPage() {
   const router = useRouter();
 const pathname = usePathname();
   const searchParams = useSearchParams();
+  const initialSearchParams = useRef(searchParams);
   const [filters, setFilters] = useState<any>({});
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -63,16 +64,17 @@ const [isHydrated, setIsHydrated] = useState(false);
 useEffect(() => {
   const initialFilters: any = {};
 
-  const urlCategory = searchParams.getAll('category');
-  const urlBrand = searchParams.getAll('brand');
-  const urlColor = searchParams.getAll('color');
-  const urlSize = searchParams.getAll('size');
-  const urlMin = searchParams.get('min');
-  const urlMax = searchParams.get('max');
-  const urlRating = searchParams.get('rating');
-  const urlSort = searchParams.get('sort');
-  const urlQ = searchParams.get('q');
-  const urlPage = searchParams.get('page');
+  const params = initialSearchParams.current;
+  const urlCategory = params.getAll('category');
+  const urlBrand = params.getAll('brand');
+  const urlColor = params.getAll('color');
+  const urlSize = params.getAll('size');
+  const urlMin = params.get('min');
+  const urlMax = params.get('max');
+  const urlRating = params.get('rating');
+  const urlSort = params.get('sort');
+  const urlQ = params.get('q');
+  const urlPage = params.get('page');
 
   if (urlCategory.length) initialFilters.category = urlCategory;
   if (urlBrand.length) initialFilters.brand = urlBrand;
@@ -94,7 +96,7 @@ useEffect(() => {
 
 
   /* ---------------------- Data Fetch ---------------------- */
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
 
@@ -121,7 +123,7 @@ for (const [key, value] of Object.entries(filters)) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 useEffect(() => {
    if (!isHydrated) return;
   fetchData();
@@ -133,7 +135,7 @@ useEffect(() => {
   });
   const query = params.toString();
   router.replace(query ? `${pathname}?${query}` : pathname);
-}, [filters]);
+}, [fetchData, filters, isHydrated, pathname, router]);
 
 
 

@@ -103,28 +103,22 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
     {
       label: 'Pending',
       active: order.status === 'PENDING',
-      done:
-        ['CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'].includes(order.status) ||
-        order.status === 'PENDING',
+      done: ['CONFIRMED', 'SHIPPED', 'DELIVERED'].includes(order.status),
     },
     {
       label: 'Confirmed',
       active: order.status === 'CONFIRMED',
-      done:
-        ['SHIPPED', 'DELIVERED', 'CANCELLED'].includes(order.status) ||
-        order.status === 'CONFIRMED',
+      done: ['SHIPPED', 'DELIVERED'].includes(order.status),
     },
     {
       label: 'Shipped',
       active: order.status === 'SHIPPED',
-      done:
-        ['DELIVERED', 'CANCELLED'].includes(order.status) ||
-        order.status === 'SHIPPED',
+      done: order.status === 'DELIVERED',
     },
     {
       label: 'Delivered',
       active: order.status === 'DELIVERED',
-      done: order.status === 'DELIVERED',
+      done: false,
     },
   ];
 

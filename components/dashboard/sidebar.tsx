@@ -174,17 +174,17 @@ export function AdminSidebar({user}:{user:any}) {
               key={i}
               className="absolute w-1 h-1 bg-blue-400 rounded-full"
               initial={{
-                x: Math.random() * 300,
-                y: Math.random() * 600,
+                x: (i * 83 + 17) % 300,
+                y: (i * 137 + 23) % 600,
               }}
               animate={{
                 y: [0, -30, 0],
                 opacity: [0.3, 0.8, 0.3],
               }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: 3 + (i % 4) * 0.5,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: (i % 5) * 0.35,
               }}
             />
           ))}
@@ -223,7 +223,7 @@ export function AdminSidebar({user}:{user:any}) {
                       HAMZA DASHBOARD
                     </h1>
                     <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
+                      <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
                       System Online
                     </p>
                   </div>

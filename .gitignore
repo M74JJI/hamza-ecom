@@ -41,6 +41,7 @@ coverage/
 .playwright/
 jest-html-reporters-*
 test-results/
+.audit/
 
 # Prisma
 generated/

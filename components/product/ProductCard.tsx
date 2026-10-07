@@ -14,8 +14,9 @@ export default function ProductCard({ product, randomizePreview=true }:{ product
   const initialVariantIndex = useMemo(()=>{
     if (!randomizePreview) return 0;
     if (variants.length === 0) return 0;
-    return Math.floor(Math.random() * variants.length);
-  }, [product.id, variants.length, randomizePreview]);
+    const seed = String(product.id ?? product.slug ?? '').split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return seed % variants.length;
+  }, [product.id, product.slug, variants.length, randomizePreview]);
 
   const [hoverVariantIdx, setHoverVariantIdx] = useState(initialVariantIndex);
   const active = variants[hoverVariantIdx] || variants[0];
@@ -44,7 +45,7 @@ export default function ProductCard({ product, randomizePreview=true }:{ product
                 title={v.name}
                 type="button"
               >
-                <img src={thumb} className="w-full h-full object-cover" />
+                <img src={thumb} alt={`${v.name || v.title || 'Product'} variant`} className="w-full h-full object-cover" />
               </button>
             )
           })}

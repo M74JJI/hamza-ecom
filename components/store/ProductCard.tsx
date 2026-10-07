@@ -65,7 +65,7 @@ export default function ProductCard({ product, viewMode = 'grid' }: ProductCardP
   const firstSize = variant.sizes[0];
   
   // Pricing calculations
-  const originalPrice = firstSize?.priceMAD || 0;
+  const originalPrice = Number(firstSize?.priceMAD ?? 0);
   const discount = firstSize?.discountPercent || 0;
   const finalPrice = discount > 0 
     ? originalPrice * (1 - discount / 100)

@@ -114,7 +114,7 @@ export function FeaturedCategoriesClient({ categories }: FeaturedCategoriesClien
                 <div className="relative h-3/4 overflow-hidden">
                   <div className="w-full h-full relative">
                     <Image
-                      src={category.imageUrl || "/placeholder.jpg"}
+                      src={category.imageUrl || "/placeholder.svg"}
                       alt={category.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"

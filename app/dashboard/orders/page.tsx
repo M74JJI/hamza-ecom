@@ -75,10 +75,11 @@ export default async function OrdersDashboard({
   ]);
 
   const totalPages = Math.ceil(totalOrders / PAGE_SIZE);
+  const serializedOrders = JSON.parse(JSON.stringify(orders));
 
   return (
     <OrdersClient
-      orders={orders}
+      orders={serializedOrders}
       currentPage={page}
       totalPages={totalPages}
       totalOrders={totalOrders}

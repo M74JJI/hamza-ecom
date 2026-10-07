@@ -3,6 +3,6 @@ import { renderEmail } from "@/lib/render-email";
 import { sendEmail } from "@/lib/email";
 
 export async function sendResetEmail(to: string, link: string){
-  const html = renderEmail(ResetPasswordEmail({ resetUrl: link } as any));
+  const html = await renderEmail(ResetPasswordEmail({ resetUrl: link } as any));
   await sendEmail(to, "Reset your password", html);
 }

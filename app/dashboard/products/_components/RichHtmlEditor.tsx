@@ -18,8 +18,18 @@ type Props = {
 
 export default function RichHtmlEditor({ value, onChange, height = 480 }: Props) {
   const editorRef = useRef<TinyMCEEditor | null>(null);
-  const uploadPreset = 'ufb48euh';
-  const cloudName = 'YOUR_CLOUD_NAME'; // ⚠️ replace with your Cloudinary cloud name
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const tinyMceApiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY;
+
+  if (!uploadPreset || !cloudName || !tinyMceApiKey) {
+    return (
+      <p role="alert" className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+        Rich-text editor is not configured. Set the public Cloudinary and TinyMCE
+        environment variables listed in .env.example.
+      </p>
+    );
+  }
 
   return (
     <CldUploadWidget
@@ -37,7 +47,7 @@ export default function RichHtmlEditor({ value, onChange, height = 480 }: Props)
     >
       {({ open }) => (
         <Editor
-          tinymceScriptSrc={`https://cdn.tiny.cloud/1/8ey6z8wxet56od0aa2q5dic1egkql18i73nus7n6ckg3he4l/tinymce/8/tinymce.min.js`}
+          apiKey={tinyMceApiKey}
           onInit={(_evt, editor) => (editorRef.current = editor)}
           value={value}
           onEditorChange={(content) => onChange(content)}
@@ -77,12 +87,17 @@ export default function RichHtmlEditor({ value, onChange, height = 480 }: Props)
                 const formData = new FormData();
                 formData.append('file', blobInfo.blob());
                 formData.append('upload_preset', uploadPreset);
-                fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`, {
                   method: 'POST',
                   body: formData,
                 })
-                  .then((res) => res.json())
-                  .then((data) => resolve(data.secure_url))
+                  .then(async (res) => {
+                    const data = await res.json();
+                    if (!res.ok || typeof data.secure_url !== 'string') {
+                      throw new Error(data?.error?.message || 'Image upload failed');
+                    }
+                    resolve(data.secure_url);
+                  })
                   .catch((err) => reject(err));
               }),
           }}

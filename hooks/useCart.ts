@@ -1,12 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Cart } from '@/lib/cart-types';
 import { addItemToCart, clearCart, getCart, getItemQty, removeItem, setItemQty, updateQty } from '@/lib/cart-cookie';
 
 const CART_EVT = 'hajzen:cart'; // 👈 same name used when dispatching in cart-cookie
 
 export function useCart(){
+  const pathname = usePathname();
   const [cart, setCart] = useState<Cart>({ items: [], updatedAt: Date.now() });
 
   const refresh = useCallback(() => setCart(getCart()), []);
@@ -38,6 +40,13 @@ export function useCart(){
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [refresh]);
+
+  // Server actions can update the cart cookie while redirecting (for example,
+  // after checkout). Refresh on navigation so persistent layouts do not keep a
+  // stale cart badge until the window is focused again.
+  useEffect(() => {
+    refresh();
+  }, [pathname, refresh]);
 
   const actions = useMemo(() => ({
     add: (item: any) => setCart(addItemToCart(item)),

@@ -45,7 +45,7 @@ export function ProductPicker({ product }:{ product:any }){
 
       <div className="grid grid-cols-4 gap-2">
         {gallery.map((img:any)=>(
-          <img key={img.id} src={img.url} className="aspect-square object-cover rounded border border-white/10"/>
+          <img key={img.id} src={img.url} alt="Product gallery thumbnail" className="aspect-square object-cover rounded border border-white/10"/>
         ))}
       </div>
     </div>

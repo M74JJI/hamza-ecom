@@ -5,6 +5,7 @@ import FeaturedCategories from "@/components/landing/FeaturedCategories";
 import Trust from "@/components/landing/Trust";
 import { TopSellers } from "@/components/landing/TopSellers";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@/generated/prisma/client";
 import { Metadata } from "next";
 
 
@@ -109,13 +110,24 @@ const heroProducts = await prisma.product.findMany({
       }
     });
 
+  // Client components cannot receive Prisma Decimal instances. Serialize all
+  // database values at this server/client boundary (Dates become ISO strings).
+  const toClientValue = <T,>(value: T) => JSON.parse(
+    JSON.stringify(value, (_key, item) =>
+      item instanceof Prisma.Decimal ? Number(item) : item,
+    ),
+  );
+
+  const serializedHeroProducts = toClientValue(heroProducts);
+  const serializedTopProducts = toClientValue(topProducts);
+
 
   return (
     <main className="min-h-screen">
       <div className="relative space-y-0">
-        <HeroPro products={heroProducts as any}/>
+        <HeroPro products={serializedHeroProducts}/>
         <FeaturedCategories/>
-        <TopSellers products={topProducts as any}/>
+        <TopSellers products={serializedTopProducts}/>
       </div>
     </main>
   );

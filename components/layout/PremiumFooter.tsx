@@ -123,18 +123,18 @@ export default function PremiumFooter() {
             key={i}
             className="absolute w-1 h-1 bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-full"
             initial={{
-              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
-              y: Math.random() * 100,
-              scale: Math.random() * 0.5 + 0.5,
+              x: `${(i * 41 + 13) % 100}vw`,
+              y: (i * 31 + 9) % 100,
+              scale: 0.5 + ((i * 19) % 50) / 100,
             }}
             animate={{
               y: [null, -20, 0], // Reduced movement
               opacity: [0, 0.4, 0], // Reduced opacity
             }}
             transition={{
-              duration: Math.random() * 6 + 4, // Slower duration
+              duration: 4 + (i % 4) * 1.25, // Slower duration
               repeat: Infinity,
-              delay: Math.random() * 5,
+              delay: (i % 5) * 0.8,
             }}
           />
         ))}

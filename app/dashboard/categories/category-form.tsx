@@ -5,7 +5,7 @@ import { CldUploadWidget } from "next-cloudinary";
 import { slugify } from "@/lib/slugify";
 import { upsertCategoryAction } from "./server-actions";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Image, X, Sparkles } from "lucide-react";
+import { Upload, Image as ImageIcon, X, Sparkles } from "lucide-react";
 
 type Category = {
   id: string;
@@ -205,7 +205,7 @@ export function CategoryForm({
                     </>
                   ) : (
                     <div className="text-center p-2">
-                      <Image className="w-8 h-8 text-gray-400 mx-auto mb-1" />
+                      <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-1" />
                       <span className="text-xs text-gray-500 dark:text-gray-400">No image</span>
                     </div>
                   )}

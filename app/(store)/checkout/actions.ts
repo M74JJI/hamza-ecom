@@ -502,7 +502,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   });
 
   try {
-    const html = renderEmail(OrderConfirmationEmail({ order } as any));
+    const html = await renderEmail(OrderConfirmationEmail({ order } as any));
     const u = await prisma.user.findUnique({ where: { id: order.userId! } });
     if (u?.email) await sendEmail(u.email, 'Your order has been placed', html);
   } catch {}
