@@ -1,0 +1,6 @@
+[build]
+  command = "bun run build"
+  publish = ".next"
+
+[context.production]
+  command = "bun run prisma:migrate:deploy && bun run build"
