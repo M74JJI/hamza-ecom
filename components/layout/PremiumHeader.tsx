@@ -6,18 +6,15 @@ import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { ChevronDown, Heart, LayoutDashboard, LogOut, Menu, Package, Search, ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { HamzaLogo } from "@/components/brand/HamzaLogo";
 
 type Category = { id: string; name: string; slug: string; productCount: number };
 const fetcher = (url: string) => fetch(url).then((response) => response.json());
 
 function Brand() {
   return (
-    <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="Hamza store home">
-      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-950 text-base font-black tracking-tight text-white">H.</span>
-      <span className="leading-none">
-        <span className="block text-lg font-black tracking-[-0.04em] text-neutral-950">HAMZA</span>
-        <span className="mt-1 block text-[10px] font-semibold tracking-[0.24em] text-neutral-500">STORE</span>
-      </span>
+    <Link href="/" className="flex shrink-0 items-center" aria-label="Hamza store home">
+      <HamzaLogo size={44} priority />
     </Link>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Folder, Gift, LayoutDashboard, Package, ShoppingCart, Truck, Users } from "lucide-react";
 import { signOutAction } from "@/app/(store)/(auth)/actions";
+import { HamzaLogo } from "@/components/brand/HamzaLogo";
 
 const items = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -23,8 +24,8 @@ export function AdminSidebar({ user }: { user: any }) {
     <>
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-neutral-200 bg-neutral-950 text-white lg:flex">
         <Link href="/dashboard" className="flex h-16 items-center gap-3 border-b border-white/10 px-6">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-sm font-black text-neutral-950">H.</span>
-          <span><span className="block text-sm font-bold">HAMZA</span><span className="block text-[10px] tracking-[0.18em] text-neutral-400">ADMIN</span></span>
+          <HamzaLogo size={40} inverted priority />
+          <span className="text-[10px] font-semibold tracking-[0.18em] text-neutral-400">ADMIN</span>
         </Link>
         <nav className="flex-1 space-y-1 overflow-y-auto p-4" aria-label="Dashboard navigation">
           {items.map((item) => (

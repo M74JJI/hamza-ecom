@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HamzaLogo } from "@/components/brand/HamzaLogo";
 import { PackageCheck, ShieldCheck, ShoppingBag } from "lucide-react";
 
 const footerSections = [
@@ -25,9 +26,8 @@ export default function PremiumFooter() {
     <footer className="border-t border-stone-200 bg-stone-950 text-stone-200">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="max-w-md">
-          <Link href="/" className="inline-flex items-center gap-3 text-xl font-black text-white">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-stone-950">H.</span>
-            HAMZA STORE
+          <Link href="/" className="inline-flex items-center" aria-label="Hamza store home">
+            <HamzaLogo size={52} inverted />
           </Link>
           <p className="mt-4 text-sm leading-6 text-stone-400">
             Products, prices, availability, and categories come from live catalog managed in dashboard.
