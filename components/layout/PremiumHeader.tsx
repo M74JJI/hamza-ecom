@@ -1,11 +1,10 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
-import { signOutAction } from "@/app/(store)/(auth)/actions";
+import { ChevronDown, Heart, LayoutDashboard, LogOut, Menu, Package, Search, ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 
 type Category = { id: string; name: string; slug: string; productCount: number };
@@ -25,11 +24,29 @@ function Brand() {
 
 export default function PremiumHeader({ user }: { user?: any }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [query, setQuery] = useState("");
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { count } = useCart();
   const { data } = useSWR<{ items: Category[] }>("/api/categories/header", fetcher, { revalidateOnFocus: false, revalidateOnReconnect: false });
   const categories = useMemo(() => (data?.items ?? []).slice(0, 5), [data]);
+
+  useEffect(() => {
+    function closeOnOutsideClick(event: MouseEvent) {
+      if (!accountMenuRef.current?.contains(event.target as Node)) setAccountOpen(false);
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setAccountOpen(false);
+    }
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +54,23 @@ export default function PremiumHeader({ user }: { user?: any }) {
     if (!value) return;
     setMobileOpen(false);
     router.push(`/browse?q=${encodeURIComponent(value)}`);
+  }
+
+  async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const response = await fetch("/api/auth/signout", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        credentials: "same-origin",
+      });
+      if (!response.ok) throw new Error("Sign-out request failed");
+      window.location.replace("/");
+    } catch {
+      setSigningOut(false);
+      window.location.reload();
+    }
   }
 
   return (
@@ -53,7 +87,33 @@ export default function PremiumHeader({ user }: { user?: any }) {
         </form>
         <div className="hidden items-center gap-1 sm:flex">
           <Link href="/profile/wishlist" className="hz-icon-button" aria-label="Wishlist"><Heart className="h-5 w-5" /></Link>
-          <Link href={user ? "/profile" : "/signin"} className="hz-icon-button" aria-label={user ? "Account" : "Sign in"}><User className="h-5 w-5" /></Link>
+          {user ? (
+            <div ref={accountMenuRef} className="relative">
+              <button type="button" onClick={() => setAccountOpen((open) => !open)} className="hz-icon-button w-auto gap-1 px-2.5" aria-label="Account menu" aria-haspopup="menu" aria-expanded={accountOpen}>
+                <User className="h-5 w-5" />
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${accountOpen ? "rotate-180" : ""}`} />
+              </button>
+              {accountOpen && (
+                <div role="menu" className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-lg border border-neutral-200 bg-white p-2 shadow-lg">
+                  <div className="border-b border-neutral-100 px-3 py-2.5">
+                    <p className="truncate text-sm font-semibold text-neutral-950">{user.name || "Your account"}</p>
+                    <p className="truncate text-xs text-neutral-500">{user.email}</p>
+                  </div>
+                  <div className="py-1">
+                    <Link role="menuitem" href="/profile" onClick={() => setAccountOpen(false)} className="hz-account-menu-item"><User className="h-4 w-4" />Account</Link>
+                    <Link role="menuitem" href="/profile/orders" onClick={() => setAccountOpen(false)} className="hz-account-menu-item"><Package className="h-4 w-4" />Orders</Link>
+                    <Link role="menuitem" href="/profile/wishlist" onClick={() => setAccountOpen(false)} className="hz-account-menu-item"><Heart className="h-4 w-4" />Wishlist</Link>
+                    {user.role === "ADMIN" && <Link role="menuitem" href="/dashboard" onClick={() => setAccountOpen(false)} className="hz-account-menu-item"><LayoutDashboard className="h-4 w-4" />Admin dashboard</Link>}
+                  </div>
+                  <div className="border-t border-neutral-100 pt-1">
+                    <button role="menuitem" type="button" onClick={signOut} disabled={signingOut} className="hz-account-menu-item w-full text-red-700 disabled:opacity-60"><LogOut className="h-4 w-4" />{signingOut ? "Signing out…" : "Sign out"}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/signin" className="hz-icon-button" aria-label="Sign in"><User className="h-5 w-5" /></Link>
+          )}
           <Link href="/cart" className="hz-icon-button relative" aria-label={`Cart with ${count} items`}>
             <ShoppingBag className="h-5 w-5" />
             {count > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-neutral-950 px-1 text-center text-[10px] font-bold leading-4 text-white">{count}</span>}
@@ -75,7 +135,7 @@ export default function PremiumHeader({ user }: { user?: any }) {
             <Link href="/profile/wishlist" onClick={() => setMobileOpen(false)} className="hz-mobile-link">Wishlist</Link>
             <Link href={user ? "/profile" : "/signin"} onClick={() => setMobileOpen(false)} className="hz-mobile-link">{user ? "Account" : "Sign in"}</Link>
             {user?.role === "ADMIN" && <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="hz-mobile-link">Dashboard</Link>}
-            {user && <form action={signOutAction}><button type="submit" className="hz-mobile-link w-full text-left text-red-700">Sign out</button></form>}
+            {user && <button type="button" onClick={signOut} disabled={signingOut} className="hz-mobile-link w-full text-left text-red-700 disabled:opacity-60">{signingOut ? "Signing out…" : "Sign out"}</button>}
           </nav>
         </div>
       )}

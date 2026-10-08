@@ -74,3 +74,21 @@ body {
   }
 }
 
+.hz-account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  color: rgb(64 64 64);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.hz-account-menu-item:hover {
+  background: rgb(245 245 244);
+  color: rgb(10 10 10);
+}
+

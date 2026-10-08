@@ -66,13 +66,19 @@ export async function destroySession() {
   const rawToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
   if (rawToken) {
-    await prisma.session.deleteMany({
-      where: {
-        token: {
-          in: getPersistedSessionTokenCandidates(rawToken),
+    try {
+      await prisma.session.deleteMany({
+        where: {
+          token: {
+            in: getPersistedSessionTokenCandidates(rawToken),
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      // Signing out must still remove the browser credential if database cleanup
+      // is temporarily unavailable. The orphaned row cannot be used without it.
+      console.error("Failed to delete session during sign-out:", error);
+    }
   }
 
   cookieStore.set(SESSION_COOKIE_NAME, "", {
