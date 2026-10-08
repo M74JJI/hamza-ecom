@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { updateProfile, changePassword, resendVerificationEmail } from '../_actions/user.actions';
 import { CheckCircle2, Loader2, MailCheck, ImagePlus, User, Lock, Key, Shield } from 'lucide-react';
 import { CldUploadWidget } from 'next-cloudinary';
+import { cloudinaryConfig } from '@/lib/cloudinary';
 import { motion } from 'framer-motion';
 
 export function ProfileInfoForm({ user }:{ user:any }){
@@ -71,7 +72,7 @@ export function ProfileInfoForm({ user }:{ user:any }){
           
           <div className="flex gap-3">
             <CldUploadWidget
-              uploadPreset="ufb48euh"
+              uploadPreset={cloudinaryConfig.uploadPreset}
               onSuccess={(res:any) => {
                 const url = res?.info?.secure_url;
                 if(url) setForm((f) => ({ ...f, image: url }));

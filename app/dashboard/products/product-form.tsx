@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { upsertProductAction } from './server-actions';
 import { CldUploadWidget } from 'next-cloudinary';
+import { cloudinaryConfig } from '@/lib/cloudinary';
 import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { 
   Trash2, PlusCircle, ChevronDown, Upload, CheckCircle2, 
@@ -502,7 +503,7 @@ useEffect(() => {
                     </motion.div>
 
                     <CldUploadWidget
-                      uploadPreset="ufb48euh"
+                      uploadPreset={cloudinaryConfig.uploadPreset}
                       onSuccess={(res: any) => {
                         const url = res.info.secure_url || (res.info.url || '').replace(/^http:/, 'https:');
                         updateVariant(vi, { variantStyleImg: url });
@@ -578,7 +579,7 @@ useEffect(() => {
                     ))}
                     {(v.images?.length || 0) < 6 && (
                       <CldUploadWidget
-                        uploadPreset="ufb48euh"
+                        uploadPreset={cloudinaryConfig.uploadPreset}
                         onSuccess={(res: any) => {
                           const url = res.info.secure_url || (res.info.url || '').replace(/^http:/, 'https:');
                           const publicId = res.info.public_id;

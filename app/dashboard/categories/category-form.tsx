@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { CldUploadWidget } from "next-cloudinary";
+import { cloudinaryConfig } from "@/lib/cloudinary";
 import { slugify } from "@/lib/slugify";
 import { upsertCategoryAction } from "./server-actions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -213,7 +214,7 @@ export function CategoryForm({
 
                 {/* Upload Button */}
                 <CldUploadWidget
-                  uploadPreset="ufb48euh"
+                  uploadPreset={cloudinaryConfig.uploadPreset}
                   onSuccess={(res: any) => {
                     const url =
                       res?.info?.secure_url ||
