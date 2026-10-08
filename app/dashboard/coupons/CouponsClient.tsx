@@ -51,14 +51,22 @@ export function CouponsClient({ coupons }: { coupons: Coupon[] }) {
   const handleSubmit = (formData: FormData) => {
     startTransition(async () => {
       try {
-        if (editingCoupon) {
-          await updateCoupon(editingCoupon.id, formData);
-          setMsg("Coupon updated successfully!");
-        } else {
-          await createCoupon(formData);
-          setMsg("Coupon created successfully!");
+        const isEditingExistingCoupon = Boolean(editingCoupon?.id);
+        const result = isEditingExistingCoupon
+          ? await updateCoupon(editingCoupon!.id, formData)
+          : await createCoupon(formData);
+
+        if (result?.error) {
+          setMsg(result.error);
+          setTimeout(() => setMsg(undefined), 3000);
+          return;
         }
-        
+
+        setMsg(
+          isEditingExistingCoupon
+            ? "Coupon updated successfully!"
+            : "Coupon created successfully!",
+        );
         router.refresh();
         setEditingCoupon(null);
         setTimeout(() => setMsg(undefined), 3000);

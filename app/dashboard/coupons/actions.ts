@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/require-admin";
 import { prisma } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 function parseOptionalDate(value: FormDataEntryValue | null) {
   const text = String(value || '').trim();
@@ -41,6 +42,7 @@ export async function createCoupon(formData: FormData) {
 
   try {
     await prisma.coupon.create({ data });
+    revalidatePath('/dashboard/coupons');
     return { ok: true };
   } catch (error: any) {
     if (error?.code === 'P2002') {
@@ -66,6 +68,7 @@ export async function updateCoupon(id: string, formData: FormData) {
       return { error: 'Coupon not found' };
     }
 
+    revalidatePath('/dashboard/coupons');
     return { ok: true };
   } catch (error: any) {
     if (error?.code === 'P2002') {
@@ -81,6 +84,7 @@ export async function deleteCouponAction(id: string) {
     await prisma.coupon.delete({
       where: { id }
     });
+    revalidatePath('/dashboard/coupons');
     return { ok: true };
   } catch {
     return { error: 'Failed to delete coupon' };
