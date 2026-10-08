@@ -18,7 +18,7 @@ export function SignInForm() {
     try {
       const data = new FormData(event.currentTarget);
       data.append("callbackUrl", callbackUrl);
-      const response = await fetch("/auth/signin", { method: "POST", body: data });
+      const response = await fetch("/api/account/session", { method: "POST", body: data });
       if (response.redirected) {
         window.location.href = response.url;
         return;
@@ -26,7 +26,7 @@ export function SignInForm() {
       const body = await response.json().catch(() => null);
       if (!response.ok) setError(body?.error || "Invalid email or password.");
     } catch {
-      setError("Could not reach server. Try again.");
+      setError("Sign-in request was blocked. Disable your browser blocker for hamza.bid and try again.");
     } finally {
       setLoading(false);
     }
