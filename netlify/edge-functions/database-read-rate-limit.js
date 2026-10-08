@@ -1,5 +1,5 @@
-export default async function databaseReadRateLimit(_request, context) {
-  return context.next();
+export default function databaseReadRateLimit() {
+  // Returning undefined continues request chain without reading response body.
 }
 
 export const config = {
@@ -10,7 +10,6 @@ export const config = {
     "/api/filters",
     "/api/categories/header",
     "/api/reviews/*",
-    "/api/health",
   ],
   method: "GET",
   rateLimit: {

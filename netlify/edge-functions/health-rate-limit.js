@@ -1,13 +1,13 @@
-export default function mutationRateLimit() {
+export default function healthRateLimit() {
   // Returning undefined continues request chain without reading response body.
 }
 
 export const config = {
-  name: "Mutation abuse guard",
-  path: "/*",
-  method: ["POST", "PUT", "PATCH", "DELETE"],
+  name: "Database health abuse guard",
+  path: "/api/health",
+  method: "GET",
   rateLimit: {
-    windowLimit: 60,
+    windowLimit: 10,
     windowSize: 60,
     aggregateBy: ["domain", "ip"],
   },

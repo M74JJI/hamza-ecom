@@ -1,5 +1,5 @@
-export default async function authRateLimit(_request, context) {
-  return context.next();
+export default function authRateLimit() {
+  // Returning undefined continues request chain without reading response body.
 }
 
 export const config = {
