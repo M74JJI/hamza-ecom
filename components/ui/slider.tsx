@@ -57,7 +57,7 @@ export function RangeSlider({
         >
           <RadixSlider.Range
             className="
-              absolute h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500
+              absolute h-2 rounded-full bg-stone-900
             "
           />
         </RadixSlider.Track>
@@ -66,9 +66,9 @@ export function RangeSlider({
         <RadixSlider.Thumb
           className="
             absolute top-1/2 -translate-y-1/2 
-            block h-5 w-5 rounded-full border-2 border-blue-400 bg-white shadow-md
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-            data-[state=active]:scale-110 data-[state=active]:border-blue-500
+            block h-5 w-5 rounded-full border-2 border-stone-900 bg-white
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-500
+            data-[state=active]:scale-110
             transition-transform
           "
           aria-label="Minimum price"
@@ -76,9 +76,9 @@ export function RangeSlider({
         <RadixSlider.Thumb
           className="
             absolute top-1/2 -translate-y-1/2 
-            block h-5 w-5 rounded-full border-2 border-blue-400 bg-white shadow-md
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-            data-[state=active]:scale-110 data-[state=active]:border-blue-500
+            block h-5 w-5 rounded-full border-2 border-stone-900 bg-white
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-500
+            data-[state=active]:scale-110
             transition-transform
           "
           aria-label="Maximum price"
@@ -87,12 +87,12 @@ export function RangeSlider({
 
       {/* Value labels */}
       <div className="mt-4 flex items-center justify-between text-sm font-medium text-gray-700 select-none">
-        <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1">
-          MAD {Math.round(local[0]).toLocaleString()}
+        <span className="rounded-md border border-stone-200 bg-stone-50 px-3 py-1">
+          MAD {Math.round(local[0]).toLocaleString('en-US')}
         </span>
         <span className="text-gray-400">→</span>
-        <span className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1">
-          MAD {Math.round(local[1]).toLocaleString()}
+        <span className="rounded-md border border-stone-200 bg-stone-50 px-3 py-1">
+          MAD {Math.round(local[1]).toLocaleString('en-US')}
         </span>
       </div>
     </div>

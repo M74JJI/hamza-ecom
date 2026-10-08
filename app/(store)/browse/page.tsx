@@ -181,14 +181,14 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between py-6 gap-4">
             <div className="space-y-2">
               <motion.h1
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="text-3xl sm:text-4xl font-light text-gray-800"
+                className="text-3xl sm:text-4xl font-semibold tracking-tight text-stone-950"
               >
                 {q ? `"${q}"` : 'Our Products'}
               </motion.h1>
@@ -219,7 +219,7 @@ useEffect(() => {
       </div>
 
       {/* ---------------------- Main ---------------------- */}
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
         {/* Desktop Sidebar */}
           <div className="hidden lg:block w-80 flex-shrink-0">
@@ -325,7 +325,7 @@ useEffect(() => {
               >
                 {[...Array(12)].map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="bg-gray-200 aspect-[3/4] rounded-2xl mb-3"></div>
+                    <div className="bg-stone-100 aspect-[3/4] rounded-lg mb-3"></div>
                     <div className="h-4 bg-gray-200 rounded mb-2"></div>
                     <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
                     <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -362,10 +362,7 @@ useEffect(() => {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-center py-20"
               >
-                <div className="w-32 h-32 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-16 h-16 text-gray-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                <h3 className="text-xl font-semibold text-stone-900 mb-3">
                   No products found
                 </h3>
                 <p className="text-gray-600 max-w-md mx-auto text-lg mb-6">
@@ -376,7 +373,7 @@ useEffect(() => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setFilters({})}
-                  className="px-8 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg"
+                  className="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-stone-800 transition-colors"
                 >
                   Reset Filters
                 </motion.button>

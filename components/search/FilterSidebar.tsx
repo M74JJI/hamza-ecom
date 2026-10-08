@@ -186,11 +186,11 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
     <motion.aside
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="w-full bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6"
+      className="w-full bg-white rounded-lg border border-stone-200 p-6 space-y-6"
     >
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-gray-800">Refine Results</h2>
+        <h2 className="text-lg font-semibold text-stone-900">Filters</h2>
      
       </div>
 
@@ -241,8 +241,8 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
 
         {/* --- Display --- */}
         <div className="flex justify-between items-center text-sm text-gray-600 font-medium mt-2">
-          <span>MAD {price[0].toLocaleString()}</span>
-          <span>MAD {price[1].toLocaleString()}</span>
+          <span>MAD {price[0].toLocaleString('en-US')}</span>
+          <span>MAD {price[1].toLocaleString('en-US')}</span>
         </div>
       </motion.div>
     )}
@@ -333,7 +333,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
           className="flex items-center justify-between w-full text-left p-3 rounded-xl"
           onClick={() => toggleSection("brand")}
         >
-          <h3 className="font-semibold text-gray-800">Designer Brands</h3>
+          <h3 className="font-semibold text-gray-800">Brands</h3>
           <ChevronDown
             className={`w-4 h-4 text-gray-400 transition-transform ${
               openSections.brand ? "rotate-180" : ""
@@ -395,7 +395,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
           className="flex items-center justify-between w-full text-left p-3 rounded-xl"
           onClick={() => toggleSection("color")}
         >
-          <h3 className="font-semibold text-gray-800">Color Palette</h3>
+          <h3 className="font-semibold text-gray-800">Colors</h3>
           <ChevronDown
             className={`w-4 h-4 text-gray-400 transition-transform ${
               openSections.color ? "rotate-180" : ""
@@ -444,7 +444,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
           className="flex items-center justify-between w-full text-left p-3 rounded-xl"
           onClick={() => toggleSection("size")}
         >
-          <h3 className="font-semibold text-gray-800">Size Guide</h3>
+          <h3 className="font-semibold text-gray-800">Sizes</h3>
           <ChevronDown
             className={`w-4 h-4 text-gray-400 transition-transform ${
               openSections.size ? "rotate-180" : ""
@@ -493,7 +493,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
           className="flex items-center justify-between w-full text-left p-3 rounded-xl"
           onClick={() => toggleSection("rating")}
         >
-          <h3 className="font-semibold text-gray-800">Excellence Rating</h3>
+          <h3 className="font-semibold text-gray-800">Customer rating</h3>
           <ChevronDown
             className={`w-4 h-4 text-gray-400 transition-transform ${
               openSections.rating ? "rotate-180" : ""

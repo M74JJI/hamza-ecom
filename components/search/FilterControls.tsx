@@ -43,12 +43,13 @@ export function FilterControls({
   return (
     <div className="flex items-center gap-3">
       {/* View Mode */}
-      <div className="flex bg-white rounded-xl border border-gray-200 p-1">
+      <div className="flex bg-white rounded-lg border border-stone-200 p-1">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setViewMode('grid')}
-          className={`p-2 rounded-lg transition-colors ${
+          aria-label="Grid view"
+          className={`p-2 rounded-md transition-colors ${
             viewMode === 'grid'
               ? 'bg-black text-white'
               : 'text-gray-600 hover:text-gray-800'
@@ -60,7 +61,8 @@ export function FilterControls({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setViewMode('list')}
-          className={`p-2 rounded-lg transition-colors ${
+          aria-label="List view"
+          className={`p-2 rounded-md transition-colors ${
             viewMode === 'list'
               ? 'bg-black text-white'
               : 'text-gray-600 hover:text-gray-800'
@@ -75,7 +77,7 @@ export function FilterControls({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowFilters(true)}
-        className="lg:hidden flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors shadow-lg"
+        className="lg:hidden flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
       >
         <SlidersHorizontal className="w-4 h-4" />
         Filter
@@ -86,24 +88,13 @@ export function FilterControls({
         )}
       </motion.button>
 
-      {/* Desktop Filter Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowFilters(true)}
-        className="hidden lg:flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors shadow-lg"
-      >
-        <SlidersHorizontal className="w-4 h-4" />
-        Filter
-      </motion.button>
-
       {/* Sort Dropdown */}
       <div className="relative">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setSortOpen(!sortOpen)}
-          className="text-gray-700 flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium hover:border-gray-300 hover:text-gray-800 transition-colors bg-white"
+          className="text-gray-700 flex items-center gap-2 px-4 py-2 border border-stone-200 rounded-lg text-sm font-medium hover:border-stone-400 hover:text-gray-900 transition-colors bg-white"
         >
           <SortAsc className="w-4 h-4" />
           Sort
@@ -119,7 +110,7 @@ export function FilterControls({
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute top-full right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50"
+              className="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg border border-stone-200 py-2 z-50"
             >
               {sortOptions.map((option) => {
                 const Icon = option.icon;
