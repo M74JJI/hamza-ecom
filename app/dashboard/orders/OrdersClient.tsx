@@ -32,6 +32,7 @@ export function OrdersClient({
   sort,
   search,
   pageSize,
+  status,
 }: any) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,7 +104,7 @@ export function OrdersClient({
     </p>
   </div>
 
-  <div className="flex flex-col sm:flex-row gap-3">
+  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     <input
       placeholder="Search order or customer"
       defaultValue={search}
@@ -120,6 +121,27 @@ export function OrdersClient({
       <option value="oldest">Oldest</option>
       <option value="total-desc">Total High → Low</option>
       <option value="total-asc">Total Low → High</option>
+    </select>
+    <select
+      value={status}
+      onChange={(e) => updateQuery({ status: e.target.value, page: "1" })}
+      className="h-10 px-3 text-sm"
+      aria-label="Filter orders by status"
+    >
+      <option value="all">All statuses</option>
+      {['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((value) => (
+        <option key={value} value={value}>{value.charAt(0) + value.slice(1).toLowerCase()}</option>
+      ))}
+    </select>
+    <select
+      value={pageSize}
+      onChange={(e) => updateQuery({ pageSize: e.target.value, page: "1" })}
+      className="h-10 px-3 text-sm"
+      aria-label="Orders per page"
+    >
+      <option value="10">10 per page</option>
+      <option value="20">20 per page</option>
+      <option value="50">50 per page</option>
     </select>
   </div>
 </div>
@@ -145,6 +167,7 @@ export function OrdersClient({
             <tr>
               <th className="p-4 text-left">Order ID</th>
               <th className="p-4 text-left">Customer</th>
+              <th className="p-4 text-left">Phone</th>
               <th className="p-4 text-left">Total</th>
               <th className="p-4 text-left">Status</th>
               <th className="p-4 text-left">Note</th>
@@ -156,8 +179,15 @@ export function OrdersClient({
     <tr key={o.id} className="border-t border-neutral-200 text-sm hover:bg-neutral-50/70">
       <td className="p-4 font-mono">#{o.id.slice(0, 8)}</td>
       <td className="p-4">
-        {o.user?.name || "—"} <br />
+        {o.shippingFullNameSnapshot || o.user?.name || "—"} <br />
         <span className="text-xs text-neutral-500">{o.user?.email}</span>
+      </td>
+      <td className="p-4">
+        {o.shippingPhoneSnapshot ? (
+          <a href={`tel:${o.shippingPhoneSnapshot}`} className="font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-900">
+            {o.shippingPhoneSnapshot}
+          </a>
+        ) : <span className="text-neutral-400">—</span>}
       </td>
       <td className="p-4">{Number(o.totalMAD).toFixed(2)} MAD</td>
 
@@ -285,7 +315,7 @@ export function OrdersClient({
         <span className="text-gray-500">
           Page {currentPage} of {totalPages}
         </span>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           <button
             disabled={currentPage === 1}
             onClick={() => updateQuery({ page: String(currentPage - 1) })}
@@ -293,6 +323,18 @@ export function OrdersClient({
           >
             Prev
           </button>
+          {Array.from({ length: totalPages }, (_, index) => index + 1)
+            .filter((value) => value === 1 || value === totalPages || Math.abs(value - currentPage) <= 1)
+            .map((value, index, values) => (
+              <span key={value} className="flex items-center gap-1">
+                {index > 0 && value - values[index - 1] > 1 && <span className="px-1 text-neutral-400">…</span>}
+                <button
+                  onClick={() => updateQuery({ page: String(value) })}
+                  aria-current={value === currentPage ? 'page' : undefined}
+                  className={`min-w-9 rounded-md border px-2 py-1.5 ${value === currentPage ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300 bg-white'}`}
+                >{value}</button>
+              </span>
+            ))}
           <button
             disabled={currentPage === totalPages}
             onClick={() => updateQuery({ page: String(currentPage + 1) })}
@@ -337,6 +379,9 @@ export function OrdersClient({
                   <b>Customer:</b> {viewOrder.user?.name} (
                   {viewOrder.user?.email})
                 </p>
+                <p><b>Phone:</b>{" "}{viewOrder.shippingPhoneSnapshot ? <a className="underline" href={`tel:${viewOrder.shippingPhoneSnapshot}`}>{viewOrder.shippingPhoneSnapshot}</a> : "—"}</p>
+                <p><b>Delivery name:</b> {viewOrder.shippingFullNameSnapshot || "—"}</p>
+                <p><b>Delivery address:</b> {[viewOrder.shippingAddressSnapshot, viewOrder.shippingCitySnapshot].filter(Boolean).join(', ') || "—"}</p>
                 <p>
                   <b>Total:</b> {Number(viewOrder.totalMAD).toFixed(2)} MAD
                 </p>

@@ -140,9 +140,23 @@ export default function ProductViewClient({ product }: { product: any }) {
     [variantIdx, variants],
   );
   const gallery = useMemo(
-    () => (variant.images || []).slice().sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
-    [variant.images],
+    () => {
+      const images = (variant.images || [])
+        .filter((image: any) => typeof image?.url === 'string' && image.url)
+        .slice()
+        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      if (images.length) return images;
+      return variant.variantStyleImg
+        ? [{ id: `style-${variant.id}`, url: variant.variantStyleImg, sortOrder: 0 }]
+        : [];
+    },
+    [variant.id, variant.images, variant.variantStyleImg],
   );
+
+  useEffect(() => {
+    setActiveImageIdx(0);
+    setIsImageLoaded(false);
+  }, [variant.id]);
 
   const prices = useMemo(() => {
     const arr = (variant.sizes || []).map((s: any) => applyDiscount(Number(s.priceMAD), s.discountPercent));
@@ -310,7 +324,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
           <>
             <div className={`transition-opacity duration-700 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <ZoomImageWrapper 
-                src={gallery[activeImageIdx].url} 
+                src={gallery[activeImageIdx]?.url || gallery[0].url} 
                 alt={variant.title || product.slug}
                 onLoad={() => setIsImageLoaded(true)}
               />

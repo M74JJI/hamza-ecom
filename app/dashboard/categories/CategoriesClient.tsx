@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { Pencil, Trash2, Star, Plus, Search, Filter, Folder } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { ChevronLeft, ChevronRight, Pencil, Trash2, Star, Plus, Search, Filter, Folder } from "lucide-react";
 import { CategoryForm } from "./category-form";
 import { deleteCategoryAction } from "./server-actions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,11 +23,18 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
+  const [sort, setSort] = useState("name-asc");
+  const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.slug.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCategories = useMemo(() => categories.filter(category =>
+    (category.name.toLowerCase().includes(searchQuery.toLowerCase()) || category.slug.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (status === "all" || (status === "featured" ? category.isActiveInHeader : !category.isActiveInHeader))
+  ).slice().sort((a, b) => sort === "name-desc" ? b.name.localeCompare(a.name) : sort === "slug-asc" ? a.slug.localeCompare(b.slug) : a.name.localeCompare(b.name)), [categories, searchQuery, sort, status]);
+  const pages = Math.max(1, Math.ceil(filteredCategories.length / pageSize));
+  const safePage = Math.min(page, pages);
+  const visibleCategories = filteredCategories.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   return (
     <div className="space-y-6">
@@ -88,16 +95,18 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
+        <label className="relative"><Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" /><input
           type="text"
           placeholder="Search categories..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
           className="h-11 w-full pl-12 pr-4 text-sm"
-        />
+        /></label>
+        <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="h-11 px-3 text-sm"><option value="all">All placements</option><option value="featured">Featured</option><option value="standard">Standard</option></select>
+        <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }} className="h-11 px-3 text-sm"><option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="slug-asc">Slug A–Z</option></select>
+        <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} className="h-11 px-3 text-sm"><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option></select>
       </motion.div>
 
       {/* Category Form */}
@@ -175,7 +184,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
             </thead>
             <tbody className="divide-y divide-white/10 dark:divide-gray-700/30">
               <AnimatePresence mode="popLayout">
-                {filteredCategories.map((category, index) => (
+                {visibleCategories.map((category, index) => (
                   <motion.tr
                     key={category.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -312,6 +321,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
             </motion.div>
           )}
         </div>
+        <div className="flex items-center justify-between border-t border-neutral-200 px-5 py-3 text-sm"><span className="text-neutral-500">Page {safePage} of {pages}</span><div className="flex items-center gap-1"><button className="hz-admin-icon" disabled={safePage === 1} onClick={() => setPage(safePage - 1)} aria-label="Previous page"><ChevronLeft className="h-4 w-4" /></button>{Array.from({ length: pages }, (_, i) => i + 1).map((value) => <button key={value} onClick={() => setPage(value)} className={`min-w-9 rounded-md border px-2 py-1.5 ${value === safePage ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-300 bg-white"}`}>{value}</button>)}<button className="hz-admin-icon" disabled={safePage === pages} onClick={() => setPage(safePage + 1)} aria-label="Next page"><ChevronRight className="h-4 w-4" /></button></div></div>
       </motion.div>
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { Pencil, Trash2, Plus, Search, Truck, Clock, DollarSign, X } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { ChevronLeft, ChevronRight, Pencil, Trash2, Plus, Search, Truck, Clock, DollarSign, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createDeliveryCompany, updateDeliveryCompany, deleteDeliveryCompanyAction } from "./actions";
 
@@ -21,10 +21,17 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
   const [msg, setMsg] = useState<string | undefined>();
   const [searchQuery, setSearchQuery] = useState("");
   const [editingCompany, setEditingCompany] = useState<DeliveryCompany | null>(null);
+  const [status, setStatus] = useState("all");
+  const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const filteredCompanies = companies.filter(company =>
-    company.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCompanies = useMemo(() => companies.filter(company =>
+    company.name.toLowerCase().includes(searchQuery.toLowerCase()) && (status === "all" || (status === "active" ? company.active : !company.active))
+  ).slice().sort((a, b) => sort === "oldest" ? +new Date(a.createdAt) - +new Date(b.createdAt) : sort === "price-asc" ? Number(a.priceMAD) - Number(b.priceMAD) : sort === "price-desc" ? Number(b.priceMAD) - Number(a.priceMAD) : +new Date(b.createdAt) - +new Date(a.createdAt)), [companies, searchQuery, sort, status]);
+  const pages = Math.max(1, Math.ceil(filteredCompanies.length / pageSize));
+  const safePage = Math.min(page, pages);
+  const visibleCompanies = filteredCompanies.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const handleSubmit = (formData: FormData) => {
     startTransition(async () => {
@@ -149,16 +156,18 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
+        <label className="relative"><Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" /><input
           type="text"
           placeholder="Search delivery companies..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
           className="h-11 w-full pl-12 pr-4 text-sm"
-        />
+        /></label>
+        <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="h-11 px-3 text-sm"><option value="all">All statuses</option><option value="active">Active</option><option value="inactive">Inactive</option></select>
+        <select value={sort} onChange={(e) => { setSort(e.target.value); setPage(1); }} className="h-11 px-3 text-sm"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="price-asc">Price low → high</option><option value="price-desc">Price high → low</option></select>
+        <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} className="h-11 px-3 text-sm"><option value="10">10 per page</option><option value="25">25 per page</option><option value="50">50 per page</option></select>
       </motion.div>
 
       {/* Company Form */}
@@ -298,7 +307,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
             </thead>
             <tbody className="divide-y divide-white/10 dark:divide-gray-700/30">
               <AnimatePresence mode="popLayout">
-                {filteredCompanies.map((company, index) => (
+                {visibleCompanies.map((company, index) => (
                   <motion.tr
                     key={company.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -413,6 +422,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
             </motion.div>
           )}
         </div>
+        <div className="flex items-center justify-between border-t border-neutral-200 px-5 py-3 text-sm"><span className="text-neutral-500">Page {safePage} of {pages}</span><div className="flex items-center gap-1"><button className="hz-admin-icon" disabled={safePage === 1} onClick={() => setPage(safePage - 1)} aria-label="Previous page"><ChevronLeft className="h-4 w-4" /></button>{Array.from({ length: pages }, (_, i) => i + 1).map((value) => <button key={value} onClick={() => setPage(value)} className={`min-w-9 rounded-md border px-2 py-1.5 ${value === safePage ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-300 bg-white"}`}>{value}</button>)}<button className="hz-admin-icon" disabled={safePage === pages} onClick={() => setPage(safePage + 1)} aria-label="Next page"><ChevronRight className="h-4 w-4" /></button></div></div>
       </motion.div>
     </div>
   );

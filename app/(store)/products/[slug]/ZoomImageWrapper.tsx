@@ -1,7 +1,6 @@
 'use client';
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 
 interface ZoomImageProps {
@@ -63,17 +62,14 @@ export default function ZoomImage({
       style={{ height }}
     >
       {/* Base image */}
-      <Image
+      <img
         src={src}
         alt={alt}
-        fill
-        priority
         onLoad={handleImageLoad}
         onError={handleImageError}
-        className={`transition-all duration-500 object-contain ${
+        className={`absolute inset-0 h-full w-full object-contain transition-all duration-500 ${
           isZoomed ? 'opacity-0' : 'opacity-100'
         } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-        sizes="(max-width: 768px) 100vw, 50vw"
       />
 
       {/* Zoomed layer */}

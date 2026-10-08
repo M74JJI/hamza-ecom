@@ -5,7 +5,7 @@ import type { Prisma } from "@/generated/prisma/client";
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZES = [10, 20, 50] as const;
 
 export default async function OrdersDashboard({
   searchParams,
@@ -13,9 +13,18 @@ export default async function OrdersDashboard({
   searchParams?: Promise<Record<string, string | undefined>>;
 }) {
   const resolvedSearchParams = (await searchParams) || {};
-  const page = Number(resolvedSearchParams.page || 1);
+  const page = Math.max(1, Number(resolvedSearchParams.page || 1) || 1);
+  const requestedPageSize = Number(resolvedSearchParams.pageSize || 20);
+  const pageSize = PAGE_SIZES.includes(requestedPageSize as 10 | 20 | 50)
+    ? requestedPageSize
+    : 20;
   const sort = resolvedSearchParams.sort || "latest";
   const search = resolvedSearchParams.search?.trim()?.toLowerCase() || "";
+  const status = resolvedSearchParams.status || "all";
+  const allowedStatuses = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
+  const normalizedStatus = allowedStatuses.includes(status as (typeof allowedStatuses)[number])
+    ? (status as (typeof allowedStatuses)[number])
+    : null;
 
   // ✅ Use Prisma.SortOrder instead of plain strings
   const orderBy: Prisma.OrderOrderByWithRelationInput =
@@ -28,10 +37,14 @@ export default async function OrdersDashboard({
       : { createdAt: "desc" as Prisma.SortOrder };
 
   // ✅ Cast "insensitive" to Prisma.QueryMode
-  const where: Prisma.OrderWhereInput = search
-    ? {
+  const where: Prisma.OrderWhereInput = {
+    AND: [
+      normalizedStatus ? { status: normalizedStatus } : {},
+      search ? {
         OR: [
           { id: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
+          { shippingFullNameSnapshot: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
+          { shippingPhoneSnapshot: { contains: search, mode: "insensitive" as Prisma.QueryMode } },
           {
             user: {
               name: { contains: search, mode: "insensitive" as Prisma.QueryMode },
@@ -43,15 +56,16 @@ export default async function OrdersDashboard({
             },
           },
         ],
-      }
-    : {};
+      } : {},
+    ],
+  };
 
   const [orders, totalOrders] = await Promise.all([
     prisma.order.findMany({
       where,
       orderBy,
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
       include: {
         user: true,
         shippingCompany: true,
@@ -74,7 +88,7 @@ export default async function OrdersDashboard({
     prisma.order.count({ where }),
   ]);
 
-  const totalPages = Math.ceil(totalOrders / PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(totalOrders / pageSize));
   const serializedOrders = JSON.parse(JSON.stringify(orders));
 
   return (
@@ -85,7 +99,8 @@ export default async function OrdersDashboard({
       totalOrders={totalOrders}
       sort={sort}
       search={search}
-      pageSize={PAGE_SIZE}
+      status={status}
+      pageSize={pageSize}
     />
   );
 }
