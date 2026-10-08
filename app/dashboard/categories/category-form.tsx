@@ -213,7 +213,7 @@ export function CategoryForm({
                 </motion.div>
 
                 {/* Upload Button */}
-                <CldUploadWidget
+                {cloudinaryConfig.cloudName && cloudinaryConfig.uploadPreset ? <CldUploadWidget
                   uploadPreset={cloudinaryConfig.uploadPreset}
                   onSuccess={(res: any) => {
                     const url =
@@ -234,7 +234,7 @@ export function CategoryForm({
                       {imageUrl ? "Change Image" : "Upload Image"}
                     </motion.button>
                   )}
-                </CldUploadWidget>
+                </CldUploadWidget> : <p className="text-sm text-amber-700">Add Cloudinary environment variables to enable image uploads. Category can still be saved without image.</p>}
 
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 dark:text-gray-400">

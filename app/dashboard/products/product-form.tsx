@@ -502,7 +502,7 @@ useEffect(() => {
                       )}
                     </motion.div>
 
-                    <CldUploadWidget
+                    {cloudinaryConfig.cloudName && cloudinaryConfig.uploadPreset ? <CldUploadWidget
                       uploadPreset={cloudinaryConfig.uploadPreset}
                       onSuccess={(res: any) => {
                         const url = res.info.secure_url || (res.info.url || '').replace(/^http:/, 'https:');
@@ -521,7 +521,7 @@ useEffect(() => {
                           Upload Style Image
                         </motion.button>
                       )}
-                    </CldUploadWidget>
+                    </CldUploadWidget> : <Input placeholder="HTTPS style image URL" value={v.variantStyleImg || ''} onChange={(e) => updateVariant(vi, { variantStyleImg: e.target.value })} />}
                   </div>
                 </div>
 
@@ -577,7 +577,7 @@ useEffect(() => {
                         </motion.button>
                       </motion.div>
                     ))}
-                    {(v.images?.length || 0) < 6 && (
+                    {(v.images?.length || 0) < 6 && cloudinaryConfig.cloudName && cloudinaryConfig.uploadPreset && (
                       <CldUploadWidget
                         uploadPreset={cloudinaryConfig.uploadPreset}
                         onSuccess={(res: any) => {

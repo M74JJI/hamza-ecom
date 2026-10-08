@@ -71,7 +71,7 @@ export function ProfileInfoForm({ user }:{ user:any }){
           </div>
           
           <div className="flex gap-3">
-            <CldUploadWidget
+            {cloudinaryConfig.cloudName && cloudinaryConfig.uploadPreset ? <CldUploadWidget
               uploadPreset={cloudinaryConfig.uploadPreset}
               onSuccess={(res:any) => {
                 const url = res?.info?.secure_url;
@@ -90,7 +90,7 @@ export function ProfileInfoForm({ user }:{ user:any }){
                   Upload Photo
                 </motion.button>
               )}
-            </CldUploadWidget>
+            </CldUploadWidget> : <p className="text-xs text-amber-700">Image uploads unavailable until Cloudinary is configured.</p>}
           </div>
         </div>
       </div>
