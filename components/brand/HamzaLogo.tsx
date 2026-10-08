@@ -20,7 +20,7 @@ export function HamzaLogo({
         width={size}
         height={size}
         priority={priority}
-        className={`h-full w-full scale-[1.55] object-contain ${inverted ? "brightness-0 invert" : ""}`}
+        className={`h-full w-full scale-[1.3] object-contain ${inverted ? "brightness-0 invert" : ""}`}
       />
     </span>
   );
