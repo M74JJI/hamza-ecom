@@ -37,10 +37,16 @@ export default async function ProfileOverview(){
     prisma.order.count({ where: { userId: user.id } }),
     prisma.wishlistItem.count({ where: { userId: user.id } }),
     prisma.review.count({ where: { userId: user.id } }),
-    prisma.order.findFirst({ 
-      where: { userId: user.id }, 
-      orderBy: { createdAt: 'desc' }, 
-      include: { items: { include: { variantSize: { include: { variant: true } } } } } 
+    prisma.order.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        status: true,
+        totalMAD: true,
+        createdAt: true,
+        _count: { select: { items: true } },
+      },
     }),
   ]);
 
@@ -130,7 +136,7 @@ export default async function ProfileOverview(){
                       
                       <div className="text-gray-600">Items</div>
                       <div className="font-medium text-gray-800">
-                        {lastOrder.items.length} product{lastOrder.items.length > 1 ? 's' : ''}
+                        {lastOrder._count.items} product{lastOrder._count.items === 1 ? '' : 's'}
                       </div>
                       
                       <div className="text-gray-600">Status</div>
@@ -138,7 +144,9 @@ export default async function ProfileOverview(){
                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                           lastOrder.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
                           lastOrder.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
+                          lastOrder.status === 'CONFIRMED' ? 'bg-amber-100 text-amber-800' :
                           lastOrder.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                          lastOrder.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {lastOrder.status}
@@ -147,7 +155,7 @@ export default async function ProfileOverview(){
                       
                       <div className="text-gray-600">Total</div>
                       <div className="font-bold text-gray-800">
-                        {lastOrder.items.reduce((total, item) => total + (Number(item.unitPriceMAD) * item.quantity), 0).toFixed(2)} MAD
+                        {Number(lastOrder.totalMAD).toFixed(2)} MAD
                       </div>
                     </div>
                   </div>

@@ -14,7 +14,7 @@ type OrderRow = {
 
 const statusConfig = {
   PENDING: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  PROCESSING: { color: 'bg-blue-100 text-blue-800', icon: Package },
+  CONFIRMED: { color: 'bg-blue-100 text-blue-800', icon: Package },
   SHIPPED: { color: 'bg-purple-100 text-purple-800', icon: Truck },
   DELIVERED: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
   CANCELLED: { color: 'bg-red-100 text-red-800', icon: XCircle },
@@ -125,18 +125,18 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }){
             </div>
             
             {/* Progress Indicator for active orders */}
-            {(row.status === 'PROCESSING' || row.status === 'SHIPPED') && (
+            {(row.status === 'CONFIRMED' || row.status === 'SHIPPED') && (
               <div className="mt-4">
                 <div className="flex justify-between text-xs text-gray-600 mb-2">
                   <span>Order Progress</span>
                   <span>
-                    {row.status === 'PROCESSING' ? 'Processing' : 'Shipped'}
+                    {row.status === 'CONFIRMED' ? 'Confirmed' : 'Shipped'}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: row.status === 'PROCESSING' ? '50%' : '80%' }}
+                    animate={{ width: row.status === 'CONFIRMED' ? '50%' : '80%' }}
                     transition={{ duration: 1, delay: 0.5 }}
                     className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
                   />
