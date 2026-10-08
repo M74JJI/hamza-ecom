@@ -13,6 +13,10 @@ function createPrismaClient() {
   const adapter = new PrismaPg({
     connectionString,
     connectionTimeoutMillis: 5_000,
+    // Keep each serverless instance from opening a large connection fan-out.
+    // Neon pooling handles concurrency; excess work should queue briefly here.
+    max: 5,
+    idleTimeoutMillis: 10_000,
   });
 
   return new PrismaClient({ adapter });

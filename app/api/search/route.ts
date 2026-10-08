@@ -3,6 +3,7 @@ import { expandCategoryIds, getCatalogCategories } from "@/lib/catalog/categorie
 import type { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { publicDatabaseCache } from "@/lib/http/cache";
 
 const PAGE_SIZE = 12;
 const MAX_PRICE_MAD = 10_000_000;
@@ -22,7 +23,7 @@ const searchSchema = z
     sort: z
       .enum(["newest", "oldest", "rating", "popular", "price-asc", "price-desc"])
       .default("newest"),
-    page: z.coerce.number().int().min(1).max(10_000).default(1),
+    page: z.coerce.number().int().min(1).max(500).default(1),
   })
   .superRefine((value, ctx) => {
     if (value.min !== undefined && value.max !== undefined && value.min > value.max) {
@@ -341,11 +342,14 @@ export async function GET(req: Request) {
     };
   });
 
-  return NextResponse.json({
-    data,
-    total,
-    page,
-    pageSize: PAGE_SIZE,
-    totalPages: Math.ceil(total / PAGE_SIZE),
-  });
+  return NextResponse.json(
+    {
+      data,
+      total,
+      page,
+      pageSize: PAGE_SIZE,
+      totalPages: Math.ceil(total / PAGE_SIZE),
+    },
+    { headers: publicDatabaseCache(30) },
+  );
 }

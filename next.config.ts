@@ -20,6 +20,12 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    serverActions: {
+      // Store forms are small. Reject oversized action payloads before parsing.
+      bodySizeLimit: "256kb",
+    },
+  },
   images: {
     remotePatterns: [
       {

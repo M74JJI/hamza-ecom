@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { publicDatabaseCache } from "@/lib/http/cache";
 
 export async function GET() {
   const items = await prisma.category.findMany({
@@ -19,10 +20,13 @@ export async function GET() {
     },
     orderBy: { name: "asc" },
   });
-  return NextResponse.json({
-    items: items.map(({ _count, ...item }) => ({
-      ...item,
-      productCount: _count.products,
-    })),
-  });
+  return NextResponse.json(
+    {
+      items: items.map(({ _count, ...item }) => ({
+        ...item,
+        productCount: _count.products,
+      })),
+    },
+    { headers: publicDatabaseCache(300) },
+  );
 }

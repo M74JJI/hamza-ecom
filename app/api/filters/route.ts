@@ -6,6 +6,7 @@ import {
 } from "@/lib/catalog/categories";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { publicDatabaseCache } from "@/lib/http/cache";
 
 type CategoryNode = CatalogCategory & {
   children: CategoryNode[];
@@ -123,20 +124,23 @@ export async function GET(req: Request) {
     allCategories.map((category) => [category.id, category.name]),
   );
 
-  return NextResponse.json({
-    categories: categoryTree,
-    categoryNameMap,
-    brands: brands
-      .map((entry) => entry.brand.trim())
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b)),
-    colors: Array.from(colors).sort((a, b) => a.localeCompare(b)),
-    sizes: Array.from(sizes).sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true }),
-    ),
-    priceRange: {
-      min: Math.floor(minPrice),
-      max: Math.ceil(maxPrice),
+  return NextResponse.json(
+    {
+      categories: categoryTree,
+      categoryNameMap,
+      brands: brands
+        .map((entry) => entry.brand.trim())
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b)),
+      colors: Array.from(colors).sort((a, b) => a.localeCompare(b)),
+      sizes: Array.from(sizes).sort((a, b) =>
+        a.localeCompare(b, undefined, { numeric: true }),
+      ),
+      priceRange: {
+        min: Math.floor(minPrice),
+        max: Math.ceil(maxPrice),
+      },
     },
-  });
+    { headers: publicDatabaseCache(120) },
+  );
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { publicDatabaseCache } from "@/lib/http/cache";
 
 const querySchema = z.object({
   q: z.string().trim().min(1).max(120),
@@ -82,5 +83,8 @@ export async function GET(req: Request) {
     };
   });
 
-  return NextResponse.json({ suggestions });
+  return NextResponse.json(
+    { suggestions },
+    { headers: publicDatabaseCache(30) },
+  );
 }

@@ -1,9 +1,16 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { publicDatabaseCache } from "@/lib/http/cache";
+import { z } from "zod";
 
-export async function GET(_req: NextRequest, context: any) {
-  const params = await Promise.resolve(context.params);
-  const { productId } = params;
+const paramsSchema = z.object({ productId: z.string().min(1).max(100) });
+
+export async function GET(_req: NextRequest, context: RouteContext<"/api/reviews/[productId]/summary">) {
+  const parsed = paramsSchema.safeParse(await context.params);
+  if (!parsed.success) {
+    return Response.json({ error: "Invalid product" }, { status: 400 });
+  }
+  const { productId } = parsed.data;
 
   const grouped = await prisma.review.groupBy({
     by: ["rating"],
@@ -31,5 +38,8 @@ export async function GET(_req: NextRequest, context: any) {
     };
   });
 
-  return Response.json({ total, avg, buckets });
+  return Response.json(
+    { total, avg, buckets },
+    { headers: publicDatabaseCache(60) },
+  );
 }
