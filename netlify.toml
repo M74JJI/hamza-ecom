@@ -3,4 +3,4 @@
   publish = ".next"
 
 [context.production]
-  command = "bun run prisma:migrate:deploy && bun run admin:bootstrap && bun run build"
+  command = "bun run prisma:migrate:deploy && bun run prisma:generate && bun run admin:bootstrap && bun run build"
