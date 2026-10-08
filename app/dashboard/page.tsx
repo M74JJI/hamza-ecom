@@ -214,19 +214,19 @@ export default async function AdminDashboard({
     dateRange: { from, to }
   };
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <DashboardHeader from={from} to={to} 
               exportButton={<ExportCSVButton data={exportData} />}
 
       />
       <StatsGrid stats={stats} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <SalesOverTime data={salesSeries} />
         <OrdersByStatus data={statusSeries} />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <TopProducts data={top} />
         <OrdersByCity data={citySeries} />
       </div>

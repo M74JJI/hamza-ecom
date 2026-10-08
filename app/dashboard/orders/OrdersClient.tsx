@@ -93,28 +93,28 @@ export function OrdersClient({
   return (
     <div className="space-y-6">
       {/* Header */}
- <div className="flex flex-col lg:flex-row justify-between gap-4">
+ <div className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-5 lg:flex-row lg:items-end">
   <div>
-    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">
       Orders
     </h1>
-    <p className="text-gray-500 dark:text-gray-400 mt-1">
-      Total: {totalOrders} orders
+    <p className="mt-1 text-sm text-neutral-500">
+      Review and manage {totalOrders} orders
     </p>
   </div>
 
   <div className="flex flex-col sm:flex-row gap-3">
     <input
-      placeholder="Search..."
+      placeholder="Search order or customer"
       defaultValue={search}
       onChange={(e) => updateQuery({ search: e.target.value, page: "1" })}
-      className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300"
+      className="h-10 min-w-64 px-3 text-sm"
     />
 
     <select
       value={sort}
       onChange={(e) => updateQuery({ sort: e.target.value, page: "1" })}
-      className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300"
+      className="h-10 px-3 text-sm"
     >
       <option value="latest">Latest</option>
       <option value="oldest">Oldest</option>
@@ -131,7 +131,7 @@ export function OrdersClient({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`px-4 py-3 text-white rounded-xl ${msgError ? "bg-red-500/90" : "bg-green-500/80"}`}
+            className={`rounded-md border px-4 py-3 text-sm ${msgError ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
           >
             {msg}
           </motion.div>
@@ -139,9 +139,9 @@ export function OrdersClient({
       </AnimatePresence>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white/80 dark:bg-gray-800/80 rounded-2xl border border-gray-700/30 shadow-xl">
+      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
         <table className="w-full">
-          <thead className="bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+          <thead className="bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="p-4 text-left">Order ID</th>
               <th className="p-4 text-left">Customer</th>
@@ -153,11 +153,11 @@ export function OrdersClient({
           </thead>
       <tbody>
   {orders.map((o: any) => (
-    <tr key={o.id} className="border-t border-gray-700/20">
+    <tr key={o.id} className="border-t border-neutral-200 text-sm hover:bg-neutral-50/70">
       <td className="p-4 font-mono">#{o.id.slice(0, 8)}</td>
       <td className="p-4">
         {o.user?.name || "—"} <br />
-        <span className="text-xs text-gray-400">{o.user?.email}</span>
+        <span className="text-xs text-neutral-500">{o.user?.email}</span>
       </td>
       <td className="p-4">{Number(o.totalMAD).toFixed(2)} MAD</td>
 
@@ -212,7 +212,7 @@ export function OrdersClient({
                 setCustomNote("");
               }
             }}
-            className="rounded-lg bg-gray-100 dark:bg-gray-800 px-2 py-1 text-sm focus:ring-2 focus:ring-pink-500/50"
+            className="px-2 py-1 text-sm"
           >
             <option value="">—</option>
             <option value="Waiting for confirmation">
@@ -243,7 +243,7 @@ export function OrdersClient({
                   setCustomNote("");
                 }
               }}
-              className="px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-600 text-sm mt-1 focus:ring-2 focus:ring-pink-500/50 outline-none"
+              className="mt-1 px-2 py-1 text-sm"
             />
           )}
 
@@ -257,7 +257,7 @@ export function OrdersClient({
               "Returned / Refused",
             ].includes(o.note) &&
             customNote !== o.id && (
-              <p className="text-xs text-gray-600 dark:text-gray-400 italic mt-1">
+              <p className="mt-1 text-xs italic text-neutral-500">
                 {o.note}
               </p>
             )}
@@ -268,7 +268,7 @@ export function OrdersClient({
       <td className="p-4">
         <button
           onClick={() => setViewOrder(o)}
-          className="px-3 py-1.5 bg-purple-600/90 text-white rounded-xl hover:bg-purple-700 transition flex items-center gap-1"
+          className="flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-100"
         >
           <Eye className="w-4 h-4" /> View
         </button>
@@ -281,7 +281,7 @@ export function OrdersClient({
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center text-sm mt-4">
+      <div className="mt-4 flex items-center justify-between text-sm">
         <span className="text-gray-500">
           Page {currentPage} of {totalPages}
         </span>
@@ -289,14 +289,14 @@ export function OrdersClient({
           <button
             disabled={currentPage === 1}
             onClick={() => updateQuery({ page: String(currentPage - 1) })}
-            className="px-3 py-1 rounded-lg border border-gray-600 disabled:opacity-40"
+            className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 disabled:opacity-40"
           >
             Prev
           </button>
           <button
             disabled={currentPage === totalPages}
             onClick={() => updateQuery({ page: String(currentPage + 1) })}
-            className="px-3 py-1 rounded-lg border border-gray-600 disabled:opacity-40"
+            className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 disabled:opacity-40"
           >
             Next
           </button>
@@ -310,7 +310,7 @@ export function OrdersClient({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[999]"
+            className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 p-4"
             onClick={() => setViewOrder(null)}
           >
             <motion.div
@@ -318,7 +318,7 @@ export function OrdersClient({
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]"
+              className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-neutral-200 bg-white p-6 shadow-xl"
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
@@ -332,7 +332,7 @@ export function OrdersClient({
                 </button>
               </div>
 
-              <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+              <div className="space-y-3 text-sm text-neutral-700">
                 <p>
                   <b>Customer:</b> {viewOrder.user?.name} (
                   {viewOrder.user?.email})

@@ -92,3 +92,62 @@ body {
   color: rgb(10 10 10);
 }
 
+/* Admin surface: one restrained light system across legacy feature screens. */
+.hz-admin main :is(h1, h2, h3) {
+  background-image: none !important;
+  color: rgb(23 23 23) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.hz-admin main :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, textarea) {
+  border: 1px solid rgb(212 212 212) !important;
+  border-radius: 0.5rem !important;
+  background: white !important;
+  color: rgb(23 23 23) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.hz-admin main :is(input, select, textarea):focus {
+  border-color: rgb(115 115 115) !important;
+  outline: 2px solid rgb(23 23 23 / 0.08) !important;
+  outline-offset: 1px;
+}
+
+.hz-admin main table {
+  background: white;
+  color: rgb(38 38 38);
+}
+
+.hz-admin main thead {
+  background: rgb(250 250 250) !important;
+  background-image: none !important;
+  color: rgb(82 82 82);
+}
+
+.hz-admin main tbody tr {
+  border-color: rgb(229 229 229) !important;
+}
+
+.hz-admin main [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+}
+
+.hz-admin main [class*="bg-gradient"] {
+  background-image: none !important;
+}
+
+.hz-admin main :is(button, a)[class*="bg-gradient"] {
+  background-color: rgb(23 23 23) !important;
+  color: white !important;
+}
+
+.hz-admin main :is(div, span)[class*="bg-gradient"] {
+  background-color: rgb(245 245 245) !important;
+  color: rgb(82 82 82) !important;
+}
+
+.hz-admin main [class*="border-white"] {
+  border-color: rgb(229 229 229) !important;
+}
+

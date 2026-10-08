@@ -12,12 +12,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   await requireAdmin();
   
   return (
-    <div className="min-h-screen bg-stone-100 text-neutral-950">
+    <div className="hz-admin min-h-screen bg-neutral-50 text-neutral-950">
       <div className="flex min-h-screen">
         <AdminSidebar user={user}/>
         <div className="min-w-0 flex-1 pb-20 lg:pb-0">
           <AdminHeader />
-          <main className="mx-auto max-w-[1600px] p-5 lg:p-8">
+          <main className="mx-auto max-w-[1500px] p-4 sm:p-6 lg:p-8">
             {children}
           </main>
         </div>

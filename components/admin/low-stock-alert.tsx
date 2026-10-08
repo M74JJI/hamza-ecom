@@ -1,8 +1,4 @@
 // components/admin/low-stock-alert.tsx
-'use client';
-
-import { motion } from 'framer-motion';
-
 interface LowStockItem {
   id: string;
   size: string;
@@ -19,35 +15,32 @@ interface LowStockAlertProps {
 
 export function LowStockAlert({ lowStock }: LowStockAlertProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      className="rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200/50 dark:border-amber-700/50 p-6"
-    >
-      <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-4 flex items-center">
-        <span className="w-2 h-2 bg-amber-500 rounded-full mr-2 animate-pulse"></span>
-        Low Stock Alert
+    <section className="rounded-lg border border-neutral-200 bg-white">
+      <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
+      <h3 className="font-semibold text-neutral-950">
+        Inventory attention
       </h3>
-      <div className="space-y-3">
+      <span className="text-xs font-medium text-neutral-500">{lowStock.length} items</span>
+      </div>
+      <div className="divide-y divide-neutral-100 px-5">
         {lowStock.length === 0 ? (
-          <p className="text-amber-800/70 dark:text-amber-300/70 text-sm">All products are well stocked! 🎉</p>
+          <p className="py-5 text-sm text-neutral-500">All products have healthy stock.</p>
         ) : (
           lowStock.map((s) => (
-            <div key={s.id} className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-900/30 rounded-xl border border-amber-200/30 dark:border-amber-700/30">
+            <div key={s.id} className="flex items-center justify-between gap-4 py-3">
               <div>
-                <p className="font-medium text-amber-900 dark:text-amber-200 text-sm">
+                <p className="text-sm font-medium text-neutral-900">
                   {s.variant.title}
                 </p>
-                <p className="text-amber-700/70 dark:text-amber-400/70 text-xs">
+                <p className="mt-1 text-xs text-neutral-500">
                   Size {s.size} • SKU {s.sku}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-bold text-amber-600 dark:text-amber-400 text-sm">
+                <p className={`text-sm font-semibold ${s.stockQty === 0 ? 'text-red-700' : 'text-amber-700'}`}>
                   {s.stockQty} left
                 </p>
-                <p className="text-amber-700/70 dark:text-amber-400/70 text-xs">
+                <p className="mt-1 text-xs text-neutral-500">
                   {s.stockQty === 0 ? 'Out of stock' : 'Low stock'}
                 </p>
               </div>
@@ -55,6 +48,6 @@ export function LowStockAlert({ lowStock }: LowStockAlertProps) {
           ))
         )}
       </div>
-    </motion.div>
+    </section>
   );
 }

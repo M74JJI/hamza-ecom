@@ -3,25 +3,24 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Calendar, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 
-interface DateRange {
+export interface AdminDateRange {
   from?: Date;
   to?: Date;
 }
 
 interface Props {
-  value?: DateRange;
-  onChange?: (range: DateRange) => void;
-  onApply?: (range: DateRange) => void;
+  value?: AdminDateRange;
+  onChange?: (range: AdminDateRange) => void;
+  onApply?: (range: AdminDateRange) => void;
   className?: string;
 }
 
 export function DateRangePicker({ value, onChange, onApply, className }: Props) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [temp, setTemp] = useState<DateRange>({
+  const [temp, setTemp] = useState<AdminDateRange>({
     from: value?.from,
     to: value?.to,
   });
@@ -53,88 +52,78 @@ export function DateRangePicker({ value, onChange, onApply, className }: Props) 
 
   return (
     <div className={`relative ${className ?? ""}`}>
-      {/* Trigger Button */}
-      <motion.button
+      <button
+        type="button"
         onClick={handleToggle}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="flex items-center space-x-2 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all duration-300 relative z-[10000]"
+        className="relative z-[10000] flex h-10 items-center gap-2 rounded-md border border-neutral-300 bg-white px-3 text-sm font-medium text-neutral-800 hover:bg-neutral-50"
       >
         <Calendar className="w-4 h-4" />
         <span className="text-sm font-medium">{label}</span>
         <ChevronDown
           className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`}
         />
-      </motion.button>
+      </button>
 
       {/* Dropdown in Portal */}
       {typeof window !== "undefined" &&
         createPortal(
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
+          open ? (
+              <div
                 style={{
                   position: "absolute",
                   top: coords.y,
                   left: coords.x,
-                  zIndex: 999999, // 👈 high enough to beat anything
+                  zIndex: 999999,
                 }}
-                className="w-72 bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-2xl p-4"
+                className="w-72 rounded-lg border border-neutral-200 bg-white p-4 shadow-lg"
               >
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="mb-1 block text-sm text-neutral-700">
                       From
                     </label>
                     <input
                       type="date"
                       value={temp.from ? format(temp.from, "yyyy-MM-dd") : ""}
                       onChange={(e) => handleChange("from", e.target.value)}
-                      className="w-full bg-white/50 dark:bg-gray-800/50 border border-gray-300/30 dark:border-gray-600/40 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                      className="hz-field"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="mb-1 block text-sm text-neutral-700">
                       To
                     </label>
                     <input
                       type="date"
                       value={temp.to ? format(temp.to, "yyyy-MM-dd") : ""}
                       onChange={(e) => handleChange("to", e.target.value)}
-                      className="w-full bg-white/50 dark:bg-gray-800/50 border border-gray-300/30 dark:border-gray-600/40 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                      className="hz-field"
                     />
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
-                    <motion.button
+                    <button
+                      type="button"
                       onClick={() => {
                         setTemp({});
                         onApply?.({});
                         setOpen(false);
                       }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-sm px-3 py-2 rounded-lg bg-gray-200/70 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 hover:bg-gray-300/70 dark:hover:bg-gray-600/70"
+                      className="rounded-md px-3 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
                     >
                       Clear
-                    </motion.button>
-                    <motion.button
+                    </button>
+                    <button
+                      type="button"
                       onClick={handleApply}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl transition-all duration-300"
+                      className="rounded-md bg-neutral-950 px-4 py-2 text-sm font-semibold text-white hover:bg-neutral-800"
                     >
                       Apply
-                    </motion.button>
+                    </button>
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
+              </div>
+            ) : null,
           document.body
         )}
     </div>
