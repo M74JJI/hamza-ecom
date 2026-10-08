@@ -97,7 +97,7 @@ const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
 useEffect(() => {
   if (categoryIds.length > 0 && categories.length > 0) {
-    const leafId = categoryIds[0];
+    const leafId = categoryIds[categoryIds.length - 1];
     const path: string[] = [];
     let current = findCategoryById(categories, leafId);
 
