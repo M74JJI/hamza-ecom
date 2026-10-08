@@ -10,7 +10,7 @@ export default function VariantEditor({ variant, onChange }:{ variant:any, onCha
   }, [freeDelivery]);
 
   return (
-    <div className="p-3 rounded border border-white/10">
+    <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={freeDelivery} onChange={e=>setFreeDelivery(e.target.checked)} />
         <span>Free delivery for this variant</span>

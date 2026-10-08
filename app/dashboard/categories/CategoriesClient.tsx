@@ -35,14 +35,14 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+        className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-5 lg:flex-row lg:items-end"
       >
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">
             Categories
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Manage your product categories and organization
+          <p className="mt-1 text-sm text-neutral-500">
+            Organize catalog navigation and storefront collections.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
                 imageUrl: null,
                 isActiveInHeader: false
               })}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
+              className="hz-admin-primary"
             >
               <Plus className="w-5 h-5" />
               New Category
@@ -75,7 +75,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setEditing(null)}
-              className="flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-gray-700 dark:text-gray-300 rounded-2xl font-semibold hover:bg-white dark:hover:bg-gray-700 transition-all duration-300"
+              className="hz-admin-secondary h-10 px-4 text-sm"
             >
               Cancel
             </motion.button>
@@ -96,7 +96,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
           placeholder="Search categories..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-300"
+          className="h-11 w-full pl-12 pr-4 text-sm"
         />
       </motion.div>
 
@@ -109,7 +109,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 p-6 shadow-lg">
+            <div className="hz-admin-panel p-5">
               <CategoryForm
                 categories={categories}
                 editing={editing}
@@ -145,10 +145,10 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 shadow-xl overflow-hidden"
+        className="hz-admin-panel overflow-hidden"
       >
         {/* Table Header */}
-        <div className="p-6 border-b border-white/20 dark:border-gray-700/30">
+        <div className="border-b border-neutral-200 px-5 py-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900 dark:text-white">
               All Categories ({filteredCategories.length})
@@ -164,7 +164,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+              <tr className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
                 <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Image</th>
                 <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Name</th>
                 <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Slug</th>
@@ -182,7 +182,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all duration-300"
+                    className="group border-t border-neutral-200 text-sm hover:bg-neutral-50"
                   >
                     <td className="p-4">
                       <motion.div 
@@ -241,7 +241,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => setEditing(category)}
-                          className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition-all duration-300"
+                          className="hz-admin-icon"
                           title="Edit"
                         >
                           <Pencil className="w-4 h-4" />
@@ -263,7 +263,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
                               router.refresh();
                             })
                           }
-                          className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-all duration-300"
+                          className="hz-admin-icon border-red-200 text-red-700 hover:bg-red-50"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -304,7 +304,7 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
                     imageUrl: null,
                     isActiveInHeader: false
                   })}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
+                  className="hz-admin-primary"
                 >
                   Create Category
                 </motion.button>

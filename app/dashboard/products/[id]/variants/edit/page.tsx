@@ -24,10 +24,10 @@ export default async function EditVariantPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between border-b border-neutral-200 pb-5">
         <h1 className="text-2xl font-semibold">Edit Variant</h1>
         <a
-          className="underline opacity-80 hover:opacity-100"
+          className="hz-admin-secondary"
           href={`/dashboard/products/${product.id}/variants`}
         >
           Back to variants

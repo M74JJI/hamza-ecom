@@ -23,12 +23,12 @@ export default async function ProductVariantsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between border-b border-neutral-200 pb-5">
         <h1 className="text-2xl font-semibold">
           Variants — {product.brand || product.slug}
         </h1>
         <a
-          className="underline opacity-80 hover:opacity-100"
+          className="hz-admin-secondary"
           href={`/dashboard/products/${product.id}`}
         >
           Back to product
@@ -37,9 +37,9 @@ export default async function ProductVariantsPage({
 
       <VariantForm productId={product.id} />
 
-      <div className="border border-white/10 rounded-md overflow-hidden">
+      <div className="hz-admin-panel overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-white/5">
+          <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
             <tr>
               <th className="text-left p-3">Title</th>
               <th className="text-left p-3">Color</th>
@@ -50,7 +50,7 @@ export default async function ProductVariantsPage({
           </thead>
           <tbody>
             {variants.map((v) => (
-              <tr key={v.id} className="border-t border-white/10">
+              <tr key={v.id} className="border-t border-neutral-200 hover:bg-neutral-50">
                 <td className="p-3">{v.title}</td>
                 <td className="p-3">{v.color || "—"}</td>
                 <td className="p-3">
@@ -68,7 +68,7 @@ export default async function ProductVariantsPage({
                     className="inline"
                   >
                     <input type="hidden" name="vid" value={v.id} />
-                    <button className="underline mr-3">Edit</button>
+                    <button className="mr-2 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-neutral-100">Edit</button>
                   </form>
                   <form
                     action={`/dashboard/products/${product.id}/variants/delete`}
@@ -76,7 +76,7 @@ export default async function ProductVariantsPage({
                     className="inline"
                   >
                     <input type="hidden" name="id" value={v.id} />
-                    <button className="underline text-red-400 hover:text-red-300">
+                    <button className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">
                       Delete
                     </button>
                   </form>

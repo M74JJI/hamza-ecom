@@ -95,14 +95,14 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+        className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-5 lg:flex-row lg:items-end"
       >
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-950">
             Delivery Companies
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Manage shipping carriers and delivery options
+          <p className="mt-1 text-sm text-neutral-500">
+            Configure carriers, delivery prices, and timing.
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
                 active: true,
                 createdAt: new Date()
               })}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-2xl font-semibold shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all duration-300"
+              className="hz-admin-primary"
             >
               <Plus className="w-5 h-5" />
               New Company
@@ -135,7 +135,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleCancelEdit}
-              className="flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 text-gray-700 dark:text-gray-300 rounded-2xl font-semibold hover:bg-white dark:hover:bg-gray-700 transition-all duration-300"
+              className="hz-admin-secondary h-10 px-4 text-sm"
             >
               <X className="w-5 h-5" />
               Cancel
@@ -157,7 +157,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
           placeholder="Search delivery companies..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-transparent transition-all duration-300"
+          className="h-11 w-full pl-12 pr-4 text-sm"
         />
       </motion.div>
 
@@ -170,7 +170,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 p-6 shadow-lg">
+            <div className="hz-admin-panel p-5">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 {editingCompany.id ? `Edit Company: ${editingCompany.name}` : 'Create New Delivery Company'}
               </h3>
@@ -231,7 +231,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
                   whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={isPending}
-                  className="px-6 py-3 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center"
+                  className="hz-admin-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isPending ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -270,7 +270,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 shadow-xl overflow-hidden"
+        className="hz-admin-panel overflow-hidden"
       >
         {/* Table Header */}
         <div className="p-6 border-b border-white/20 dark:border-gray-700/30">
@@ -288,7 +288,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-teal-500/10 to-blue-500/10">
+              <tr className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
                 <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Name</th>
                 <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Price</th>
                 <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Delivery Time</th>
@@ -405,7 +405,7 @@ export function ShippingClient({ companies }: { companies: DeliveryCompany[] }) 
                     active: true,
                     createdAt: new Date()
                   })}
-                  className="px-6 py-3 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-2xl font-semibold shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all duration-300"
+                  className="hz-admin-primary"
                 >
                   Add Company
                 </motion.button>

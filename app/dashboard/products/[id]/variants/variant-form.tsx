@@ -33,12 +33,12 @@ export function VariantForm({ productId, initial }:{ productId: string, initial?
           setSku(''); setColor(''); setSize(''); setPriceCents(0); setStockQty(0); setIsActive(true);
         }
       });
-    }} className="grid md:grid-cols-6 gap-3 border border-white/10 rounded-md p-4">
-      <input className="px-3 py-2 rounded bg-white/5 border border-white/10" placeholder="SKU" value={sku} onChange={e=>setSku(e.target.value)} />
-      <input className="px-3 py-2 rounded bg-white/5 border border-white/10" placeholder="Color (e.g., Blue or Blue,Red)" value={color} onChange={e=>setColor(e.target.value)} />
-      <input className="px-3 py-2 rounded bg-white/5 border border-white/10" placeholder="Size (e.g., M)" value={size} onChange={e=>setSize(e.target.value)} />
-      <input className="px-3 py-2 rounded bg-white/5 border border-white/10" placeholder="Price (cents)" type="number" value={priceCents} onChange={e=>setPriceCents(Number(e.target.value))} />
-      <input className="px-3 py-2 rounded bg-white/5 border border-white/10" placeholder="Stock qty" type="number" value={stockQty} onChange={e=>setStockQty(Number(e.target.value))} />
+    }} className="hz-admin-panel grid gap-3 p-5 md:grid-cols-3">
+      <input className="h-11 px-3" placeholder="SKU" value={sku} onChange={e=>setSku(e.target.value)} />
+      <input className="h-11 px-3" placeholder="Color (e.g., Blue or Blue,Red)" value={color} onChange={e=>setColor(e.target.value)} />
+      <input className="h-11 px-3" placeholder="Size (e.g., M)" value={size} onChange={e=>setSize(e.target.value)} />
+      <input className="h-11 px-3" placeholder="Price (cents)" type="number" value={priceCents} onChange={e=>setPriceCents(Number(e.target.value))} />
+      <input className="h-11 px-3" placeholder="Stock qty" type="number" value={stockQty} onChange={e=>setStockQty(Number(e.target.value))} />
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={freeDelivery} onChange={e=>setFreeDelivery(e.target.checked)} />
         Free delivery for this variant
@@ -48,7 +48,7 @@ export function VariantForm({ productId, initial }:{ productId: string, initial?
         Active
       </label>
       <div className="col-span-full">
-        <button disabled={pending} className="px-4 py-2 rounded bg-white text-black">{pending?'Saving...':'Save variant'}</button>
+        <button disabled={pending} className="hz-admin-primary">{pending?'Saving...':'Save variant'}</button>
         {msg && <span className="ml-3 text-xs opacity-70">{msg}</span>}
       </div>
     </form>

@@ -1,266 +1,39 @@
-'use client';
+"use client";
 
-import { motion } from "framer-motion";
-import { Package, Plus, Edit, Eye, TrendingUp } from "lucide-react";
+import { Edit, Package, Plus } from "lucide-react";
 import Link from "next/link";
 
-type Product = {
-  id: string;
-  slug: string;
-  status: string;
-  isFeaturedInHero: boolean;
-  categories: Array<{
-    categoryId: string;
-    category: {
-      name: string;
-    };
-  }>;
-};
+type Product = { id: string; slug: string; status: string; isFeaturedInHero: boolean; categories: Array<{ categoryId: string; category: { name: string } }> };
 
-interface ProductsClientProps {
-  products: Product[];
-}
-
-export function ProductsClient({ products }: ProductsClientProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PUBLISHED':
-        return 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'DRAFT':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
-      default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4"
-      >
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Products
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Manage your product catalog and inventory
-          </p>
-        </div>
-
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <Link
-            href="/dashboard/products/new"
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
-          >
-            <Plus className="w-5 h-5" />
-            New Product
-          </Link>
-        </motion.div>
-      </motion.div>
-
-      {/* Stats Overview */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-4 gap-4"
-      >
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-              <Package className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{products.length}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total Products</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-              <Eye className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {products.filter(p => p.status === 'PUBLISHED').length}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Published</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-xl flex items-center justify-center">
-              <Edit className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {products.filter(p => p.status === 'DRAFT').length}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Drafts</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {products.filter(p => p.isFeaturedInHero).length}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Featured</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Products Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 shadow-xl overflow-hidden"
-      >
-        {/* Table Header */}
-        <div className="p-6 border-b border-white/20 dark:border-gray-700/30">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Product Catalog ({products.length})
-            </h3>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Sorted by Newest
-            </div>
-          </div>
-        </div>
-
-        {/* Table Content */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-                <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Product</th>
-                <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Status</th>
-                <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Categories</th>
-                <th className="text-left p-4 font-semibold text-gray-900 dark:text-white">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10 dark:divide-gray-700/30">
-              {products.map((product, index) => (
-                <motion.tr
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all duration-300"
-                >
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-xl flex items-center justify-center">
-                        <Package className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-white">
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {product.slug}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(product.status)}`}>
-                      {product.status === 'PUBLISHED' && (
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5 animate-pulse" />
-                      )}
-                      {product.status}
-                    </span>
-                    {product.isFeaturedInHero && (
-                      <div className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30">
-                        Featured
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-1">
-                      {product.categories.slice(0, 2).map((pc, idx) => (
-                        <span
-                          key={pc.categoryId}
-                          className="px-2 py-1 bg-white/50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-lg text-xs border border-white/20 dark:border-gray-700/30"
-                        >
-                          {pc.category.name}
-                        </span>
-                      ))}
-                      {product.categories.length > 2 && (
-                        <span className="px-2 py-1 bg-white/50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 rounded-lg text-xs">
-                          +{product.categories.length - 2} more
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Link
-                        href={`/dashboard/products/${product.id}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Edit
-                      </Link>
-                    </motion.div>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Empty State */}
-          {products.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-12 text-center"
-            >
-              <div className="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-                <Package className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                No products yet
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
-                Get started by creating your first product
-              </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link
-                  href="/dashboard/products/new"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
-                >
-                  <Plus className="w-5 h-5" />
-                  Create Product
-                </Link>
-              </motion.div>
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
+export function ProductsClient({ products }: { products: Product[] }) {
+  const published = products.filter((p) => p.status === "PUBLISHED").length;
+  const drafts = products.filter((p) => p.status === "DRAFT").length;
+  const featured = products.filter((p) => p.isFeaturedInHero).length;
+  return <div className="space-y-5">
+    <PageHeader title="Products" description="Manage catalog, publishing, categories, and featured placement." action={<Link href="/dashboard/products/new" className="hz-admin-primary"><Plus className="h-4 w-4" /> New product</Link>} />
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <Stat label="Total products" value={products.length} /><Stat label="Published" value={published} /><Stat label="Drafts" value={drafts} /><Stat label="Featured" value={featured} />
     </div>
-  );
+    <section className="hz-admin-panel overflow-hidden">
+      <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4"><h2 className="font-semibold">Product catalog</h2><span className="text-xs text-neutral-500">Newest first</span></div>
+      <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm">
+        <thead><tr><Th>Product</Th><Th>Status</Th><Th>Categories</Th><Th>Placement</Th><Th><span className="sr-only">Actions</span></Th></tr></thead>
+        <tbody className="divide-y divide-neutral-200">{products.map((product) => <tr key={product.id} className="hover:bg-neutral-50">
+          <td className="p-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-md bg-neutral-100 text-neutral-500"><Package className="h-4 w-4" /></span><div><p className="font-medium text-neutral-950">{humanize(product.slug)}</p><p className="mt-0.5 font-mono text-xs text-neutral-500">{product.slug}</p></div></div></td>
+          <td className="p-4"><Badge tone={product.status === "PUBLISHED" ? "green" : "gray"}>{humanize(product.status)}</Badge></td>
+          <td className="p-4"><div className="flex flex-wrap gap-1.5">{product.categories.length ? product.categories.slice(0, 3).map((item) => <Badge key={item.categoryId}>{item.category.name}</Badge>) : <span className="text-neutral-400">Uncategorized</span>}</div></td>
+          <td className="p-4">{product.isFeaturedInHero ? <Badge tone="dark">Featured</Badge> : <span className="text-neutral-400">Standard</span>}</td>
+          <td className="p-4 text-right"><Link href={`/dashboard/products/${product.id}`} className="hz-admin-secondary"><Edit className="h-3.5 w-3.5" /> Edit</Link></td>
+        </tr>)}</tbody>
+      </table></div>
+      {!products.length && <Empty title="No products yet" text="Create your first product to start building catalog." />}
+    </section>
+  </div>;
 }
 
+function PageHeader({ title, description, action }: { title: string; description: string; action: React.ReactNode }) { return <header className="flex flex-col justify-between gap-4 border-b border-neutral-200 pb-5 sm:flex-row sm:items-end"><div><h1 className="text-2xl font-semibold tracking-tight">{title}</h1><p className="mt-1 text-sm text-neutral-500">{description}</p></div>{action}</header>; }
+function Stat({ label, value }: { label: string; value: number }) { return <div className="hz-admin-panel p-4"><p className="text-xs text-neutral-500">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></div>; }
+function Th({ children }: { children: React.ReactNode }) { return <th className="bg-neutral-50 p-4 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">{children}</th>; }
+function Badge({ children, tone = "gray" }: { children: React.ReactNode; tone?: "gray" | "green" | "dark" }) { const style = tone === "green" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : tone === "dark" ? "border-neutral-900 bg-neutral-900 text-white" : "border-neutral-200 bg-neutral-100 text-neutral-600"; return <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${style}`}>{children}</span>; }
+function Empty({ title, text }: { title: string; text: string }) { return <div className="p-12 text-center"><Package className="mx-auto h-8 w-8 text-neutral-300" /><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-1 text-sm text-neutral-500">{text}</p></div>; }
+function humanize(value: string) { return value.replace(/[-_]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()); }

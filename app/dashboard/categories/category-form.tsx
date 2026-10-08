@@ -86,13 +86,13 @@ export function CategoryForm({
           animate={{ opacity: 1, y: 0, height: "auto" }}
           exit={{ opacity: 0, y: -20, height: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-2xl border border-white/20 dark:border-gray-700/30 shadow-xl overflow-hidden"
+          className="hz-admin-panel overflow-hidden"
         >
           {/* Form Header */}
-          <div className="p-6 border-b border-white/20 dark:border-gray-700/30 bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+          <div className="border-b border-neutral-200 bg-neutral-50 p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <div className="grid h-10 w-10 place-items-center rounded-md bg-neutral-900">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -227,7 +227,7 @@ export function CategoryForm({
                       whileTap={{ scale: 0.95 }}
                       type="button"
                       onClick={() => open?.()}
-                      className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300"
+                      className="hz-admin-primary"
                     >
                       <Upload className="w-4 h-4" />
                       {imageUrl ? "Change Image" : "Upload Image"}
@@ -325,7 +325,7 @@ export function CategoryForm({
                   whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={pending}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300"
+                  className="hz-admin-primary disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {pending ? (
                     <>
