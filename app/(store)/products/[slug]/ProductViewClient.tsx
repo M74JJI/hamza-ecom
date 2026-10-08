@@ -329,7 +329,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     className="w-12 h-12 sm:w-16 sm:h-16 border-[3px] border-gray-300 border-t-black rounded-full mb-3 sm:mb-4 mx-auto"
                   />
-                  <p className="text-gray-400 font-light text-sm sm:text-lg">Loading luxury experience...</p>
+                  <p className="text-gray-400 font-light text-sm sm:text-lg">Loading image...</p>
                 </motion.div>
               </div>
             )}
@@ -422,7 +422,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
               className="text-center text-gray-400"
             >
               <Zap className="w-12 h-12 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-6 opacity-50" />
-              <p className="text-sm sm:text-lg font-light">Luxury Image Coming Soon</p>
+              <p className="text-sm sm:text-lg font-light">Image coming soon</p>
             </motion.div>
           </div>
         )}
@@ -822,7 +822,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
           transition={{ delay: 0.8 }}
           className="text-2xl sm:text-3xl lg:text-4xl font-light text-black mb-8 sm:mb-16 text-center bg-gradient-to-br from-black to-gray-700 bg-clip-text text-transparent"
         >
-          Luxury Product Details
+          Product details
         </motion.h2>
         <motion.div
           initial={{ opacity: 0 }}

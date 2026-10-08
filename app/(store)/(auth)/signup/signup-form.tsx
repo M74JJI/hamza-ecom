@@ -1,206 +1,56 @@
-// app/(auth)/signup/signup-form.tsx
-'use client';
-import { useState, FormEvent } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowRight, Loader2, ShoppingBag } from 'lucide-react';
-import Link from 'next/link';
+"use client";
 
-export function SignUpForm(){
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { CheckCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+
+export function SignUpForm() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>();
-  const [ok, setOk] = useState(false);
+  const [error, setError] = useState<string>();
+  const [complete, setComplete] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: ''
-  });
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>){
-    e.preventDefault();
-    setLoading(true); 
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
     setError(undefined);
-
     try {
-      const data = new FormData(e.currentTarget);
-      const res = await fetch('/auth/signup', {
-        method: 'POST',
-        body: data
-      });
-
-      const j = await res.json().catch(() => null);
-      if(!res.ok){
-        setError(j?.error || 'Failed to create account. Please try again.');
-      } else {
-        setOk(true);
-      }
+      const response = await fetch("/auth/signup", { method: "POST", body: new FormData(event.currentTarget) });
+      const body = await response.json().catch(() => null);
+      if (!response.ok) setError(body?.error || "Failed to create account. Try again.");
+      else setComplete(true);
     } catch {
-      setError('Could not reach the server. Disable any blocker for this site and try again.');
+      setError("Could not reach server. Disable blockers for this site and try again.");
     } finally {
       setLoading(false);
     }
   }
 
-  if (ok) {
+  if (complete) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center py-8"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring" }}
-          className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4"
-        >
-          <CheckCircle className="w-8 h-8 text-green-600" />
-        </motion.div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">Check Your Email</h3>
-        <p className="text-gray-600 mb-4">
-          If this address can be registered, verification instructions will arrive shortly.
-        </p>
-        <p className="text-gray-500 text-sm mb-6">
-          If you already have an account, you can sign in or use password recovery instead.
-        </p>
-        
-        <Link href="/products">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Browse Products
-          </motion.button>
-        </Link>
-      </motion.div>
+      <div className="py-8 text-center">
+        <CheckCircle className="mx-auto h-10 w-10 text-emerald-600" />
+        <h3 className="mt-5 text-2xl font-semibold text-neutral-950">Check your email</h3>
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-neutral-600">If this address can be registered, verification instructions will arrive shortly.</p>
+        <Link href="/browse" className="hz-secondary-button mt-7">Browse catalog</Link>
+      </div>
     );
   }
 
   return (
-    <motion.form
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      onSubmit={onSubmit}
-      className="space-y-6"
-    >
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-red-50 border border-red-200 rounded-xl p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">!</span>
-              </div>
-              <p className="text-red-700 font-medium text-sm">{error}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="space-y-4">
-        {/* Name Input */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <User className="w-4 h-4" />
-            Full Name
-          </label>
-          <input 
-            name="name" 
-            placeholder="Enter your full name"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-            required
-          />
-        </div>
-
-        {/* Email Input */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <Mail className="w-4 h-4" />
-            Email Address
-          </label>
-          <input 
-            name="email" 
-            type="email" 
-            placeholder="your@email.com"
-            value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-            required
-          />
-        </div>
-
-        {/* Password Input */}
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <Lock className="w-4 h-4" />
-            Password
-          </label>
-          <div className="relative">
-            <input 
-              name="password" 
-              type={showPassword ? "text" : "password"}
-              placeholder="Create a strong password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all pr-12"
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-          </div>
+    <form onSubmit={onSubmit} className="space-y-5">
+      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">{error}</div>}
+      <div><label htmlFor="signup-name" className="mb-2 block text-sm font-medium text-neutral-800">Full name</label><input id="signup-name" name="name" autoComplete="name" required placeholder="Your full name" className="hz-field" /></div>
+      <div><label htmlFor="signup-email" className="mb-2 block text-sm font-medium text-neutral-800">Email address</label><input id="signup-email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" className="hz-field" /></div>
+      <div>
+        <label htmlFor="signup-password" className="mb-2 block text-sm font-medium text-neutral-800">Password</label>
+        <div className="relative">
+          <input id="signup-password" name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" minLength={8} required placeholder="At least 8 characters" className="hz-field pr-11" />
+          <button type="button" onClick={() => setShowPassword((show) => !show)} className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center text-neutral-400 hover:text-neutral-700" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
         </div>
       </div>
-
-      {/* Submit Button */}
-      <motion.button
-        type="submit"
-        disabled={loading}
-        whileHover={{ scale: loading ? 1 : 1.02 }}
-        whileTap={{ scale: loading ? 1 : 0.98 }}
-        className={`w-full py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 transition-all ${
-          loading
-            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
-        }`}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Creating Account...
-          </>
-        ) : (
-          <>
-            Start Shopping
-            <ArrowRight className="w-5 h-5" />
-          </>
-        )}
-      </motion.button>
-
-      {/* Login Link */}
-      <div className="text-center pt-4 border-t border-gray-200">
-        <p className="text-gray-600">
-          Already have an account?{' '}
-          <Link 
-            href="/signin" 
-            className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
-          >
-            Sign in here
-          </Link>
-        </p>
-      </div>
-    </motion.form>
+      <button type="submit" disabled={loading} className="hz-primary-button w-full disabled:cursor-not-allowed disabled:opacity-60">{loading && <Loader2 className="h-4 w-4 animate-spin" />}{loading ? "Creating account…" : "Create account"}</button>
+      <p className="text-center text-sm text-neutral-600">Already registered? <Link href="/signin" className="font-semibold text-neutral-950 underline-offset-4 hover:underline">Sign in</Link></p>
+    </form>
   );
 }

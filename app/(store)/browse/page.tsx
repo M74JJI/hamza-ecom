@@ -198,7 +198,7 @@ useEffect(() => {
                   animate={{ opacity: 1 }}
                   className="text-gray-600 text-lg"
                 >
-                  Discover {total} exquisite {total === 1 ? 'piece' : 'pieces'}
+                  {total} {total === 1 ? 'product' : 'products'} available
                 </motion.p>
               )}
             </div>

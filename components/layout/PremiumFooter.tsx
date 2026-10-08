@@ -26,11 +26,11 @@ export default function PremiumFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-[1.5fr_1fr_1fr]">
         <div className="max-w-md">
           <Link href="/" className="inline-flex items-center gap-3 text-xl font-black text-white">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-stone-950">H</span>
-            HAMZA
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-stone-950">H.</span>
+            HAMZA STORE
           </Link>
           <p className="mt-4 text-sm leading-6 text-stone-400">
-            Products, prices, availability, and categories shown on this store come from the live catalog managed in the dashboard.
+            Products, prices, availability, and categories come from live catalog managed in dashboard.
           </p>
           <div className="mt-6 grid gap-3 text-sm text-stone-300">
             <div className="flex items-center gap-3">

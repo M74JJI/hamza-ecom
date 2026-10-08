@@ -4,7 +4,7 @@ export default function Footer(){
       <div className="container py-12 grid sm:grid-cols-3 gap-8 text-sm">
         <div>
           <h3 className="font-semibold mb-2">About</h3>
-          <p>Premium e-commerce experience built with Next.js</p>
+          <p>Live catalog, secure account access, and clear checkout.</p>
         </div>
         <div>
           <h3 className="font-semibold mb-2">Links</h3>

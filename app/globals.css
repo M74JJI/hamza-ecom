@@ -2,19 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{
-  --bg: 14 14 16;
-  --fg: 244 244 245;
-}
-html,body{height:100%}
-body{
-  background-color: rgb(var(--bg));
-  color: rgb(var(--fg));
+:root {
+  --bg: 250 250 249;
+  --fg: 23 23 23;
 }
 
-/* Premium theme helpers */
-:root { --grid-bg: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.06) 1px, transparent 1px); }
-.premium-grid-bg { background-image: var(--grid-bg); background-size: 24px 24px; }
+html, body { min-height: 100%; }
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: #171717; color: #fff; }
+
+/* Keep legacy screens restrained until each feature moves onto shared primitives. */
+:where([class*="shadow-2xl"], [class*="shadow-xl"], [class*="shadow-lg"], [class*="shadow-md"]) {
+  --tw-shadow: 0 1px 2px rgb(0 0 0 / 0.06) !important;
+  --tw-shadow-colored: 0 1px 2px var(--tw-shadow-color) !important;
+}
+
+:where([class*="rounded-3xl"], [class*="rounded-2xl"]) {
+  border-radius: 0.75rem !important;
+}
 
 @layer utilities {
   .scroll-indicator {
@@ -25,6 +37,40 @@ body{
   
   html {
     scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .hz-eyebrow {
+    @apply text-xs font-bold tracking-[0.2em] text-neutral-500;
+  }
+
+  .hz-nav-link {
+    @apply rounded-md px-3 py-2 text-sm font-medium text-neutral-600 transition hover:bg-neutral-100 hover:text-neutral-950;
+  }
+
+  .hz-mobile-link {
+    @apply rounded-md px-3 py-2.5 text-sm font-medium text-neutral-800 transition hover:bg-neutral-100;
+  }
+
+  .hz-icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg text-neutral-700 transition hover:bg-neutral-100 hover:text-neutral-950;
+  }
+
+  .hz-primary-button {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-neutral-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2;
+  }
+
+  .hz-secondary-button {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 transition hover:border-neutral-500 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2;
+  }
+
+  .hz-panel {
+    @apply rounded-xl border border-neutral-200 bg-white;
+  }
+
+  .hz-field {
+    @apply h-11 w-full rounded-lg border border-neutral-300 bg-white px-3 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-500 focus:ring-2 focus:ring-neutral-950/5;
   }
 }
 

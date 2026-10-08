@@ -410,7 +410,7 @@ export default function CartPageClient() {
             transition={{ delay: 0.3 }}
             className="text-gray-600 mb-8 text-lg"
           >
-            Discover our curated collection and find something special
+            Browse currently available products
           </motion.p>
 
           <motion.div

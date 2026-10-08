@@ -17,7 +17,8 @@
     "audit": "bun audit",
     "prisma:migrate:status": "prisma migrate status",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "prisma:migrate:baseline:resolve": "prisma migrate resolve --applied 0_init"
+    "prisma:migrate:baseline:resolve": "prisma migrate resolve --applied 0_init",
+    "admin:bootstrap": "bun scripts/bootstrap-admin.ts"
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.28",
