@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/db";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { getAllowedOrderTransitions } from "@/lib/orders/status";
+import { sendOrderStatusUpdate } from "@/lib/emails/order-status";
 
 export { getAllowedOrderTransitions, isOrderStatus } from "@/lib/orders/status";
 
 export async function transitionOrderStatus(orderId: string, nextStatus: OrderStatus) {
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const order = await tx.order.findUnique({
       where: { id: orderId },
       include: {
@@ -64,4 +65,20 @@ export async function transitionOrderStatus(orderId: string, nextStatus: OrderSt
 
     return { ok: true as const, status: nextStatus, changed: true as const };
   });
+
+  if (result.ok && result.changed) {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: { user: { select: { email: true } } },
+      });
+      if (order?.user?.email) {
+        await sendOrderStatusUpdate(order.user.email, orderId, result.status);
+      }
+    } catch (error) {
+      console.error("Order status email delivery failed", { orderId, error });
+    }
+  }
+
+  return result;
 }

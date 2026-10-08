@@ -5,9 +5,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { CheckoutSchema } from '@/lib/zod-checkout';
-import { sendEmail } from '@/lib/email';
-import { renderEmail } from '@/lib/render-email';
-import OrderConfirmationEmail from '@/emails/order-confirmation';
+import { sendOrderCreatedEmails } from '@/lib/emails/order-created';
+import type { OrderEmailData } from '@/emails/order-types';
 import { z } from 'zod';
 
 const CookieCartSchema = z.object({
@@ -46,6 +45,12 @@ async function readCookieCart(): Promise<{ items: CookieCartItem[]; invalid: boo
 function priceAfterDiscount(base: number, pct?: number | null) {
   if (!pct || pct <= 0) return base;
   return Math.max(0, Number((base * (100 - pct) / 100).toFixed(2)));
+}
+
+function getOrderAttribute(value: unknown, key: string) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const attribute = (value as Record<string, unknown>)[key];
+  return typeof attribute === 'string' ? attribute : null;
 }
 
 export async function ensureLoggedInOrRedirectCart() {
@@ -502,10 +507,38 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
   });
 
   try {
-    const html = await renderEmail(OrderConfirmationEmail({ order } as any));
-    const u = await prisma.user.findUnique({ where: { id: order.userId! } });
-    if (u?.email) await sendEmail(u.email, 'Your order has been placed', html);
-  } catch {}
+    const [customer, admins] = await Promise.all([
+      prisma.user.findUnique({ where: { id: order.userId! }, select: { email: true } }),
+      prisma.user.findMany({ where: { role: 'ADMIN' }, select: { email: true } }),
+    ]);
+
+    if (customer?.email) {
+      const emailOrder: OrderEmailData = {
+        id: order.id,
+        customerName: order.shippingFullNameSnapshot ?? 'Customer',
+        customerEmail: customer.email,
+        phone: order.shippingPhoneSnapshot ?? 'Not provided',
+        city: order.shippingCitySnapshot ?? 'Not provided',
+        address: order.shippingAddressSnapshot ?? 'Not provided',
+        shippingCompany: order.shippingCompanyNameSnapshot ?? order.shippingCompany?.name ?? 'Delivery',
+        subtotalMAD: Number(order.subtotalMAD ?? order.totalMAD),
+        discountMAD: Number(order.discountMAD ?? 0),
+        shippingFeeMAD: Number(order.shippingFeeMAD ?? 0),
+        totalMAD: Number(order.totalMAD),
+        items: order.items.map((item) => ({
+          title: item.titleSnapshot,
+          variant: getOrderAttribute(item.attributesSnapshot, 'variantName'),
+          size: getOrderAttribute(item.attributesSnapshot, 'size'),
+          quantity: item.quantity,
+          unitPriceMAD: Number(item.unitPriceMAD),
+        })),
+      };
+
+      await sendOrderCreatedEmails(emailOrder, admins.map((admin) => admin.email));
+    }
+  } catch (error) {
+    console.error('Could not prepare order emails', { orderId: order.id, error });
+  }
 
   redirect('/profile/orders/' + order.id);
 }

@@ -1,13 +1,11 @@
-import { Html } from '@react-email/components';
+import { EmailButton, EmailShell, emailStyles } from "@/emails/EmailShell";
+import { Text } from "@react-email/components";
 
-export default function ResetPasswordEmail({ resetUrl }: { resetUrl: string }){
-  return (
-    <Html>
-      <div style={{fontFamily:'Inter,Arial',padding:'24px',background:'#0b0b0d',color:'#fff'}}>
-        <h1>Reset your password</h1>
-        <p>Click the link below to reset your password.</p>
-        <p><a style={{color:'#9ae6b4'}} href={resetUrl}>{resetUrl}</a></p>
-      </div>
-    </Html>
-  );
+export default function ResetPasswordEmail({ resetUrl, logoUrl }: { resetUrl: string; logoUrl: string }) {
+  return <EmailShell preview="Reset your HAMZA password" logoUrl={logoUrl}>
+    <Text style={emailStyles.heading}>Reset your password</Text>
+    <Text style={emailStyles.text}>Use this secure link to choose a new password for your HAMZA account.</Text>
+    <EmailButton href={resetUrl}>Reset password</EmailButton>
+    <Text style={emailStyles.muted}>If you did not request this, ignore this email. Your password stays unchanged.</Text>
+  </EmailShell>;
 }

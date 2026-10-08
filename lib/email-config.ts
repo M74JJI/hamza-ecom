@@ -55,7 +55,7 @@ export function getEmailConfig(env: EmailEnv = process.env): EmailConfig {
   const port = explicitPort ?? (secure ? 465 : 587);
   const from =
     firstNonEmpty(env.SMTP_FROM, env.AUTH_EMAIL_FROM) ??
-    `Hajzen Store <${user}>`;
+    `HAMZA <${user}>`;
 
   return {
     host,

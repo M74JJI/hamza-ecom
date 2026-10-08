@@ -1,4 +1,4 @@
-# Hajzen Store
+# HAMZA Store
 
 Next.js storefront and admin dashboard backed by PostgreSQL and Prisma.
 
@@ -23,7 +23,9 @@ UPDATE "User" SET "role" = 'ADMIN' WHERE "email" = 'owner@example.com';
 - Set `DATABASE_URL` to a TLS-enabled production PostgreSQL connection.
 - Set `APP_URL` to the canonical public HTTPS origin.
 - Generate `RATE_LIMIT_HASH_SECRET` from at least 32 random characters.
-- Configure SMTP credentials and a verified `SMTP_FROM` sender.
+- Configure SMTP credentials, a verified `SMTP_FROM` sender, and optional
+  `ORDER_NOTIFICATION_EMAIL`. Verified users with the `ADMIN` role receive new
+  order notifications automatically.
 - Configure Cloudinary cloud name plus an unsigned upload preset restricted by
   file type, file size, and target folder.
 - Configure a domain-restricted TinyMCE API key.

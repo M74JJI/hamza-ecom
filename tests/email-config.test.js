@@ -14,7 +14,7 @@ describe("getEmailConfig", () => {
       secure: true,
       user: "mailer@example.com",
       pass: "secret",
-      from: "Hajzen Store <mailer@example.com>",
+      from: "HAMZA <mailer@example.com>",
     });
   });
 
