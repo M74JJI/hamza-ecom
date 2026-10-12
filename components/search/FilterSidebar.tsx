@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState } from "react";
-import { RangeSlider,  } from "@/components/ui/slider";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RangeSlider } from "@/components/ui/slider";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, CheckCircle, Star, ChevronRight } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce"; 
@@ -18,6 +18,18 @@ function CategoryTree({
   level?: number;
 }) {
   const [openNodes, setOpenNodes] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const open: Record<string, boolean> = {};
+    const visit = (node: any): boolean => {
+      const childSelected = (node.children || []).some(visit);
+      const selected = selectedIds.includes(node.id);
+      if (childSelected) open[node.id] = true;
+      return selected || childSelected;
+    };
+    nodes.forEach(visit);
+    if (Object.keys(open).length) setOpenNodes((current) => ({ ...current, ...open }));
+  }, [nodes, selectedIds]);
   const toggle = (id: string) =>
     setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   
@@ -89,6 +101,30 @@ function normalizeFacetFilters(source: Record<string, any>) {
   return normalized;
 }
 
+const COLOR_SWATCHES: Record<string, string> = {
+  black: "#111111",
+  white: "#ffffff",
+  gray: "#9ca3af",
+  grey: "#9ca3af",
+  silver: "#c0c0c0",
+  navy: "#172554",
+  blue: "#2563eb",
+  red: "#dc2626",
+  green: "#16a34a",
+  yellow: "#facc15",
+  orange: "#f97316",
+  purple: "#9333ea",
+  pink: "#ec4899",
+  brown: "#78350f",
+  beige: "#d6c6a5",
+  cream: "#fffdd0",
+};
+
+function colorSwatch(value: string) {
+  const normalized = value.trim().toLowerCase().replace(/[\s_-]+/g, "");
+  return COLOR_SWATCHES[normalized] ?? value;
+}
+
 export function FilterSidebar({
   onChange,
   initialFilters = {},
@@ -115,14 +151,23 @@ export function FilterSidebar({
     size: true,
     rating: true,
   });
-  const [isSliding, setIsSliding] = useState(false);
+  const filtersRef = useRef(filters);
 
   useEffect(() => {
-    setFilters(normalizeFacetFilters(initialFilters));
+    filtersRef.current = filters;
+  }, [filters]);
+
+  useEffect(() => {
+    const next = normalizeFacetFilters(initialFilters);
+    setFilters(next);
+    setPrice((current) => [
+      typeof next.min === 'number' ? next.min : current[0],
+      typeof next.max === 'number' ? next.max : current[1],
+    ]);
   }, [initialFilters]);
 
   /* 🧠 Fetch filters dynamically */
-  const fetchFilters = async (cats?: string[]) => {
+  const fetchFilters = useCallback(async (cats?: string[]) => {
     try {
       const params = new URLSearchParams();
       if (cats && cats.length)
@@ -133,19 +178,23 @@ export function FilterSidebar({
       });
       const json = await res.json();
       setData(json);
-      if (json.priceRange)
+      if (json.priceRange) {
+        const lower = Number(json.priceRange.min ?? 0);
+        const upper = Number(json.priceRange.max ?? lower);
+        const active = filtersRef.current;
         setPrice([
-          json.priceRange.min || 0,
-          json.priceRange.max || 10000,
+          typeof active.min === "number" ? Math.max(lower, Math.min(active.min, upper)) : lower,
+          typeof active.max === "number" ? Math.max(lower, Math.min(active.max, upper)) : upper,
         ]);
+      }
     } catch (err) {
       console.error("Failed to fetch filters:", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchFilters(filters.category);
-  }, [filters.category]);
+  }, [fetchFilters, filters.category]);
 
   /* 🧩 Update filters and notify parent */
 const updateFilters = (update: Record<string, any>) => {
@@ -166,7 +215,7 @@ const updateFilters = (update: Record<string, any>) => {
 
   const clearAll = () => {
     setFilters({ category: [], brand: [], color: [], size: [] });
-    setPrice([0, 10000]);
+    setPrice([Number(data.priceRange.min ?? 0), Number(data.priceRange.max ?? 0)]);
     onChange({});
     fetchFilters();
   };
@@ -177,9 +226,18 @@ const updateFilters = (update: Record<string, any>) => {
 
 
 const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
-  updateFilters({ min: val[0], max: val[1] });
-  setIsSliding(false);
-}, 500);
+  const lower = Number(data.priceRange.min ?? 0);
+  const upper = Number(data.priceRange.max ?? lower);
+  updateFilters({
+    min: val[0] <= lower ? undefined : val[0],
+    max: val[1] >= upper ? undefined : val[1],
+  });
+}, 350);
+
+  const activeFilterCount = Object.values(filters).reduce(
+    (count: number, value) => count + (Array.isArray(value) ? value.length : value === undefined ? 0 : 1),
+    0,
+  );
 
   /* ---------------------- Render ---------------------- */
   return (
@@ -190,8 +248,12 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
     >
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-stone-900">Filters</h2>
-     
+        <h2 className="text-lg font-semibold text-stone-900">Filters{activeFilterCount ? ` (${activeFilterCount})` : ''}</h2>
+        {activeFilterCount > 0 && (
+          <button type="button" onClick={clearAll} className="text-sm font-medium text-blue-700 hover:text-blue-900">
+            Clear all
+          </button>
+        )}
       </div>
 
 {/* Price Section */}
@@ -219,21 +281,27 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
       >
         {/* --- Slider --- */}
         <RangeSlider
-          min={data.priceRange.min || 0}
-          max={data.priceRange.max || 10000}
-          step={100}
+          min={Number(data.priceRange.min ?? 0)}
+          max={Math.max(Number(data.priceRange.min ?? 0) + 1, Number(data.priceRange.max ?? 0))}
+          step={Math.max(1, Math.round((Number(data.priceRange.max ?? 0) - Number(data.priceRange.min ?? 0)) / 100))}
           value={price}
-          onChange={(val) => setPrice(val)} // live UI
-          onCommit={(val) => {
+          onChange={(val) => {
             setPrice(val);
-            updateFilters({ min: val[0], max: val[1] }); // apply after drag
+            debouncedApplyPrice(val);
+          }}
+          onCommit={(val) => {
+            debouncedApplyPrice.cancel();
+            setPrice(val);
+            const lower = Number(data.priceRange.min ?? 0);
+            const upper = Number(data.priceRange.max ?? lower);
+            updateFilters({ min: val[0] <= lower ? undefined : val[0], max: val[1] >= upper ? undefined : val[1] });
           }}
         />
 
         {/* --- Inputs --- */}
         <PriceInputs
-          minLimit={data.priceRange.min || 0}
-          maxLimit={data.priceRange.max || 10000}
+          minLimit={Number(data.priceRange.min ?? 0)}
+          maxLimit={Number(data.priceRange.max ?? 0)}
           price={price}
           setPrice={setPrice}
           updateFilters={updateFilters}
@@ -257,7 +325,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
           className="flex items-center justify-between w-full text-left p-3 rounded-xl"
           onClick={() => toggleSection("category")}
         >
-          <h3 className="font-semibold text-gray-800">Collections</h3>
+          <h3 className="font-semibold text-gray-800">Categories &amp; subcategories</h3>
           <ChevronDown
             className={`w-4 h-4 text-gray-400 transition-transform ${
               openSections.category ? "rotate-180" : ""
@@ -408,7 +476,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 grid grid-cols-6 gap-3"
+              className="mt-4 grid grid-cols-2 gap-2"
             >
               {data.colors.map((col: string) => {
                 const selected = new Set(filters.color || []);
@@ -422,14 +490,18 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
                       isActive ? selected.delete(col) : selected.add(col);
                       updateFilters({ color: Array.from(selected) });
                     }}
-                    className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    type="button"
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-2 rounded-lg border px-2 py-2 text-left text-xs font-medium transition-all ${
                       isActive
-                        ? "ring-2 ring-blue-500 ring-offset-2 border-white shadow-lg"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? "border-blue-500 bg-blue-50 text-blue-800"
+                        : "border-gray-200 text-gray-700 hover:border-gray-300"
                     }`}
-                    style={{ backgroundColor: col.toLowerCase() }}
                     title={col}
-                  />
+                  >
+                    <span className="h-5 w-5 shrink-0 rounded-full border border-black/15" style={{ backgroundColor: colorSwatch(col) }} />
+                    <span className="truncate">{col}</span>
+                  </motion.button>
                 );
               })}
             </motion.div>
@@ -508,21 +580,14 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 space-y-3"
             >
-              {[4, 3, 2].map((r) => (
-                <motion.label
+              {[4, 3, 2, 1].map((r) => (
+                <motion.button
+                  type="button"
                   key={r}
                   whileHover={{ x: 4 }}
-                  className="flex items-center space-x-3 group cursor-pointer"
+                  onClick={() => updateFilters({ rating: filters.rating === r ? undefined : r })}
+                  className="flex w-full items-center space-x-3 group cursor-pointer text-left"
                 >
-                  <input
-                    type="radio"
-                    name="rating"
-                    checked={filters.rating === r}
-                    onChange={(e) =>
-                      updateFilters({ rating: e.target.checked ? r : undefined })
-                    }
-                    className="sr-only"
-                  />
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     className={`w-5 h-5 border-2 rounded-full flex items-center justify-center transition-all ${
@@ -548,7 +613,7 @@ const debouncedApplyPrice = useDebouncedCallback((val: [number, number]) => {
                     ))}
                     <span className="ml-2 text-xs">& Up</span>
                   </span>
-                </motion.label>
+                </motion.button>
               ))}
             </motion.div>
           )}
@@ -585,8 +650,11 @@ function PriceInputs({
   // apply after debounce or blur
   const debouncedApply = useDebouncedCallback((min: number, max: number) => {
     setPrice([min, max]);
-    updateFilters({ min, max });
-  }, 800);
+    updateFilters({
+      min: min <= minLimit ? undefined : min,
+      max: max >= maxLimit ? undefined : max,
+    });
+  }, 500);
 
   const applyIfValid = (minText: string, maxText: string) => {
     const minVal = Number(minText);
@@ -600,14 +668,19 @@ function PriceInputs({
   };
 
   const handleMinChange = (val: string) => {
-    setLocalMin(val); // user typing freely
+    setLocalMin(val);
+    if (val !== "") applyIfValid(val, localMax);
   };
 
   const handleMaxChange = (val: string) => {
     setLocalMax(val);
+    if (val !== "") applyIfValid(localMin, val);
   };
 
-  const handleBlur = () => applyIfValid(localMin, localMax);
+  const handleBlur = () => {
+    applyIfValid(localMin, localMax);
+    debouncedApply.flush();
+  };
 
   return (
     <div className="flex items-center justify-between gap-3">

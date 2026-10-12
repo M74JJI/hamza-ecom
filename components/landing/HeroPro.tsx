@@ -2,10 +2,11 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { ShoppingBag, Star, Heart, Eye, ChevronRight, Zap, Sparkles, ArrowRight, ArrowLeft, Shield, Truck, Clock, Award, Crown, Gem, Check } from 'lucide-react';
+import { ShoppingBag, Star, Eye, ChevronRight, Zap, Sparkles, ArrowRight, ArrowLeft, Shield, Truck, Clock, Award, Crown, Gem, Check } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { HeroProduct } from '@/types/hero';
+import WishlistButton from '@/components/wishlist/WishlistButton';
 
 function calculateDiscountedPrice(price: number, discountPercent: number | null) {
   if (!discountPercent) return price;
@@ -42,6 +43,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
 
   const currentProduct = products[activeProduct];
   const currentVariant = currentProduct.variants[activeVariant];
+  const currentReviewCount = currentProduct.reviews.length;
 
   // Get cheapest size for a variant considering discounts
   const getCheapestSize = useCallback((variant: typeof currentVariant) => {
@@ -374,13 +376,9 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
           {currentProduct.categories?.[0]?.category?.name || "Catalog"}
         </motion.p>
       </div>
-      <motion.div
-        whileHover={{ scale: 1.1, rotate: 12 }}
-        whileTap={{ scale: 0.9 }}
-        className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center border border-amber-300/30 cursor-pointer flex-shrink-0 hover:from-amber-600 hover:to-amber-800 transition-all duration-300 shadow-lg z-30" // increased z-index to be safe
-      >
-        <Heart className="w-6 h-6 text-white" />
-      </motion.div>
+      <div className="relative z-30 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-amber-700 shadow-lg [&_button]:static [&_button]:bg-transparent [&_button]:text-white [&_button]:shadow-none">
+        <WishlistButton productId={currentProduct.id} variantId={currentVariant.id} />
+      </div>
     </div>
   </div>
 
@@ -418,14 +416,14 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
                             <Star
                               key={i}
                               className={`w-5 h-5 ${
-                                i < Math.floor(currentProduct.rating || 5)
+                                i < Math.floor(currentProduct.rating ?? 0)
                                   ? 'fill-amber-400 text-amber-400'
                                   : 'text-stone-300'
                               }`}
                             />
                           ))}
                           <span className="text-sm text-stone-600 whitespace-nowrap">
-                            ({currentProduct.reviews?.length || 5} reviews)
+                            ({currentReviewCount} reviews)
                           </span>
                         </div>
                       </div>
@@ -517,7 +515,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="flex gap-6 mt-2"
+              className="grid grid-flow-col auto-cols-[minmax(160px,1fr)] gap-4 mt-2 overflow-x-auto pb-4 snap-x snap-mandatory"
             >
               {products.map((product, index) => {
                 const productMinPrice = Math.min(...product.variants.flatMap(variant =>
@@ -533,7 +531,7 @@ function BrandFocusedHeroContent({products}:{products:HeroProduct[]}) {
                       setActiveProduct(index);
                       setActiveVariant(0);
                     }}
-                    className={`flex-1 p-5 bg-white/90 backdrop-blur-sm rounded-2xl border transition-all duration-500 shadow-lg hover:shadow-xl ${
+                    className={`snap-start p-5 bg-white/90 backdrop-blur-sm rounded-2xl border transition-all duration-500 shadow-lg hover:shadow-xl ${
                       activeProduct === index
                         ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50'
                         : 'border-stone-300/50 hover:border-amber-300'

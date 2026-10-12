@@ -63,6 +63,39 @@ export async function POST(req: Request) {
       return { ok: false as const, status: 404, error: "Product not found" };
     }
 
+    const purchasedItem = await tx.orderItem.findFirst({
+      where: {
+        order: {
+          userId: user.id,
+          status: "DELIVERED",
+        },
+        variantSize: {
+          ...(chosenSize ? { size: chosenSize } : {}),
+          variant: {
+            productId: product.id,
+            ...(chosenVariantId ? { id: chosenVariantId } : {}),
+          },
+        },
+      },
+      select: {
+        quantity: true,
+        variantSize: {
+          select: {
+            size: true,
+            variantId: true,
+          },
+        },
+      },
+    });
+
+    if (!purchasedItem) {
+      return {
+        ok: false as const,
+        status: 403,
+        error: "Reviews are available after this product has been delivered",
+      };
+    }
+
     // Serialize review writes for a product so the cached aggregate rating
     // stays consistent with the database-level one-review-per-user constraint.
     await tx.$queryRaw`SELECT "id" FROM "Product" WHERE "id" = ${product.id} FOR UPDATE`;

@@ -5,7 +5,7 @@ import { WishlistGrid } from '../_components/WishlistGrid';
 import { AnimatedBackground } from '../_components/AnimatedBackground';
 import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
-import { Heart, ShoppingBag, Star, TrendingUp, Zap } from 'lucide-react';
+import { Heart, TrendingUp, Zap } from 'lucide-react';
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -128,48 +128,18 @@ export default async function WishlistPage() {
                 </div>
               </div>
 
-              <WishlistGrid items={items} />
+              <WishlistGrid items={items.map((item) => ({
+                ...item,
+                createdAt: item.createdAt.toISOString(),
+                variant: {
+                  ...item.variant,
+                  sizes: item.variant.sizes.map((size) => ({
+                    ...size,
+                    priceMAD: Number(size.priceMAD),
+                  })),
+                },
+              }))} />
             </SectionCard>
-
-            {/* Quick Actions */}
-            {items.length > 0 && (
-              <SectionCard 
-                title="Quick Actions" 
-                subtitle="Manage your wishlist efficiently"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl p-6 border border-blue-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                        <ShoppingBag className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-800 text-lg">Move All to Cart</h3>
-                        <p className="text-gray-600 text-sm">Add all items to your shopping cart</p>
-                      </div>
-                    </div>
-                    <button className="w-full py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
-                      Add All to Cart
-                    </button>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                        <Star className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-800 text-lg">Share Wishlist</h3>
-                        <p className="text-gray-600 text-sm">Share your favorites with friends</p>
-                      </div>
-                    </div>
-                    <button className="w-full py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors">
-                      Share List
-                    </button>
-                  </div>
-                </div>
-              </SectionCard>
-            )}
 
             {/* Recommendations */}
             <SectionCard 
@@ -184,9 +154,9 @@ export default async function WishlistPage() {
                 <p className="text-gray-600 mb-6">
                   Browse our collection to find more items you'll love
                 </p>
-                <button className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors">
+                <a href="/browse" className="inline-block px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors">
                   Explore Products
-                </button>
+                </a>
               </div>
             </SectionCard>
           </div>

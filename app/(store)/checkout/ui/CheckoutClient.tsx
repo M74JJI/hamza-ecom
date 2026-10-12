@@ -1,15 +1,9 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { MA_CITIES } from '@/lib/ma-cities';
-import { isValidMoroccanPhone } from '@/lib/ma-phone';
 import { applyCouponAction, placeOrderAction } from '../actions';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Truck, Package, CreditCard, Lock, Gift, Sparkles, 
-  CheckCircle, MapPin, Phone, Home, ArrowRight, Zap,
-  Shield, Clock, Award, Heart, Star, ChevronRight
-} from 'lucide-react';
+import { Truck, Package, CreditCard, Lock, Gift, CheckCircle, MapPin, ArrowRight, Shield } from 'lucide-react';
 import { AddressForm } from '../../profile/_components/AddressForm';
 import type { Address } from '@/generated/prisma/browser';
 
@@ -49,19 +43,12 @@ CheckoutClient({ companies, dbCart, addresses = [] }: {
   );
   const [addingNew, setAddingNew] = useState(addresses.length === 0);
 
-const [newAddress, setNewAddress] = useState({
-  id: 'new',
-  fullName: '',
-  phone: '',
-  city: MA_CITIES[0],
-  fullAddress: '',
-  isDefault: true,
-});
 const [addressesState, setAddresses] = useState(addresses || []);
   const [companyId, setCompanyId] = useState(companies[0]?.id || '');
   const [couponCode, setCouponCode] = useState('');
   const [couponPercent, setCouponPercent] = useState<number>(0);
-  const [err, setErr] = useState<string | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -81,47 +68,31 @@ const [addressesState, setAddresses] = useState(addresses || []);
 
   async function onApplyCoupon(e: React.FormEvent){
     e.preventDefault();
-    setErr(null); setOk(null);
+    setCouponError(null); setOk(null);
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
     const res = await applyCouponAction(null, fd);
-    if(!res.ok){ setErr(res.error || 'Invalid coupon'); setCouponPercent(0); }
+    if(!res.ok){ setCouponError(res.error || 'Invalid coupon'); setCouponPercent(0); }
     else{ setCouponPercent(res.percent || 0); setCouponCode(res.code || couponCode); setOk('Coupon applied successfully!'); }
   }
 
-function validAddress() {
-  if (!addingNew) return !!selectedAddressId && selectedAddressId !== 'new';
-  return (
-    newAddress.fullName.length > 1 &&
-    isValidMoroccanPhone(newAddress.phone) &&
-    newAddress.fullAddress.length > 5 &&
-    MA_CITIES.includes(newAddress.city)
-  );
-}
-
-
   function place(e: React.FormEvent<HTMLFormElement>){
     e.preventDefault();
-    if(!validAddress()){ setErr('Please fill a valid address'); return; }
-    if(!companyId){ setErr('Select a delivery company'); return; }
+    setCheckoutError(null);
+    if(addingNew || !selectedAddressId || selectedAddressId === 'new'){
+      setCheckoutError('Save or select a valid shipping address before placing your order.');
+      return;
+    }
+    if(!companyId){ setCheckoutError('Select a delivery company.'); return; }
     const fd = new FormData();
-
-  if (addingNew) {
-  fd.set('addressId', 'new');
-  fd.set('fullName', newAddress.fullName);
-  fd.set('phone', newAddress.phone);
-  fd.set('city', newAddress.city);
-  fd.set('fullAddress', newAddress.fullAddress);
-} else {
-  fd.set('addressId', selectedAddressId);
-}
+    fd.set('addressId', selectedAddressId);
 
     fd.set('shippingCompanyId', companyId);
     if(couponPercent>0 && couponCode) fd.set('couponCode', couponCode);
     start(async ()=>{
       const res = await placeOrderAction(null, fd);
       if(!res?.ok && res?.error){
-        setErr(res.error);
+        setCheckoutError(res.error);
       }
     });
   }
@@ -265,7 +236,10 @@ function validAddress() {
             name="address"
             className="sr-only"
             checked={selectedAddressId === addr.id}
-            onChange={() => setSelectedAddressId(addr.id)}
+            onChange={() => {
+              setSelectedAddressId(addr.id);
+              setCheckoutError(null);
+            }}
           />
           <div className="flex-1">
             <div className="font-semibold text-gray-800">{addr.fullName}</div>
@@ -290,13 +264,25 @@ function validAddress() {
 
   {/* New Address Form */}
   {(addingNew || addressesState.length === 0) && (
-<AddressForm
-  onDone={(newAddr:Address) => {
-    setAddresses(prev => [...prev, newAddr]);
-    setSelectedAddressId(newAddr.id);
-    setAddingNew(false);
-  }}
-/>
+    <div className="space-y-4">
+      {addressesState.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setAddingNew(false)}
+          className="text-sm font-semibold text-gray-700 underline underline-offset-4 hover:text-black"
+        >
+          Use a saved address instead
+        </button>
+      )}
+      <AddressForm
+        onDone={(newAddr:Address) => {
+          setAddresses(prev => [...prev, newAddr]);
+          setSelectedAddressId(newAddr.id);
+          setAddingNew(false);
+          setCheckoutError(null);
+        }}
+      />
+    </div>
   )}
 </motion.section>
 
@@ -386,14 +372,14 @@ function validAddress() {
               </form>
               
               <AnimatePresence>
-                {err && (
+                {couponError && (
                   <motion.p
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     className="text-red-600 text-sm mt-3 font-medium"
                   >
-                    {err}
+                    {couponError}
                   </motion.p>
                 )}
                 {ok && (
@@ -495,6 +481,11 @@ function validAddress() {
                       {pending ? 'Placing Order...' : 'Place Order'}
                       <ArrowRight className="w-5 h-5" />
                     </motion.button>
+                    {checkoutError && (
+                      <p role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                        {checkoutError}
+                      </p>
+                    )}
                   </form>
 
                   {/* Security & Trust */}

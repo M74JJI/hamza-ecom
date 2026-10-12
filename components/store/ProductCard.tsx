@@ -29,7 +29,7 @@ export default function ProductCard({ product, randomizePreview = true, viewMode
             <Image src={image} alt={title} fill className="object-cover transition duration-500 group-hover:scale-[1.025]" sizes={viewMode === "list" ? "180px" : "(max-width: 768px) 50vw, 25vw"} />
           </div>
         </Link>
-        <div className="absolute right-2 top-2"><WishlistButton productId={product.id} /></div>
+        <div className="absolute right-2 top-2"><WishlistButton productId={product.id} variantId={active?.id} /></div>
         {maxDiscount > 0 && <span className="absolute left-2 top-2 rounded-md bg-white px-2 py-1 text-[11px] font-bold text-neutral-950">-{maxDiscount}%</span>}
       </div>
       <div className="pt-3">

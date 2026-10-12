@@ -1,7 +1,7 @@
 // app/(store)/profile/_components/AddressList.tsx
 'use client';
 import { useTransition, useState } from 'react';
-import { deleteAddress } from '../_actions/address.actions';
+import { deleteAddress, setDefaultAddress } from '../_actions/address.actions';
 import { Pencil, Trash2, MapPin, Star, CheckCircle } from 'lucide-react';
 import { AddressForm } from './AddressForm';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -93,6 +93,18 @@ export function AddressList({ items }: { items: any[] }) {
                   
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
+                    {!address.isDefault && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => start(async () => await setDefaultAddress(address.id))}
+                        disabled={pending}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-yellow-500 text-white rounded-xl font-semibold hover:bg-yellow-600 disabled:bg-gray-400 transition-colors"
+                      >
+                        <Star className="w-4 h-4" />
+                        Make default
+                      </motion.button>
+                    )}
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}

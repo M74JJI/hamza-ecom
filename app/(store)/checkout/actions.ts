@@ -178,7 +178,7 @@ export async function placeOrderAction(prevState: any, formData: FormData) {
     fullName: String(formData.get('fullName') || ''),
     phone: String(formData.get('phone') || ''),
     city: String(formData.get('city') || ''),
-    fullAddress: String(formData.get('street') || ''),
+    fullAddress: String(formData.get('fullAddress') || formData.get('street') || ''),
   };
 
   const parsed = CheckoutSchema.safeParse(payload);

@@ -66,7 +66,7 @@ function StarRating({ rating, reviewCount, size = "md" }: { rating: number; revi
   );
 }
 
-export default function ProductViewClient({ product }: { product: any }) {
+export default function ProductViewClient({ product, reviewEligibility }: { product: any; reviewEligibility: "eligible" | "not-purchased" | "signed-out" }) {
   const { add, inCartQty } = useCart();
   const [variantIdx, setVariantIdx] = useState(0);
   const [selectedSizeIdx, setSelectedSizeIdx] = useState(-1);
@@ -860,6 +860,7 @@ const orderedSizes = (variant.sizes || []).slice().sort((a: any, b: any) => {
     <div className="mx-auto">
       <ReviewsSection
         productId={product.id}
+        reviewEligibility={reviewEligibility}
         variants={product.variants.map((v: any) => ({
           id: v.id,
           title: v.title,

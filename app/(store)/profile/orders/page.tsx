@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db';
 import { requireUser } from '@/lib/require-user';
 import { Package, ShoppingBag, ArrowRight, TrendingUp } from 'lucide-react';
 import type { Metadata } from "next";
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: "Orders",
@@ -34,7 +35,12 @@ export default async function OrdersPage(){
   // Calculate some stats
   const totalOrders = orders.length;
   const totalSpent = orders.reduce((sum, order) => sum + Number(order.totalMAD ?? 0), 0);
-  const recentOrders = orders.slice(0, 3).length;
+  const activeOrders = orders.filter((order) =>
+    ['PENDING', 'CONFIRMED', 'SHIPPED'].includes(order.status),
+  ).length;
+  const currentOrder = orders.find((order) =>
+    ['PENDING', 'CONFIRMED', 'SHIPPED'].includes(order.status),
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 py-8">
@@ -93,8 +99,8 @@ export default async function OrdersPage(){
                       <ShoppingBag className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <div className="text-2xl font-black text-gray-800">{recentOrders}</div>
-                      <div className="text-sm text-gray-600 font-medium">Recent Orders</div>
+                      <div className="text-2xl font-black text-gray-800">{activeOrders}</div>
+                      <div className="text-sm text-gray-600 font-medium">Active Orders</div>
                     </div>
                   </div>
                 </div>
@@ -119,9 +125,13 @@ export default async function OrdersPage(){
                       <p className="text-gray-600 text-sm">Get real-time updates on your delivery</p>
                     </div>
                   </div>
-                  <button className="w-full py-3 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors">
-                    Track Package
-                  </button>
+                  {currentOrder ? (
+                    <Link href={`/profile/orders/${currentOrder.id}`} className="block w-full rounded-xl bg-blue-500 py-3 text-center font-semibold text-white transition-colors hover:bg-blue-600">
+                      View Current Order
+                    </Link>
+                  ) : (
+                    <p className="rounded-xl bg-blue-100 py-3 text-center text-sm font-medium text-blue-800">No active order</p>
+                  )}
                 </div>
                 
                 <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200">
@@ -134,9 +144,9 @@ export default async function OrdersPage(){
                       <p className="text-gray-600 text-sm">Discover new products and deals</p>
                     </div>
                   </div>
-                  <button className="w-full py-3 bg-green-500 text-white rounded-xl font-semibold hover:bg-green-600 transition-colors">
+                  <Link href="/browse" className="block w-full rounded-xl bg-green-500 py-3 text-center font-semibold text-white transition-colors hover:bg-green-600">
                     Browse Products
-                  </button>
+                  </Link>
                 </div>
               </div>
             </SectionCard>

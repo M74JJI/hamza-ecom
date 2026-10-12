@@ -6,11 +6,14 @@ import { Star, MessageCircle, TrendingUp, Award, Users, Filter } from 'lucide-re
 import ReviewStats from '@/components/reviews/ReviewStats';
 import ReviewForm from '@/components/reviews/ReviewForm';
 import ReviewList from '@/components/reviews/ReviewList';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type Summary = { total: number; avg: number; buckets: { star: number; count: number; pct: number }[] };
 type ListResp = { reviews: any[]; count: number };
 
-export default function ReviewsSection({ productId, variants }: { productId: string; variants: any[] }) {
+export default function ReviewsSection({ productId, variants, reviewEligibility }: { productId: string; variants: any[]; reviewEligibility: "eligible" | "not-purchased" | "signed-out" }) {
+  const pathname = usePathname();
   const [sum, setSum] = useState<Summary>({ total: 0, avg: 0, buckets: [] });
   const [list, setList] = useState<ListResp>({ reviews: [], count: 0 });
   const [activeFilter, setActiveFilter] = useState<'all' | number>('all');
@@ -60,6 +63,10 @@ useEffect(() => {
   const filteredReviews = activeFilter === 'all' 
     ? list.reviews 
     : list.reviews.filter((review: any) => review.rating === activeFilter);
+  const positiveReviews = sum.buckets
+    .filter((bucket) => bucket.star >= 4)
+    .reduce((total, bucket) => total + bucket.count, 0);
+  const positivePercent = sum.total > 0 ? Math.round((positiveReviews / sum.total) * 100) : 0;
 
   return (
     <motion.section
@@ -168,11 +175,11 @@ useEffect(() => {
               <div className="flex items-center gap-6 text-xs font-light">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-gray-600" />
-                  <span>{sum.total}+ Verified</span>
+                  <span>{sum.total} Verified</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-gray-600" />
-                  <span>98% Positive</span>
+                  <span>{positivePercent}% Positive</span>
                 </div>
               </div>
             </motion.div>
@@ -186,7 +193,23 @@ useEffect(() => {
             className="lg:col-span-8 space-y-8"
           >
             {/* Review Form */}
-            <ReviewForm productId={productId} variants={variants} />
+            {reviewEligibility === 'eligible' ? (
+              <ReviewForm productId={productId} variants={variants} />
+            ) : (
+              <div className="rounded-2xl border border-gray-200 bg-white p-8">
+                <h3 className="text-2xl font-light text-black">Share Your Experience</h3>
+                <p className="mt-2 text-gray-600">
+                  {reviewEligibility === 'signed-out'
+                    ? 'Sign in and purchase this product before leaving a review.'
+                    : 'Reviews unlock after this product is delivered to you.'}
+                </p>
+                {reviewEligibility === 'signed-out' && (
+                  <Link href={`/signin?callbackUrl=${encodeURIComponent(pathname)}`} className="mt-5 inline-flex rounded-lg bg-black px-5 py-3 text-sm font-medium text-white">
+                    Sign in
+                  </Link>
+                )}
+              </div>
+            )}
 
             {/* Reviews List */}
             <motion.div

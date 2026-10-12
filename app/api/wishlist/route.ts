@@ -15,18 +15,26 @@ const wishlistMutationSchema = idPairSchema.extend({
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ items: [] });
+  if (!user) {
+    return NextResponse.json(
+      { items: [] },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  }
 
   const items = await prisma.wishlistItem.findMany({
     where: { userId: user.id },
-    include: {
-      product: true,
-      variant: true,
+    select: {
+      productId: true,
+      variantId: true,
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ items });
+  return NextResponse.json(
+    { items },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(req: Request) {

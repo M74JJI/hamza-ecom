@@ -2,15 +2,31 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { moveWishlistToCart, removeWishlistItem } from '../_actions/wishlist.actions';
+import { useEffect, useState, useTransition } from 'react';
 import { ShoppingCart, X, Heart, Star, Zap, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function WishlistGrid({ items }: { items: any[] }) {
   const [pending, start] = useTransition();
+  const [visibleItems, setVisibleItems] = useState(items);
 
-  if (items.length === 0) {
+  useEffect(() => setVisibleItems(items), [items]);
+
+  function remove(productId: string, variantId: string) {
+    start(async () => {
+      const response = await fetch(
+        `/api/wishlist?productId=${encodeURIComponent(productId)}&variantId=${encodeURIComponent(variantId)}`,
+        { method: 'DELETE' },
+      );
+      if (response.ok) {
+        setVisibleItems((current) =>
+          current.filter((item) => item.productId !== productId || item.variantId !== variantId),
+        );
+      }
+    });
+  }
+
+  if (visibleItems.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -24,15 +40,9 @@ export function WishlistGrid({ items }: { items: any[] }) {
         <p className="text-gray-600 mb-6">
           Start saving items you love to see them here
         </p>
-        <Link href="/products">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
-          >
+        <Link href="/browse" className="inline-flex items-center gap-2 rounded-xl bg-black px-8 py-3 font-semibold text-white transition-colors hover:bg-gray-800">
             Start Shopping
             <ArrowRight className="w-4 h-4" />
-          </motion.button>
         </Link>
       </motion.div>
     );
@@ -44,7 +54,7 @@ export function WishlistGrid({ items }: { items: any[] }) {
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
     >
       <AnimatePresence>
-        {items.map((w, index) => {
+        {visibleItems.map((w, index) => {
           const product = w.product;
           const variant = w.variant;
       const primaryImage =
@@ -94,11 +104,7 @@ export function WishlistGrid({ items }: { items: any[] }) {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() =>
-                    start(async () => {
-                      await removeWishlistItem(w.productId, w.variantId);
-                    })
-                  }
+                  onClick={() => remove(w.productId, w.variantId)}
                   disabled={pending}
                   className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors"
                 >
@@ -154,11 +160,7 @@ export function WishlistGrid({ items }: { items: any[] }) {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() =>
-                      start(async () => {
-                        await removeWishlistItem(w.productId, w.variantId);
-                      })
-                    }
+                    onClick={() => remove(w.productId, w.variantId)}
                     disabled={pending}
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-500 text-white rounded-xl font-semibold hover:bg-gray-600 disabled:bg-gray-400 transition-colors text-sm"
                   >
@@ -166,22 +168,9 @@ export function WishlistGrid({ items }: { items: any[] }) {
                     Remove
                   </motion.button>
                   
-                  <Link 
-                    href={`/products/${product.slug}`}
-                    onClick={() =>
-                      start(async () => {
-                        await moveWishlistToCart(w.productId, w.variantId);
-                      })
-                    }
-                  >
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-600 transition-colors text-sm"
-                    >
+                  <Link href={`/products/${product.slug}`} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-500 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-600">
                       <ShoppingCart className="w-3 h-3" />
-                      Add to Cart
-                    </motion.button>
+                      Choose options
                   </Link>
                 </div>
               </div>

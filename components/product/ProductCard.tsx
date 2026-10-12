@@ -30,7 +30,7 @@ export default function ProductCard({ product, randomizePreview=true }:{ product
   return (
     <Link href={`/products/${product.slug}`} className="group block rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:shadow-xl/10">
       <div className="relative aspect-[4/5] w-full">
-        <div className="absolute right-2 top-2 z-10"><WishlistButton productId={product.id} /></div>
+        <div className="absolute right-2 top-2 z-10"><WishlistButton productId={product.id} variantId={active?.id} /></div>
         <Image src={mainImage} alt={active?.title || product.slug || ''} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2 bg-black/30 backdrop-blur rounded-full px-2 py-1">
           {variants.slice(0,8).map((v:any, idx:number)=>{

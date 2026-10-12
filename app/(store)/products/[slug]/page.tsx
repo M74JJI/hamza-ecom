@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import ProductViewClient from "./ProductViewClient";
 import { Prisma } from "@/generated/prisma/client";
 import type { Metadata } from "next";
+import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Product Details",
@@ -45,6 +46,19 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
 
   if (!product || product.status !== "PUBLISHED") notFound();
 
+  const user = await getCurrentUser();
+  const canReview = user
+    ? Boolean(
+        await prisma.orderItem.findFirst({
+          where: {
+            order: { userId: user.id, status: "DELIVERED" },
+            variantSize: { variant: { productId: product.id } },
+          },
+          select: { id: true },
+        }),
+      )
+    : false;
+
   const serialized = JSON.parse(
     JSON.stringify(product, (key, value) =>
       value instanceof Prisma.Decimal ? Number(value) : value
@@ -61,7 +75,10 @@ export default async function ProductDetail({ params }: { params: Promise<{ slug
   </div>
 
   <div className="container mx-auto px-4 sm:px-6 py-8 relative z-10">
-    <ProductViewClient product={serialized} />
+    <ProductViewClient
+      product={serialized}
+      reviewEligibility={user ? (canReview ? "eligible" : "not-purchased") : "signed-out"}
+    />
   </div>
 </main>
   );

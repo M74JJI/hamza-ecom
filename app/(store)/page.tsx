@@ -16,10 +16,17 @@ export default async function PremiumHome(){
 const heroProducts = await prisma.product.findMany({
   where: {
     status: "PUBLISHED",
-    isFeaturedInHero: true,
+    variants: {
+      some: {
+        isActive: true,
+        images: { some: {} },
+        sizes: { some: { isActive: true, stockQty: { gt: 0 } } },
+      },
+    },
   },
   include: {
     highlights: true,
+    reviews: true,
     variants: {
       where: { 
         isActive: true,
@@ -27,8 +34,10 @@ const heroProducts = await prisma.product.findMany({
       },
       include: {
         images: { orderBy: { sortOrder: 'asc' }, take: 6 },
-        sizes: { orderBy: { priceMAD: 'asc' } },
-        reviews:true
+        sizes: {
+          where: { isActive: true, stockQty: { gt: 0 } },
+          orderBy: { priceMAD: 'asc' },
+        },
       },
       orderBy: { sortOrder: 'asc' },
     },
@@ -44,8 +53,11 @@ const heroProducts = await prisma.product.findMany({
       },
     },
   },
-  take: 4,
-  orderBy: { createdAt: 'desc' },
+  take: 8,
+  orderBy: [
+    { isFeaturedInHero: 'desc' },
+    { createdAt: 'desc' },
+  ],
 });
 
 

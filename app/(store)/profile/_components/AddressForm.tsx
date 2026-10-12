@@ -5,6 +5,7 @@ import { createAddress, updateAddress } from '../_actions/address.actions';
 import { CheckCircle2, Loader2, Plus, MapPin, User, Phone, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MA_CITIES } from '@/lib/ma-cities';
+import { isValidMoroccanPhone } from '@/lib/ma-phone';
 
 export function AddressForm({
   address,
@@ -14,6 +15,8 @@ export function AddressForm({
   onDone?: (newAddr: any) => void;
 }){
   const [pending, start] = useTransition();
+  const [attempted, setAttempted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     fullName: address?.fullName ?? '',
     phone: address?.phone ?? '',
@@ -22,15 +25,26 @@ export function AddressForm({
     isDefault: address?.isDefault ?? false,
   });
   function submit() {
+    setAttempted(true);
+    setError(null);
+    if (!isFormValid) return;
     start(async () => {
-      const result = address
-        ? await updateAddress(address.id, form)
-        : await createAddress(form);
-      onDone?.(result); // 
+      try {
+        const result = address
+          ? await updateAddress(address.id, form)
+          : await createAddress(form);
+        onDone?.(result);
+      } catch {
+        setError('Could not save this address. Check the required fields and try again.');
+      }
     });
   }
 
-  const isFormValid = form.fullName.length > 1 && form.phone.length > 5 && form.fullAddress.length > 5;
+  const nameValid = form.fullName.trim().length > 1;
+  const phoneValid = isValidMoroccanPhone(form.phone);
+  const addressValid = form.fullAddress.trim().length > 5;
+  const cityValid = MA_CITIES.includes(form.city);
+  const isFormValid = nameValid && phoneValid && addressValid && cityValid;
 
   return (
     <motion.div
@@ -40,37 +54,46 @@ export function AddressForm({
     >
       <div className="grid md:grid-cols-2 gap-4">
         <Input 
-          label="Full Name" 
+          label="Full Name (required)"
           icon={User}
           value={form.fullName} 
           onChange={e => setForm({ ...form, fullName: e.target.value })}
           placeholder="Enter your full name"
+          required
+          error={attempted && !nameValid ? 'Enter your full name.' : undefined}
         />
         <Input 
-          label="Phone Number" 
+          label="Phone Number (required)"
           icon={Phone}
           value={form.phone} 
           onChange={e => setForm({ ...form, phone: e.target.value })}
           placeholder="+212 XXX XXX XXX"
+          type="tel"
+          autoComplete="tel"
+          required
+          error={attempted && !phoneValid ? 'Use a Moroccan mobile number: 06…, 07…, +2126…, or +2127…' : undefined}
         />
         
         <div className="md:col-span-2">
           <SelectInput 
-            label="City" 
+            label="City (required)"
             icon={MapPin}
             value={form.city} 
             onChange={e => setForm({ ...form, city: e.target.value })}
             options={MA_CITIES}
+            required
           />
         </div>
         
         <div className="md:col-span-2">
           <Input 
-            label="Full Address" 
+            label="Full Address (required)"
             icon={Home}
             value={form.fullAddress} 
             onChange={e => setForm({ ...form, fullAddress: e.target.value })}
             placeholder="Enter your complete address with building number, street, etc."
+            required
+            error={attempted && !addressValid ? 'Enter a complete delivery address.' : undefined}
           />
         </div>
       </div>
@@ -87,7 +110,7 @@ export function AddressForm({
           {form.isDefault && <CheckCircle2 className="w-4 h-4" />}
         </div>
         <div>
-          <div className="font-semibold text-gray-800">Set as default shipping address</div>
+          <div className="font-semibold text-gray-800">Set as default shipping address (optional)</div>
           <div className="text-sm text-gray-600">This address will be used for all future orders</div>
         </div>
         <input
@@ -99,12 +122,13 @@ export function AddressForm({
       </motion.label>
 
       <motion.button
+        type="button"
         onClick={submit}
-        disabled={pending || !isFormValid}
-        whileHover={{ scale: !pending && isFormValid ? 1.02 : 1 }}
-        whileTap={{ scale: !pending && isFormValid ? 0.98 : 1 }}
+        disabled={pending}
+        whileHover={{ scale: !pending ? 1.02 : 1 }}
+        whileTap={{ scale: !pending ? 0.98 : 1 }}
         className={`w-full py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 transition-all ${
-          pending || !isFormValid
+          pending
             ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
             : 'bg-black text-white hover:bg-gray-800 shadow-lg'
         }`}
@@ -116,11 +140,12 @@ export function AddressForm({
         )}
         {address ? 'Update Address' : 'Add New Address'}
       </motion.button>
+      {error && <p role="alert" className="text-sm font-medium text-red-600">{error}</p>}
     </motion.div>
   );
 }
 
-function Input({ label, icon: Icon, ...props }: { label: string; icon: any } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ label, icon: Icon, error, ...props }: { label: string; icon: any; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="space-y-2">
       <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -131,6 +156,7 @@ function Input({ label, icon: Icon, ...props }: { label: string; icon: any } & R
         {...props}
         className="w-full px-4 py-3 text-black bg-white border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
       />
+      {error && <p className="text-sm font-medium text-red-600">{error}</p>}
     </div>
   );
 }
